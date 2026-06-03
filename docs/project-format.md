@@ -51,6 +51,7 @@ Runtimes and editor screens consume this model. They do not redefine it.
 * Grid position is `[x, y]`.
 * `x` is right.
 * `y` is down.
+* Map size is `[width, height]` and both values must be positive integers.
 * Tile size is a project setting.
 
 ## Asset References
@@ -155,6 +156,7 @@ Validation should catch:
 * missing referenced maps
 * missing referenced tilesets
 * missing referenced assets
+* map event lists whose event belongs to a different map
 * missing flags, switches, and variables
 * invalid command payloads
 * invalid coordinates

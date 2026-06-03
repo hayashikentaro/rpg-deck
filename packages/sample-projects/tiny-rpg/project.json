@@ -52,6 +52,14 @@
       "tileset": "town_tiles",
       "events": ["mayor_intro"],
       "collision": [[1, 1], [1, 2], [2, 1]]
+    },
+    "cave_entrance": {
+      "id": "cave_entrance",
+      "name": "Cave Entrance",
+      "size": [12, 10],
+      "tileset": "town_tiles",
+      "events": ["cave_slime"],
+      "collision": [[0, 0], [0, 1], [1, 0]]
     }
   },
   "events": {
@@ -63,12 +71,16 @@
       "trigger": "interact",
       "commands": [
         {
+          "type": "play_bgm",
+          "bgm": "town_theme"
+        },
+        {
           "type": "play_sfx",
           "sfx": "talk"
         },
         {
           "type": "show_message",
-          "speaker": "mayor",
+          "speaker": "mayor_intro",
           "text": "北の洞窟には近づくな。"
         },
         {
@@ -83,8 +95,13 @@
                   "flag": "cave_warning_ignored"
                 },
                 {
+                  "type": "transfer_player",
+                  "map": "cave_entrance",
+                  "position": [3, 4]
+                },
+                {
                   "type": "show_message",
-                  "speaker": "mayor",
+                  "speaker": "mayor_intro",
                   "text": "ならば気をつけて行け。"
                 }
               ]
@@ -98,12 +115,29 @@
                 },
                 {
                   "type": "show_message",
-                  "speaker": "mayor",
+                  "speaker": "mayor_intro",
                   "text": "それが賢明だ。"
                 }
               ]
             }
           ]
+        }
+      ]
+    },
+    "cave_slime": {
+      "id": "cave_slime",
+      "map": "cave_entrance",
+      "position": [6, 4],
+      "trigger": "touch",
+      "commands": [
+        {
+          "type": "show_message",
+          "speaker": "hero",
+          "text": "スライムが飛び出してきた！"
+        },
+        {
+          "type": "start_battle",
+          "enemy": "slime"
         }
       ]
     }

@@ -228,6 +228,35 @@ export type ProjectSummary = {
   };
 };
 
+export type ProjectEntityType =
+  | "project"
+  | "asset"
+  | "tileset"
+  | "map"
+  | "event"
+  | "actor"
+  | "enemy"
+  | "item"
+  | "skill"
+  | "flag"
+  | "switch"
+  | "variable";
+
+export type ProjectDiffChange = {
+  type: "added" | "removed" | "changed";
+  entityType: ProjectEntityType;
+  entityId: string;
+  path: string;
+  before?: unknown;
+  after?: unknown;
+};
+
+export type ProjectDiff = {
+  beforeProjectId: string;
+  afterProjectId: string;
+  changes: ProjectDiffChange[];
+};
+
 export type EventGraphNode = {
   id: string;
   type: "event" | "map" | "battle" | "choice" | "flag";

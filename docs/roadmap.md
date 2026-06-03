@@ -40,6 +40,7 @@ Initial implementation status:
 * `packages/core-domain` has the first TypeScript model, Zod schema, validation, JSON/YAML parsing, project summary, and event graph builder.
 * `packages/sample-projects/tiny-rpg/project.json` is the first valid sample project.
 * `pnpm validate:sample` validates the sample and prints summary and graph data.
+* Core hardening has started with coarse project diffing, Mermaid event graph output, stronger validation, and a `tiny-rpg` sample that includes transfer and battle edges.
 
 ## Phase 2: UX Kit Seed
 

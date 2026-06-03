@@ -125,11 +125,21 @@ function validateMaps(project: GameProject, issues: ValidationIssue[]) {
     }
 
     for (const eventId of map.events) {
-      if (!project.events[eventId]) {
+      const event = project.events[eventId];
+      if (!event) {
         issues.push({
           severity: "error",
           code: "missing_map_event",
           message: `Map '${map.id}' references missing event '${eventId}'.`,
+          path: `maps.${map.id}.events`,
+          entityId: map.id,
+          entityType: "map"
+        });
+      } else if (event.map !== map.id) {
+        issues.push({
+          severity: "error",
+          code: "map_event_mismatch",
+          message: `Map '${map.id}' lists event '${eventId}', but the event belongs to map '${event.map}'.`,
           path: `maps.${map.id}.events`,
           entityId: map.id,
           entityType: "map"
@@ -205,6 +215,16 @@ function validateCommands(
 
     switch (command.type) {
       case "show_message":
+        if (command.speaker && !project.actors[command.speaker] && !project.events[command.speaker]) {
+          issues.push({
+            severity: "warning",
+            code: "unknown_message_speaker",
+            message: `Command 'show_message' references unknown speaker '${command.speaker}'.`,
+            path: `${path}.speaker`,
+            entityId: context.eventId,
+            entityType: "event"
+          });
+        }
         return;
 
       case "choice":

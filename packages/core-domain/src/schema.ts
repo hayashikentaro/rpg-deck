@@ -6,6 +6,10 @@ export const gridPositionSchema = z
   .tuple([z.number().int().nonnegative(), z.number().int().nonnegative()])
   .describe("Grid position [x, y], where x is right and y is down.");
 
+const mapSizeSchema = z
+  .tuple([z.number().int().positive(), z.number().int().positive()])
+  .describe("Map size [width, height].");
+
 const spriteAssetSchema = z.object({
   path: z.string().min(1),
   frameSize: gridPositionSchema.optional()
@@ -37,7 +41,7 @@ export const tilesetDefinitionSchema = z.object({
 export const mapDefinitionSchema = z.object({
   id: idSchema,
   name: z.string().min(1),
-  size: gridPositionSchema,
+  size: mapSizeSchema,
   tileset: idSchema,
   events: z.array(idSchema).default([]),
   collision: z.array(gridPositionSchema).optional()
@@ -68,7 +72,7 @@ export const eventCommandSchema: CommandSchema = z.lazy(() =>
           label: z.string().min(1),
           commands: z.array(eventCommandSchema)
         })
-      )
+      ).min(1)
     }),
     z.object({
       type: z.literal("set_flag"),

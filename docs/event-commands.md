@@ -55,6 +55,8 @@ Examples:
 
 Nested commands must remain serializable and schema-validated.
 
+`choice.options` must contain at least one option. `if_flag.then` and `if_flag.else` may be empty arrays when a branch intentionally does nothing.
+
 ## NPC Conversation Example
 
     id: mayor_intro
