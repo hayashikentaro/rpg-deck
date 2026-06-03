@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { ProjectSummary } from "@rpg-deck/core-domain";
+import type { GameProject, ProjectSummary } from "@rpg-deck/core-domain";
 import type { RuntimeSnapshot } from "@rpg-deck/web-runtime";
 import { EditorOverview } from "../EditorOverview.js";
 import type { ProjectProposal } from "../proposals.js";
@@ -21,6 +21,50 @@ const summary: ProjectSummary = {
     switches: 1,
     variables: 1
   }
+};
+
+const project: GameProject = {
+  id: "tiny-rpg",
+  title: "Tiny RPG",
+  settings: {
+    tileSize: 16,
+    start: {
+      map: "town",
+      position: [4, 6]
+    }
+  },
+  assets: {
+    sprites: {},
+    tilesets: {},
+    audio: {}
+  },
+  tilesets: {},
+  maps: {
+    town: {
+      id: "town",
+      name: "Town",
+      size: [10, 8],
+      tileset: "town_tiles",
+      events: ["mayor_intro"],
+      collision: [[1, 1]]
+    }
+  },
+  events: {
+    mayor_intro: {
+      id: "mayor_intro",
+      map: "town",
+      position: [7, 6],
+      trigger: "interact",
+      commands: []
+    }
+  },
+  actors: {},
+  enemies: {},
+  items: {},
+  skills: {},
+  flags: {},
+  switches: {},
+  variables: {}
 };
 
 const snapshot: RuntimeSnapshot = {
@@ -61,6 +105,13 @@ describe("EditorOverview", () => {
 
     expect(html).toContain("Runtime snapshot");
     expect(html).toContain("&quot;currentMapId&quot;");
+  });
+
+  it("renders playable grid preview section", () => {
+    const html = renderOverview();
+
+    expect(html).toContain("Playable Grid Preview");
+    expect(html).toContain("Runtime Status");
   });
 
   it("renders event graph section", () => {
@@ -137,6 +188,7 @@ function renderOverview(proposal: ProjectProposal | null = null) {
       eventLog={[]}
       mermaid={"flowchart TD\n  map_town[\"Town\"]\n"}
       proposal={proposal}
+      project={project}
       projectTitle="Tiny RPG"
       runtimeSnapshot={snapshot}
       summary={summary}

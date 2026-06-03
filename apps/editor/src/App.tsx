@@ -74,6 +74,7 @@ export function App() {
       eventLog={eventLog.slice(-8).reverse()}
       mermaid={mermaid}
       proposal={proposal}
+      project={project}
       projectTitle={project.title}
       runtimeSnapshot={snapshot}
       summary={summary}

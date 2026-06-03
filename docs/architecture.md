@@ -115,6 +115,8 @@ core-domain project data
 
 Preview components may render project data and runtime snapshots, but they must not own behavior semantics or duplicate runtime rules inside the editor app.
 
+The first playable preview is intentionally HTML/CSS grid based and renderer-free. It visualizes map cells, player position, events, collision markers, and runtime status from `core-domain` data and `web-runtime` snapshots before introducing Canvas, PixiJS, or asset-driven rendering.
+
 ## AI-Generated Changes
 
 AI-generated changes should be represented as reviewable diffs, not silent mutations.

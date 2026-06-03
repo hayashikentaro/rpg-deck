@@ -1,4 +1,4 @@
-import type { ProjectSummary, ValidationIssue } from "@rpg-deck/core-domain";
+import type { GameProject, ProjectSummary, ValidationIssue } from "@rpg-deck/core-domain";
 import type { Direction, RuntimeEventLogEntry, RuntimeSnapshot } from "@rpg-deck/web-runtime";
 import {
   AppShell,
@@ -9,10 +9,12 @@ import {
   PropertyGrid,
   ValidationIssueList
 } from "@rpg-deck/ux-kit";
+import { PlayablePreview } from "./features/preview/PlayablePreview.js";
 import type { ProjectProposal } from "./proposals.js";
 
 export type EditorOverviewProps = {
   projectTitle: string;
+  project: GameProject;
   summary: ProjectSummary;
   validationIssues: ValidationIssue[];
   mermaid: string;
@@ -30,6 +32,7 @@ export type EditorOverviewProps = {
 
 export function EditorOverview({
   projectTitle,
+  project,
   summary,
   validationIssues,
   mermaid,
@@ -96,18 +99,7 @@ export function EditorOverview({
       }
       main={
         <main className="editor-main">
-          <section className="preview-placeholder" aria-label="Preview placeholder">
-            <h2>Preview placeholder</h2>
-            <p>No canvas renderer yet. This panel reflects headless runtime state.</p>
-            <dl>
-              <dt>Current map</dt>
-              <dd>{runtimeSnapshot.currentMapId}</dd>
-              <dt>Player position</dt>
-              <dd>[{runtimeSnapshot.playerPosition.join(", ")}]</dd>
-              <dt>Status</dt>
-              <dd>{runtimeSnapshot.status}</dd>
-            </dl>
-          </section>
+          <PlayablePreview eventLog={eventLog} project={project} snapshot={runtimeSnapshot} />
           <section>
             <h2>Runtime snapshot</h2>
             <pre>{JSON.stringify(runtimeSnapshot, null, 2)}</pre>

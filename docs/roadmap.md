@@ -156,6 +156,10 @@ Non-goals:
 * full map editor
 * AI diff review
 
+Initial implementation status:
+
+* `apps/editor` now has a renderer-free HTML/CSS playable grid preview that displays the current map, player marker, event markers, collision markers, runtime status, message/choice panels, and battle placeholder from `core-domain` project data plus `web-runtime` snapshots.
+
 ## Phase 6: Minimal Event Inspector + Live Preview
 
 Purpose:

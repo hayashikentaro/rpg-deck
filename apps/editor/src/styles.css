@@ -73,7 +73,7 @@ select {
   gap: 16px;
 }
 
-.preview-placeholder,
+.playable-preview,
 .editor-main section,
 .rdk-inspector__section {
   padding: 14px;
@@ -97,11 +97,122 @@ select {
 }
 
 .rdk-property-grid__label,
-.preview-placeholder dt {
+.playable-preview dt {
   color: #555;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.playable-preview__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.playable-preview__header h2,
+.playable-preview__header p {
+  margin: 0;
+}
+
+.playable-preview__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.playable-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(18px, 1fr));
+  gap: 2px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid #deded8;
+  border-radius: 6px;
+  background: #eeeeea;
+}
+
+.playable-preview__cell {
+  display: grid;
+  min-width: 18px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid #d1d1ca;
+  border-radius: 3px;
+  background: #fff;
+  color: #777;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.playable-preview__cell[data-cell-kind="player"] {
+  border-color: #2266aa;
+  background: #dcecff;
+  color: #0d4075;
+}
+
+.playable-preview__cell[data-cell-kind="collision"] {
+  border-color: #5f5f59;
+  background: #6b6b64;
+  color: #fff;
+}
+
+.playable-preview__cell[data-cell-kind="interact"] {
+  border-color: #7c5c00;
+  background: #fff1bf;
+  color: #5f4300;
+}
+
+.playable-preview__cell[data-cell-kind="touch"] {
+  border-color: #9d3528;
+  background: #ffe0dc;
+  color: #7d1f14;
+}
+
+.playable-preview__cell[data-cell-kind="autorun"] {
+  border-color: #5b3e91;
+  background: #eee4ff;
+  color: #432777;
+}
+
+.playable-preview__status {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.playable-preview__status h3,
+.playable-preview__status h4,
+.playable-preview__status p {
+  margin: 0;
+}
+
+.playable-preview__status dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 6px 10px;
+  margin: 0;
+}
+
+.playable-preview__message,
+.playable-preview__choice,
+.playable-preview__battle,
+.playable-preview__last-log {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #deded8;
+  border-radius: 6px;
+  background: #fafaf8;
+}
+
+.playable-preview__choice ol {
+  margin: 0;
+  padding-left: 20px;
 }
 
 .rdk-canvas-toolbar {
