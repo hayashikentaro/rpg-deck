@@ -111,4 +111,4 @@ Reasons:
 * easy for AI agents to add and update component stories
 * room for future visual regression testing
 
-Do not add Storybook, Ladle, React, Tailwind, or build tooling until the package setup phase explicitly calls for it.
+Do not add Storybook, Ladle, Tailwind, shadcn/ui, Radix, or app bundling until the package setup phase explicitly calls for it. The initial React package exists, but component workshop and styling-framework setup remain deferred.

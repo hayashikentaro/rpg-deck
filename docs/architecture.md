@@ -63,6 +63,8 @@ serialize/
 
 The browser-based prototype/runtime preview. It may execute `core-domain` data for fast iteration, but it must not define the canonical meaning of project data.
 
+The first runtime layer is a headless simulation for movement, collision, event triggers, and a small set of declarative commands. Browser rendering should be added later as an adapter over those semantics, not mixed into the runtime state.
+
 Expected areas:
 
 ```text

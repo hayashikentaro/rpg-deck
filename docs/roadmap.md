@@ -82,6 +82,10 @@ Target outcome:
 * early gameplay semantics can be tested quickly
 * the web runtime remains a prototype, not the source of truth
 
+Initial implementation status:
+
+* `packages/web-runtime` has started with a headless runtime simulation for project loading, new game startup, grid movement, collision, interact/touch triggers, minimal command execution, event logs, and serializable snapshots.
+
 ## Phase 4: Editor App
 
 Scope:

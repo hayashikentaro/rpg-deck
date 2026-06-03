@@ -27,6 +27,8 @@ The TypeScript runtime is a design probe / prototype runtime. The Godot runtime 
 * prototype event execution
 * browser preview state
 
+The initial `web-runtime` implementation is intentionally headless and renderer-free. Its movement, collision, trigger, and command semantics can be used as a design probe for a future browser renderer and as reference behavior for the Godot runtime boundary.
+
 Godot runtime owns:
 
 * Godot nodes
