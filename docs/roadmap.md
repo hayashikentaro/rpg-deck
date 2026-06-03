@@ -103,6 +103,10 @@ Target outcome:
 * editor screens compose `core-domain`, `web-runtime`, and `ux-kit`
 * domain logic does not move into editor feature code
 
+Initial implementation status:
+
+* `apps/editor` has started with a minimal Vite + React shell that loads `tiny-rpg`, shows summary, validation issues, Mermaid graph text, runtime snapshots, recent runtime logs, and sends button inputs to the headless runtime.
+
 ## Phase 5: AI Diff Review
 
 Scope:

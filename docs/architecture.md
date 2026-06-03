@@ -85,6 +85,8 @@ The migration boundary for Godot. It converts `core-domain` data into Godot-read
 
 The human-facing authoring app. It composes the domain package, runtime preview, Godot exporter, and UX components. It must not become the owner of domain logic or runtime-specific objects.
 
+The first editor shell is intentionally an integration surface: it loads sample data through `core-domain`, drives the headless `web-runtime`, and renders generic controls from `ux-kit`. Validation, graph generation, movement, collision, and command execution stay in packages.
+
 Game-specific screens belong under:
 
 ```text
