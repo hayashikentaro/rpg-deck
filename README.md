@@ -39,6 +39,9 @@ RPG Deck is not:
 * Godot migration should stay possible through a clean export boundary.
 * Runtime-specific objects must not enter domain models.
 * UX components belong in `packages/ux-kit` so editor quality can be improved independently.
+* Authoring changes should be confirmed in a playable preview loop as early as possible.
+
+Early preview can be symbolic, HTML-grid based, and status-panel driven. It does not need final rendering, but it should come before richer editing surfaces or expanded AI diff review.
 
 ## Initial Architecture
 
@@ -92,8 +95,11 @@ ux-kit
 3. UX Kit Seed: inspector, property grid, command list, diff card, reference picker, and validation list.
 4. Web Runtime Preview: map render, player movement, collision, NPC display, `show_message`, `transfer_player`, and `set_flag`.
 5. Editor App: map list, map canvas, event list, inspector, command editor, and preview pane.
-6. AI Diff Review: proposed changes, affected entities, accept/reject/hold, validation issues, and before/after summaries.
-7. Godot Boundary Spike: export `tiny-rpg` data and read it in a Godot C# runtime where the player can walk on the exported map.
+6. Playable Grid Preview: HTML-grid preview, player/event/collision markers, message/choice/battle status, and runtime controls.
+7. Event and Command Editing: minimal event inspector and command editing with immediate runtime confirmation.
+8. Diff Review with Preview Confirmation: accept/reject/hold project changes only after their effects can be inspected in the editor and preview.
+9. Map Editing and Renderer Improvements: HTML grid map editing first, then better preview rendering.
+10. Godot Boundary Spike: export `tiny-rpg` or an edited sample and read it in a Godot C# runtime where the player can walk on exported map data.
 
 ## Documentation
 

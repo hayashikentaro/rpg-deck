@@ -97,6 +97,24 @@ apps/editor/src/features/
 
 Reusable authoring UI components. The kit should make editor UX quality improvable in isolation and should not depend on RPG-specific domain concepts.
 
+## Editor-to-Playable Confirmation Loop
+
+The editor app is not only a form-based project editor. It should make project changes visible through playable or runtime preview as early as possible.
+
+The intended loop is:
+
+```text
+core-domain project data
+  -> editor authoring UI
+  -> web-runtime headless semantics
+  -> playable preview / runtime confirmation
+  -> validation and diff review
+```
+
+`apps/editor` composes `core-domain`, `web-runtime`, and `ux-kit` to support this loop. `core-domain` remains the source of truth, and `web-runtime` remains responsible for behavior semantics such as movement, collision, event triggers, and command execution.
+
+Preview components may render project data and runtime snapshots, but they must not own behavior semantics or duplicate runtime rules inside the editor app.
+
 ## AI-Generated Changes
 
 AI-generated changes should be represented as reviewable diffs, not silent mutations.

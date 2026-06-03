@@ -2,6 +2,17 @@
 
 This roadmap starts RPG Deck as a declarative, AI-assisted RPG authoring environment. It intentionally begins with architecture, project data, and reviewability before runtime or editor implementation.
 
+## Roadmap Principle: Editor-to-Playable Confirmation
+
+Every implementation phase should connect editor-side authoring or inspection with playable or runtime-side confirmation.
+
+Editing project data is not enough by itself. Each new authoring feature should answer:
+
+* how does the user inspect or change it in the editor?
+* how does the user confirm the resulting game behavior?
+
+Validation and diff review should support this loop, not replace playable confirmation. Playable confirmation can start as an HTML grid, status panels, and runtime snapshots before any final renderer exists.
+
 ## Phase 0: Architecture Scaffold
 
 Scope:
@@ -107,37 +118,166 @@ Initial implementation status:
 
 * `apps/editor` has started with a minimal Vite + React shell that loads `tiny-rpg`, shows summary, validation issues, Mermaid graph text, runtime snapshots, recent runtime logs, and sends button inputs to the headless runtime.
 
-## Phase 5: AI Diff Review
+## Phase 5: Playable Grid Preview
+
+Purpose:
+
+* make the current project visually inspectable as a playable preview
+* connect `core-domain` project data and `web-runtime` snapshots to a visible grid
+* allow users to confirm game behavior without reading JSON snapshots
 
 Scope:
 
-* proposed changes
-* affected entities
-* accept / reject / hold
-* validation issues
-* before/after summary
+* HTML/CSS grid preview, not Canvas/PixiJS
+* current map display
+* player marker
+* event markers
+* collision markers
+* current runtime status
+* message panel
+* choice panel
+* battle placeholder
+* existing movement/interact controls connected to visible grid
 
-Target outcome:
+Target confirmation:
 
-* AI-generated project changes are reviewable before application
-* reviewers can understand the impact of a change
-* validation issues are surfaced during review
-* accepted changes remain structured and serializable
+* moving changes the visible player marker
+* collision blocks movement visibly
+* interact event shows message/choice UI
+* touch event can show battle placeholder
+* runtime snapshot and visual preview agree
 
-Initial implementation status:
+Non-goals:
 
-* `apps/editor` has started AI Diff Review with an editor-local mock project proposal, `core-domain` `ProjectDiff` generation, and `ux-kit` `DiffCard` actions for accept, reject, and hold.
+* tile images
+* sprite images
+* PixiJS
+* Canvas rendering
+* full map editor
+* AI diff review
 
-## Phase 6: Godot Boundary Spike
+## Phase 6: Minimal Event Inspector + Live Preview
+
+Purpose:
+
+* make event data inspectable/editable
+* confirm edits immediately in playable preview
 
 Scope:
 
-* export `tiny-rpg` data
-* Godot C# runtime reads data
-* player can walk on exported map
+* event list
+* event inspector
+* edit event position
+* edit event trigger
+* edit basic event label/sprite marker if useful
+* edit first `show_message` text if present
+* project validation refresh
+* runtime restart/recreate from edited project
 
-Target outcome:
+Target confirmation:
 
-* the Godot migration boundary is tested early
-* exported asset IDs, map data, player start, and collision data are usable
-* the spike proves the architecture without attempting a full port
+* moving an event changes its marker in the grid preview
+* editing message text changes what appears when interacting
+* changing trigger affects how the event is activated
+
+## Phase 7: Minimal Command Editing + Runtime Confirmation
+
+Purpose:
+
+* edit simple `EventCommand` sequences and confirm runtime behavior
+
+Scope:
+
+* command list viewer
+* minimal editing for:
+  * `show_message`
+  * `set_flag`
+  * `unset_flag`
+  * `play_bgm`
+  * `play_sfx`
+  * `transfer_player`
+  * `start_battle`
+* validation refresh
+* runtime confirmation
+
+Target confirmation:
+
+* adding/editing `show_message` changes message output
+* adding `transfer_player` changes map/position during preview
+* adding `start_battle` triggers battle placeholder
+* flag commands affect later `if_flag` behavior where testable
+
+## Phase 8: Mock Proposal / Diff Review + Preview Confirmation
+
+Purpose:
+
+* introduce structured proposal review only after visible preview exists
+* accept/reject/hold project changes and confirm accepted changes in editor and preview
+
+Scope:
+
+* mock project proposal
+* `diffProjects`
+* `DiffCard`
+* Accept / Reject / Hold
+* accept updates current project
+* validation and preview refresh after accept
+
+Target confirmation:
+
+* accepted dialogue changes appear in event inspector and runtime message panel
+* accepted event additions appear in event list and grid preview
+* rejected changes do not affect current project
+* held changes remain visible as pending review state
+
+Historical note:
+
+* The editor already has an initial mock proposal and `DiffCard` surface. Future work should connect that review to visible preview confirmation before expanding the diff-review workflow.
+
+## Phase 9: HTML Grid Map Editing + Runtime Confirmation
+
+Purpose:
+
+* begin map-level editing while staying in HTML grid
+
+Scope:
+
+* collision toggle
+* event placement/move
+* start position edit if small
+* map bounds display
+* validation refresh
+* runtime confirmation
+
+Target confirmation:
+
+* adding collision blocks movement
+* removing collision allows movement
+* moving event changes interact/touch behavior location
+
+## Phase 10: Better Preview Renderer
+
+Purpose:
+
+* improve visual clarity without changing source of truth
+
+Scope:
+
+* CSS tile colors
+* marker styling
+* simple viewport scaling
+* optional asset-aware labels
+* no heavy renderer unless explicitly chosen later
+
+## Phase 11: Godot Boundary Spike
+
+Purpose:
+
+* validate that edited project data and runtime semantics can cross into Godot
+
+Scope:
+
+* export `tiny-rpg` or edited sample to Godot-readable JSON
+* Godot C# loader
+* map/player/collision movement spike
+* no full Godot game implementation
