@@ -153,3 +153,22 @@ npm test
 ```
 
 For documentation-only changes, `git diff --check` is required. Build/test commands are useful when quick, but may be skipped if unrelated and reported as skipped.
+
+## Architecture Rules
+
+* `packages/core-domain` must not import React, DOM, PixiJS, Canvas, Godot, or editor code.
+* `packages/ux-kit` must not import `core-domain`, `web-runtime`, or game-specific feature code.
+* `packages/web-runtime` may import `core-domain` but must not import React or editor code.
+* `packages/godot-export` may import `core-domain` but must not import editor or web-runtime code.
+* `apps/editor` may compose all packages but must keep game-specific screens under `features/`.
+* Event behavior must be represented as declarative `EventCommand` data, not arbitrary script code.
+* Asset references in `core-domain` must use stable asset IDs, not runtime-specific paths.
+* Runtime-specific objects must never be stored in `core-domain` models.
+
+Core boundary principles:
+
+```text
+ux-kit should not know RPG.
+core-domain should not know UI.
+web-runtime should not know Editor.
+```
