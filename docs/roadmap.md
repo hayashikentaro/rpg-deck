@@ -35,6 +35,12 @@ Target outcome:
 * invalid references are reported as structured validation issues
 * event graph data can be produced for review and future Mermaid output
 
+Initial implementation status:
+
+* `packages/core-domain` has the first TypeScript model, Zod schema, validation, JSON/YAML parsing, project summary, and event graph builder.
+* `packages/sample-projects/tiny-rpg/project.json` is the first valid sample project.
+* `pnpm validate:sample` validates the sample and prints summary and graph data.
+
 ## Phase 2: UX Kit Seed
 
 Scope:

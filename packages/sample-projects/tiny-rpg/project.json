@@ -1,0 +1,159 @@
+{
+  "id": "tiny-rpg",
+  "title": "Tiny RPG",
+  "settings": {
+    "tileSize": 16,
+    "start": {
+      "map": "town",
+      "position": [4, 6]
+    }
+  },
+  "assets": {
+    "sprites": {
+      "hero": {
+        "path": "assets/sprites/characters/hero.png",
+        "frameSize": [16, 16]
+      },
+      "mayor": {
+        "path": "assets/sprites/characters/mayor.png",
+        "frameSize": [16, 16]
+      }
+    },
+    "tilesets": {
+      "town_tiles": {
+        "path": "assets/tilesets/town.png",
+        "tileSize": 16
+      }
+    },
+    "audio": {
+      "town_theme": {
+        "path": "assets/audio/bgm/town-theme.ogg",
+        "kind": "bgm"
+      },
+      "talk": {
+        "path": "assets/audio/sfx/talk.ogg",
+        "kind": "sfx"
+      }
+    }
+  },
+  "tilesets": {
+    "town_tiles": {
+      "id": "town_tiles",
+      "name": "Town Tiles",
+      "asset": "town_tiles",
+      "tileSize": 16
+    }
+  },
+  "maps": {
+    "town": {
+      "id": "town",
+      "name": "Town",
+      "size": [20, 15],
+      "tileset": "town_tiles",
+      "events": ["mayor_intro"],
+      "collision": [[1, 1], [1, 2], [2, 1]]
+    }
+  },
+  "events": {
+    "mayor_intro": {
+      "id": "mayor_intro",
+      "map": "town",
+      "position": [7, 6],
+      "sprite": "mayor",
+      "trigger": "interact",
+      "commands": [
+        {
+          "type": "play_sfx",
+          "sfx": "talk"
+        },
+        {
+          "type": "show_message",
+          "speaker": "mayor",
+          "text": "北の洞窟には近づくな。"
+        },
+        {
+          "type": "choice",
+          "prompt": "それでも行くか？",
+          "options": [
+            {
+              "label": "行く",
+              "commands": [
+                {
+                  "type": "set_flag",
+                  "flag": "cave_warning_ignored"
+                },
+                {
+                  "type": "show_message",
+                  "speaker": "mayor",
+                  "text": "ならば気をつけて行け。"
+                }
+              ]
+            },
+            {
+              "label": "やめておく",
+              "commands": [
+                {
+                  "type": "set_flag",
+                  "flag": "cave_warning_seen"
+                },
+                {
+                  "type": "show_message",
+                  "speaker": "mayor",
+                  "text": "それが賢明だ。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "actors": {
+    "hero": {
+      "id": "hero",
+      "name": "Hero"
+    }
+  },
+  "enemies": {
+    "slime": {
+      "id": "slime",
+      "name": "Slime"
+    }
+  },
+  "items": {
+    "potion": {
+      "id": "potion",
+      "name": "Potion"
+    }
+  },
+  "skills": {
+    "guard": {
+      "id": "guard",
+      "name": "Guard"
+    }
+  },
+  "flags": {
+    "cave_warning_seen": {
+      "id": "cave_warning_seen",
+      "name": "Cave warning seen"
+    },
+    "cave_warning_ignored": {
+      "id": "cave_warning_ignored",
+      "name": "Cave warning ignored"
+    }
+  },
+  "switches": {
+    "intro_complete": {
+      "id": "intro_complete",
+      "name": "Intro complete",
+      "default": false
+    }
+  },
+  "variables": {
+    "gold": {
+      "id": "gold",
+      "name": "Gold",
+      "default": 0
+    }
+  }
+}
