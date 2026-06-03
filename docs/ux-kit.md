@@ -26,6 +26,12 @@ Core rule:
 
 These components should be useful across map editing, event editing, database editing, preview panes, validation panels, and AI diff review.
 
+## Initial Package
+
+`packages/ux-kit` now starts as a minimal TypeScript + React package with generic components for shell layout, split panes, inspectors, property grids, command lists, diff cards, reference picking, validation issue lists, and canvas-like toolbars.
+
+This package intentionally has no dependency on `packages/core-domain`, editor feature code, runtime packages, or RPG-specific types. It also does not include Tailwind, shadcn/ui, Radix, Storybook, Ladle, or app bundling yet; styling remains className-friendly and framework-neutral.
+
 ## Dependency Rules
 
 `packages/ux-kit`:

@@ -59,6 +59,10 @@ Target outcome:
 * generic components do not depend on RPG-specific domain logic
 * editor features can compose reusable UI instead of inventing local panels
 
+Initial implementation status:
+
+* `packages/ux-kit` has started with generic React components for app shell layout, split panes, inspector panels, property grids, command lists, diff cards, reference pickers, validation issue lists, and canvas toolbars.
+
 ## Phase 3: Web Runtime Preview
 
 Scope:
