@@ -1,199 +1,108 @@
 # UX Kit
 
-`packages/ux-kit` should be independent from RPG-specific domain logic.
+`packages/ux-kit` is the reusable authoring UI component package for RPG Deck.
 
-Its purpose is to make production-tool UX reusable, reviewable, and improvable outside `apps/editor`.
+It is where editor UX quality can be improved in isolation. It should not know RPG-specific concepts, and it should not depend on the editor app or the domain package.
 
 Core rule:
 
-```text
-ux-kit should not know RPG.
-```
+    ux-kit should not know RPG.
 
 ## Responsibilities
 
-Suggested structure:
+`ux-kit` should provide reusable production-tool components such as:
 
-```text
-packages/ux-kit/
-  src/
-    primitives/
-    layout/
-    inspector/
-    property-grid/
-    tree/
-    command-list/
-    diff/
-    canvas-controls/
-    picker/
-    dialogue/
-    token/
-```
-
-Reusable components should include:
-
+* `AppShell`
+* `SplitPane`
 * `InspectorPanel`
 * `PropertyGrid`
-* `TreeView`
 * `CommandList`
-* `TilePalette`
-* `CanvasToolbar`
 * `DiffCard`
-* `ChoiceEditor`
-* `DialogueEditor`
-* `CommandPalette`
-* `AssetPicker`
+* `EntityPicker`
 * `ReferencePicker`
 * `ValidationIssueList`
+* `CanvasToolbar`
+* `DialogueEditor` primitives
+
+These components should be useful across map editing, event editing, database editing, preview panes, validation panels, and AI diff review.
+
+## Dependency Rules
+
+`packages/ux-kit`:
+
+* does not depend on `apps/editor`
+* does not depend on `packages/core-domain`
+* does not depend on `packages/web-runtime`
+* does not depend on game-specific feature code
+
+RPG-specific components belong in:
+
+    apps/editor/src/features/*
+
+Generic UX components belong in:
+
+    packages/ux-kit
 
 ## Component Boundary
 
 Good `ux-kit` components:
 
-* `PropertyGrid`
 * `InspectorPanel`
-* `DiffCard`
+* `PropertyGrid`
 * `CommandList`
-* `EntityPicker`
+* `DiffCard`
+* `ReferencePicker`
 * `ValidationIssueList`
-* `ResizablePane`
+* `SplitPane`
 * `CanvasToolbar`
 
-Bad `ux-kit` components:
+Feature-specific components that should not live in `ux-kit`:
 
 * `RpgEventEditor`
 * `TownMapPanel`
 * `SlimeEnemyEditor`
+* `ActorDatabaseScreen`
 
-RPG-specific components belong under `apps/editor/src/features/*`.
+The editor can adapt domain concepts into generic props before passing them to `ux-kit`.
 
-## Inspector
+## Initial Component Notes
 
-The inspector is the primary editing surface for selected entities.
+`InspectorPanel` should support sections, fields, validation messages, and inline diff indicators.
 
-Expected composition:
+`PropertyGrid` should support text, number, select, boolean, position, asset, and reference-style fields through generic props.
 
-```text
-InspectorPanel
-  Section
-  Field
-  ReferencePicker
-  ValidationMessage
-  InlineDiff
-```
+`CommandList` should support command rows, nested command blocks, drag handles, add-command actions, disabled states, and validation markers without knowing RPG command semantics.
 
-It should be reusable for:
+`DiffCard` should support summaries, before/after views, affected entities, risk markers, and accept/reject/hold actions.
 
-* maps
-* NPCs
-* treasure chests
-* dialogue
-* enemies
-* items
-* skills
+`EntityPicker` and `ReferencePicker` should support search, recent selections, create-new flows, validation state, and jump-to-target actions.
 
-## PropertyGrid
+`ValidationIssueList` should display structured issues from any source, not just RPG domain validation.
 
-`PropertyGrid` is the foundation for stable editing UI.
+## Styling Direction
 
-Expected fields:
-
-* `TextField`
-* `NumberField`
-* `SelectField`
-* `BooleanField`
-* `PositionField`
-* `AssetField`
-* `ReferenceField`
-
-Well-defined field components also make AI-assisted UI generation safer: given a typed value, the agent can choose the matching field.
-
-## CommandList
-
-`CommandList` is the center of the event editor.
-
-Expected parts:
-
-* `CommandRow`
-* `NestedCommandBlock`
-* `DragHandle`
-* `AddCommandButton`
-* `DisableCommandToggle`
-* `ValidationMarker`
-
-Event command editing quality is one of the most important UX requirements for an RPG creation tool.
-
-## DiffReview
-
-AI-assisted editing needs first-class diff review components.
-
-Expected parts:
-
-* `DiffCard`
-* `Summary`
-* `BeforeAfter`
-* `AffectedEntities`
-* `RiskMarkers`
-* `AcceptRejectHold`
-
-The review states should include:
-
-* accept
-* reject
-* hold
-
-## EntityPicker and ReferencePicker
-
-RPG projects have many references:
-
-* `mapId`
-* `eventId`
-* `actorId`
-* `enemyId`
-* `itemId`
-* `skillId`
-* `flagId`
-* `assetId`
-
-Picker UX should support:
-
-* search
-* recent selections
-* create new
-* validation display
-* jump to target
-
-Weak reference selection will make the editor hard to use and easy to corrupt.
-
-## Implementation Direction
-
-Use a headless-ish approach with styled components.
-
-Preferred choices:
+Expected future stack:
 
 * shadcn/ui base
 * Tailwind
 * CVA or tailwind-variants
 * variant-based state management
-* no arbitrary classes by default
-* Storybook or Ladle for isolated component review
-* visual regression structure that can be added later
 
-Do not make the kit fully headless unless there is a concrete need. Fully headless components can slow down implementation. Do not make it app-specific either, because that blocks reuse.
+Avoid arbitrary class overuse. Components should expose clear variants and stable composition points instead of accumulating one-off styling in editor feature code.
 
-## Component Workshop
+## Component Review
 
-`packages/ux-kit` should use Ladle or Storybook.
+Storybook or Ladle should be considered later for isolated component review.
 
-Recommended default:
+Recommended first candidate:
 
-```text
-packages/ux-kit + Ladle
-```
+    packages/ux-kit + Ladle
 
 Reasons:
 
-* lightweight
-* focused on component review
-* easy to ask agents to add stories
-* allows UX work without booting the full editor
+* lightweight component previews
+* UX work without running the full editor
+* easy for AI agents to add and update component stories
+* room for future visual regression testing
+
+Do not add Storybook, Ladle, React, Tailwind, or build tooling until the package setup phase explicitly calls for it.

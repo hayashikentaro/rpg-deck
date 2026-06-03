@@ -1,146 +1,163 @@
 # Project Format
 
-The canonical project format belongs to `packages/core-domain`.
+RPG Deck projects are declarative game projects. The external storage format is expected to be YAML or JSON. The internal representation should be TypeScript typed objects owned by `packages/core-domain`.
 
-Runtime implementations, editor views, and Godot export code must consume this format rather than inventing their own source of truth.
+The project format should be readable by humans, AI agents, validators, runtime previews, exporters, and future tooling.
 
-## Core Model Scope
+## Core Concepts
 
-Core data should include:
+Initial domain concepts:
 
 * `GameProject`
 * `MapDefinition`
+* `TilesetDefinition`
+* `AssetManifest`
 * `EventDefinition`
-* `BattleDefinition`
-* `DialogueDefinition`
+* `EventCommand`
 * `ActorDefinition`
 * `EnemyDefinition`
 * `ItemDefinition`
-* `AssetManifest`
+* `SkillDefinition`
 * `FlagDefinition`
 * `SwitchDefinition`
 * `VariableDefinition`
-* `ValidationIssue`
-* `ProjectDiff`
+* `SaveState`
 
-Core services should include:
+## Ownership
 
-* Zod schemas
+`packages/core-domain` owns:
+
+* TypeScript domain types
+* schemas
 * validation
 * reference integrity checks
-* diff generation
-* event graph generation
-* YAML and JSON serialization
+* YAML and JSON loading
+* YAML and JSON writing
+* project summaries
+* project diffs
+* event graph data
 
-## Storage Format
+Runtimes and editor screens consume this model. They do not redefine it.
 
-The project should support YAML and JSON serialization through `core-domain`.
+## Storage Rules
 
-Sample project shape:
-
-```text
-packages/sample-projects/
-  tiny-rpg/
-    game.yaml
-    maps/
-    events/
-    actors/
-    enemies/
-```
-
-`game.yaml` should describe the project manifest and reference domain files. The exact split can evolve, but references should remain explicit and validated.
+* External storage is YAML or JSON.
+* Internal representation is TypeScript typed objects.
+* Validation lives in `core-domain`.
+* Runtime-specific objects must not appear in saved project data.
+* Editor-specific panel state must not appear in saved project data.
+* Asset references use stable asset IDs, not runtime-specific paths.
+* Coordinates are grid-based.
+* Grid position is `[x, y]`.
+* `x` is right.
+* `y` is down.
+* Tile size is a project setting.
 
 ## Asset References
 
-Core data must use stable asset IDs, not runtime-specific paths.
+Avoid storing direct runtime paths on entities:
 
-Avoid:
+    sprite: assets/sprites/characters/mayor.png
 
-```yaml
-sprite: assets/sprites/mayor.png
-```
+Prefer stable asset IDs:
 
-Prefer:
+    sprite: mayor
 
-```yaml
-sprite: mayor
-```
+The asset manifest resolves the ID:
 
-Resolve the ID through an asset manifest:
+    assets:
+      sprites:
+        mayor:
+          path: assets/sprites/characters/mayor.png
+          frameSize: [16, 16]
 
-```yaml
-assets:
-  sprites:
-    mayor:
-      path: assets/sprites/characters/mayor.png
-      frameSize: [16, 16]
-```
+The web runtime may resolve this to a browser asset URL. The Godot exporter or Godot adapter may resolve it to a `res://` path.
 
-This keeps Godot export free to convert paths to `res://...` or another runtime-specific scheme.
+## Coordinate Rules
 
-## Coordinates
+Core data uses grid coordinates:
 
-The coordinate system should be fixed early.
+    position: [12, 8]
 
-Core convention:
+The runtime converts to world coordinates:
 
-```text
-grid position = [x, y]
-x = right
-y = down
-tileSize = project setting
-```
+    worldX = gridX * tileSize
+    worldY = gridY * tileSize
 
-Runtime conversion:
+This rule should remain consistent across web runtime and Godot runtime.
 
-```text
-worldX = gridX * tileSize
-worldY = gridY * tileSize
-```
+## Small Project Example
 
-Godot should use the same domain convention and convert at the runtime boundary.
+    id: tiny-rpg
+    title: Tiny RPG
+    settings:
+      tileSize: 16
+      start:
+        map: town
+        position: [4, 6]
+    assets:
+      sprites:
+        hero:
+          path: assets/sprites/characters/hero.png
+          frameSize: [16, 16]
+        mayor:
+          path: assets/sprites/characters/mayor.png
+          frameSize: [16, 16]
+      tilesets:
+        town_tiles:
+          path: assets/tilesets/town.png
+          tileSize: 16
+    maps:
+      town:
+        id: town
+        name: Town
+        size: [20, 15]
+        tileset: town_tiles
+        events:
+          - mayor_intro
+    events:
+      mayor_intro:
+        id: mayor_intro
+        map: town
+        position: [7, 6]
+        sprite: mayor
+        trigger: interact
+        commands:
+          - type: show_message
+            speaker: mayor
+            text: 北の洞窟には近づくな。
+          - type: set_flag
+            flag: cave_warning_seen
+    flags:
+      cave_warning_seen:
+        id: cave_warning_seen
+        name: Cave warning seen
 
-## Runtime Objects
+## Save State
 
-Runtime-specific objects must never be stored in core models.
+`SaveState` should store runtime progress as serializable data:
 
-Avoid:
+* current map ID
+* player grid position
+* party state
+* inventory
+* flags
+* switches
+* variables
+* defeated enemies or event-local state where needed
 
-```ts
-type Npc = {
-  sprite: PixiSprite;
-  x: number;
-  y: number;
-  onClick: () => void;
-};
-```
+`SaveState` must not store runtime objects such as sprites, DOM nodes, Godot nodes, timers, or closures.
 
-Prefer:
-
-```ts
-type NpcEvent = {
-  id: string;
-  mapId: string;
-  position: GridPosition;
-  spriteId: string;
-  trigger: EventTrigger;
-  commands: EventCommand[];
-};
-```
-
-Rendering should be resolved by the runtime from `spriteId`, not embedded in `core-domain`.
-
-## Validation
+## Validation Targets
 
 Validation should catch:
 
 * missing referenced maps
-* missing referenced events
-* missing referenced actors, enemies, items, or skills
-* missing flags, switches, variables, and assets
-* invalid coordinates
+* missing referenced tilesets
+* missing referenced assets
+* missing flags, switches, and variables
 * invalid command payloads
+* invalid coordinates
 * invalid nested command structures
-* unreachable or cyclic event graph issues where relevant
-
-Validation output should use structured `ValidationIssue` data so both CLI and editor UI can present the same errors.
+* duplicate IDs
+* unresolved actor, enemy, item, or skill references

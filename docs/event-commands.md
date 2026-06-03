@@ -1,105 +1,125 @@
 # Event Commands
 
-Event behavior should be represented as declarative command data, not arbitrary script code.
+RPG Deck events are declarative `EventCommand` sequences.
 
-This keeps event behavior portable across:
+The event system should be readable by humans, editable by AI agents, reviewable as diffs, validated by `core-domain`, and executable by both web and Godot runtimes with the same meaning.
 
-* web runtime
-* Godot runtime
-* editor validation
-* AI diff review
-* event graph analysis
+## Why Declarative Commands
 
-## Command Data
+Declarative commands make it possible to:
 
-Example:
+* validate event structure before runtime
+* generate reviewable AI diffs
+* produce event graphs and Mermaid diagrams later
+* keep behavior portable across TypeScript and Godot runtimes
+* avoid hiding important game behavior inside editor or runtime code
 
-```yaml
-commands:
-  - type: show_message
-    speaker: mayor
-    text: 北の洞窟には近づくな。
-  - type: set_flag
-    flag: cave_warning_seen
-  - type: choice
-    prompt: それでも行くか？
-    options:
-      - label: 行く
-        commands:
-          - type: transfer_player
-            map: cave
-            position: [3, 10]
-```
+## Initial Command Candidates
 
-The same command sequence should be executable in both web and Godot runtimes.
-
-## Avoid Free Scripts
-
-Avoid:
-
-```yaml
-script: |
-  if player.level > 5:
-    showMessage("...")
-```
-
-Free scripts hurt portability, validation, graph generation, diff review, and Godot migration. If scripting is added later, it should be added after the declarative command model is stable.
-
-## Initial Command Set
-
-The initial playable prototype should support:
+Initial commands:
 
 * `show_message`
-* `transfer_player`
-* `set_flag`
 * `choice`
-
-Useful next commands:
-
-* `set_switch`
-* `set_variable`
+* `set_flag`
+* `unset_flag`
+* `if_flag`
 * `give_item`
+* `take_item`
 * `start_battle`
-* `play_sound`
-* `wait`
-* `conditional_branch`
+* `transfer_player`
+* `play_bgm`
+* `play_sfx`
 
-## Command Ownership
+This list is intentionally small. Commands should be added when their data shape, validation, and runtime semantics are clear.
 
-`core-domain` owns:
+## No Arbitrary Scripts Initially
 
-* command schemas
-* command payload types
-* validation
-* reference checks
-* graph generation
-* diff-friendly serialization
+Arbitrary script code is prohibited in the initial project format.
 
-`web-runtime` owns:
+Avoid event data like:
 
-* executing commands in the browser prototype
-* presenting dialogue
-* applying command effects to runtime state
-* mapping command behavior to rendering and input adapters
+    script: |
+      if player.level > 5:
+        showMessage("...")
 
-`godot-export` owns:
+Free scripts make validation, AI review, event graph generation, and Godot migration harder. If scripting is added later, it should be a deliberate extension after declarative commands are stable.
 
-* exporting commands to Godot-readable data
-* preserving stable command semantics
-* adapting IDs and asset references for Godot runtime loading
+## Nested Commands
 
-`apps/editor` owns:
+Nested commands are allowed where the command schema explicitly supports them.
 
-* command editing workflows
-* command list UI composition
-* validation display
-* AI diff review for command changes
+Examples:
 
-## Portability Rules
+* `choice` option branches
+* `if_flag` true/false branches
 
-* Commands must be serializable data.
-* Commands must use stable IDs for maps, assets, flags, switches, variables, and entities.
-* Commands must not store runtime objects.
-* Commands must not store editor component state.
-* Nested commands must remain explicit and schema-validated.
-* Runtime-specific behavior should be implemented in runtime adapters, not in command payloads.
+Nested commands must remain serializable and schema-validated.
+
+## NPC Conversation Example
+
+    id: mayor_intro
+    map: town
+    position: [7, 6]
+    sprite: mayor
+    trigger: interact
+    commands:
+      - type: show_message
+        speaker: mayor
+        text: 北の洞窟には近づくな。
+      - type: choice
+        prompt: それでも行くか？
+        options:
+          - label: 行く
+            commands:
+              - type: set_flag
+                flag: cave_warning_ignored
+              - type: transfer_player
+                map: cave_entrance
+                position: [3, 10]
+          - label: やめておく
+            commands:
+              - type: set_flag
+                flag: cave_warning_seen
+              - type: show_message
+                speaker: mayor
+                text: それが賢明だ。
+
+## Runtime Portability
+
+Web runtime and Godot runtime should execute the same command data with the same domain meaning.
+
+Runtime-specific rendering or audio details belong in runtime adapters. The command payload should use stable IDs for maps, assets, flags, items, enemies, and other entities.
+
+For example:
+
+    - type: play_bgm
+      bgm: town_theme
+
+The command references `town_theme`. The runtime or exporter resolves that ID to an actual asset path.
+
+## AI Review
+
+`EventCommand` data should be easy for AI agents to generate and easy for humans to review.
+
+Useful diff review metadata:
+
+* affected event IDs
+* affected map IDs
+* added commands
+* removed commands
+* changed command payloads
+* validation issues
+* possible reference risks
+
+## Event Graphs
+
+The command model should support future event graph and Mermaid generation.
+
+Useful graph edges include:
+
+* map transfer targets
+* battle targets
+* flag branches
+* choice branches
+* referenced assets
+* referenced items, enemies, actors, and skills

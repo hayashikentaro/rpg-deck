@@ -1,297 +1,125 @@
 # Architecture
 
-This project treats TypeScript runtime code as a prototyping runtime, not as the final source of truth.
+RPG Deck is a declarative RPG authoring environment designed for AI-assisted workflows. The project is built around structured game data that humans and AI agents can inspect, validate, diff, and change safely.
 
-The source of truth is:
+RPG Deck is not an RPG Maker clone. It does not treat GUI state, a TypeScript runtime, or a specific engine runtime as the canonical project. The canonical project is declarative data owned by `packages/core-domain`.
 
-```text
-Core Domain = declarative game data and domain model
-Web Runtime = design probe / prototyping runtime
-Godot Runtime = production candidate
-```
+## Design Philosophy
 
-The TypeScript runtime is useful for rapidly validating event semantics, battle logic, map structure, UX, and AI-assisted diff review. Stable concepts should move into `core-domain` first, then be consumed by web and Godot runtimes.
-
-## Layer Boundaries
-
-The repository is split into five primary layers:
-
-1. `packages/core-domain`
-2. `packages/web-runtime`
-3. `packages/godot-export`
-4. `apps/editor`
-5. `packages/ux-kit`
-
-## `packages/core-domain`
-
-`core-domain` owns the canonical game production data.
-
-Suggested structure:
+The central design choice is:
 
 ```text
-packages/core-domain/
-  src/
-    schema/
-    model/
-    validation/
-    commands/
-    events/
-    diff/
-    graph/
-    serialize/
+Core Domain = source of truth
+Web Runtime = prototype/runtime preview
+Godot Runtime = future production candidate
+Editor App = integration surface
+UX Kit = reusable authoring UI components
 ```
 
-Responsibilities:
+The TypeScript runtime is valuable because it lets the project test map structure, movement, event semantics, battle experiments, save/load ideas, and editor preview quickly. It is not the final authority on game rules.
 
-* `GameProject`
-* `MapDefinition`
-* `EventDefinition`
-* `BattleDefinition`
-* `DialogueDefinition`
-* `Flag`, `Switch`, and `Variable` definitions
-* Zod schemas
+Godot support should remain possible by keeping the domain model declarative, serializable, and free of runtime-specific objects.
+
+## Source of Truth
+
+`packages/core-domain` owns the game production data:
+
+* project model
+* map definitions
+* tileset definitions
+* asset manifest
+* event definitions
+* event command schemas
+* actors, enemies, items, and skills
+* flags, switches, and variables
+* save-state shapes
 * validation
-* project diffing
+* diff generation
 * event graph generation
-* reference integrity checks
 * YAML and JSON serialization
 
-Allowed examples:
+React components, PixiJS objects, Canvas objects, DOM events, Godot nodes, and editor panel state must not be stored in domain models.
 
-* `GameProject`
-* `MapDefinition`
-* `EventCommand`
-* `validateProject()`
-* `diffProject()`
-* `exportEventGraph()`
+## Initial Layers
 
-Forbidden examples:
+### `packages/core-domain`
 
-* React components
-* Pixi sprites
-* Canvas rendering
-* Godot nodes
-* DOM events
+The canonical data and domain model package. It should stay pure enough that web runtime, editor, exporter, CLI tools, tests, and future Godot adapters can share the same meaning.
 
-Keeping this package clean is the main requirement for a practical Godot migration path.
-
-## `packages/web-runtime`
-
-`web-runtime` is a TypeScript prototype runtime.
-
-Suggested structure:
+Expected areas:
 
 ```text
-packages/web-runtime/
-  src/
-    engine/
-    map/
-    character/
-    event-runner/
-    battle/
-    input/
-    render/
+schema/
+model/
+validation/
+commands/
+events/
+diff/
+graph/
+serialize/
 ```
 
-Responsibilities:
+### `packages/web-runtime`
 
-* tile rendering
-* player movement
-* collision
-* event execution
-* dialogue display
-* battle preview
-* save/load prototyping
+The browser-based prototype/runtime preview. It may execute `core-domain` data for fast iteration, but it must not define the canonical meaning of project data.
 
-This package reads `core-domain` data. It must not become the canonical place for game semantics.
-
-Event command meaning should be defined by `core-domain`; `web-runtime` only executes those commands.
-
-## `packages/godot-export`
-
-`godot-export` is the boundary for Godot migration.
-
-Suggested structure:
+Expected areas:
 
 ```text
-packages/godot-export/
-  src/
-    export-project.ts
-    export-maps.ts
-    export-events.ts
-    export-database.ts
-    godot-manifest.ts
+engine/
+map/
+character/
+event-runner/
+battle/
+input/
+render/
 ```
 
-Responsibilities:
+### `packages/godot-export`
 
-* transform `core-domain` data for Godot
-* manage output strategy for `.tscn`, `.tres`, `.json`, `.res`, or related formats
-* format data for a Godot runtime
-* convert asset paths
-* map stable IDs to Godot node names where needed
+The migration boundary for Godot. It converts `core-domain` data into Godot-readable output. The first target should be exported JSON read by a Godot C# runtime, not mass generation of `.tscn` scenes.
 
-The first export target should be simple:
+### `apps/editor`
+
+The human-facing authoring app. It composes the domain package, runtime preview, Godot exporter, and UX components. It must not become the owner of domain logic or runtime-specific objects.
+
+Game-specific screens belong under:
 
 ```text
-core-domain project
-  -> godot-export
-  -> godot-project/game_data/*.json
+apps/editor/src/features/
 ```
 
-Godot C# runtime should initially read exported JSON. Generating many Godot scenes too early adds complexity before the runtime boundary is understood.
+### `packages/ux-kit`
 
-## `apps/editor`
+Reusable authoring UI components. The kit should make editor UX quality improvable in isolation and should not depend on RPG-specific domain concepts.
 
-`apps/editor` is the human-facing production environment.
+## AI-Generated Changes
 
-Suggested structure:
+AI-generated changes should be represented as reviewable diffs, not silent mutations.
+
+The expected workflow is:
 
 ```text
-apps/editor/
-  src/
-    app/
-    features/
-      map-editor/
-      event-editor/
-      database-editor/
-      preview/
-      diff-review/
-    panels/
-    routes/
+proposed change
+  -> affected entities
+  -> validation issues
+  -> before/after summary
+  -> accept / reject / hold
 ```
 
-Responsibilities:
-
-* open project files
-* edit maps
-* edit events
-* edit database entries
-* preview the game
-* review AI-generated diffs
-
-The editor is an application composition layer. Generic UI quality should live in `packages/ux-kit`, not inside editor feature code.
-
-## `packages/ux-kit`
-
-`ux-kit` owns reusable production-tool UX components.
-
-Suggested structure:
-
-```text
-packages/ux-kit/
-  src/
-    primitives/
-    layout/
-    inspector/
-    property-grid/
-    tree/
-    command-list/
-    diff/
-    canvas-controls/
-    picker/
-    dialogue/
-    token/
-```
-
-Good component examples:
-
-* `PropertyGrid`
-* `InspectorPanel`
-* `DiffCard`
-* `CommandList`
-* `EntityPicker`
-* `ValidationIssueList`
-* `ResizablePane`
-* `CanvasToolbar`
-
-Bad component examples:
-
-* `RpgEventEditor`
-* `TownMapPanel`
-* `SlimeEnemyEditor`
-
-RPG-specific components belong under `apps/editor/src/features/*`. Generic UX components belong in `packages/ux-kit`.
-
-## Recommended Monorepo Shape
-
-```text
-rpg-loom/
-  apps/
-    editor/
-      src/
-        features/
-          map-editor/
-          event-editor/
-          database-editor/
-          preview/
-          diff-review/
-        app/
-        main.tsx
-
-  packages/
-    core-domain/
-      src/
-        schema/
-        model/
-        validation/
-        diff/
-        graph/
-        serialize/
-
-    web-runtime/
-      src/
-        engine/
-        render/
-        input/
-        event-runner/
-        battle/
-
-    ux-kit/
-      src/
-        primitives/
-        inspector/
-        property-grid/
-        tree/
-        command-list/
-        diff/
-        picker/
-        dialogue/
-        canvas-controls/
-
-    godot-export/
-      src/
-        export-project.ts
-        export-maps.ts
-        export-events.ts
-
-    sample-projects/
-      tiny-rpg/
-        game.yaml
-        maps/
-        events/
-        actors/
-        enemies/
-
-  docs/
-    architecture.md
-    project-format.md
-    event-commands.md
-    godot-boundary.md
-    ux-kit.md
-```
+This requires stable IDs, structured data, deterministic serialization, and validation that can run outside the editor UI.
 
 ## Dependency Rules
 
-Forbidden dependencies:
+These rules are mandatory:
 
-* `core-domain` depends on runtime, UI, editor, or Godot code.
-* `ux-kit` depends on `core-domain`, `web-runtime`, or game-specific feature code.
-* `web-runtime` depends on React or editor code.
-* `godot-export` depends on editor or web-runtime code.
-* `editor` becomes the owner of core semantics instead of acting as an integration layer.
+* `packages/core-domain` must not import React, DOM, PixiJS, Canvas, Godot, or editor code.
+* `packages/ux-kit` must not import `core-domain`, `web-runtime`, or game-specific feature code.
+* `packages/web-runtime` may import `core-domain` but must not import React or editor code.
+* `packages/godot-export` may import `core-domain` but must not import editor or web-runtime code.
+* `apps/editor` may compose all packages but must keep game-specific screens under `features/`.
 
-Boundary principles:
+Core boundary principles:
 
 ```text
 ux-kit should not know RPG.
@@ -299,11 +127,28 @@ core-domain should not know UI.
 web-runtime should not know Editor.
 ```
 
-## Runtime Shape
+## Initial Repository Shape
 
-Web and Godot runtimes should share concepts, even if the implementations are in different languages.
+```text
+apps/
+  editor/
 
-TypeScript target:
+packages/
+  core-domain/
+  web-runtime/
+  ux-kit/
+  godot-export/
+  sample-projects/
+    tiny-rpg/
+
+docs/
+```
+
+## Runtime Alignment
+
+Web and Godot runtimes should share concepts even if they are implemented in different languages.
+
+Example TypeScript shape:
 
 ```ts
 interface GameRuntime {
@@ -314,132 +159,10 @@ interface GameRuntime {
   tick(deltaMs: number): void;
   getSnapshot(): RuntimeSnapshot;
 }
-
-class WebRuntime implements GameRuntime {}
 ```
 
-Godot C# target:
+Godot C# can mirror the concepts without requiring exact API parity.
 
-```csharp
-public interface IGameRuntime
-{
-    Task LoadProject(GameProject project);
-    Task StartNewGame();
-    void Dispatch(PlayerInput input);
-    void Tick(double deltaMs);
-    RuntimeSnapshot GetSnapshot();
-}
-```
+## Implementation Direction
 
-The APIs do not need to match exactly. The concepts should match.
-
-## Runtime Internals
-
-Keep this conceptual split even if the first implementation is not physically split:
-
-```text
-runtime-core
-runtime-renderer-web
-runtime-input-web
-```
-
-Event execution, movement, and battle calculations should be pure-ish. Rendering, audio, and input should be adapters. This makes future Godot translation easier.
-
-## Development Phases
-
-### Phase 0: Architecture scaffold
-
-Create the monorepo boundaries:
-
-* `apps/editor`
-* `packages/core-domain`
-* `packages/web-runtime`
-* `packages/ux-kit`
-* `packages/godot-export`
-* `packages/sample-projects`
-
-The first goal is to lock dependency direction.
-
-### Phase 1: Core Domain
-
-Define the game data format:
-
-* `GameProject`
-* `MapDefinition`
-* `EventDefinition`
-* `EventCommand`
-* `ActorDefinition`
-* `EnemyDefinition`
-* `ItemDefinition`
-* `AssetManifest`
-* `ValidationIssue`
-* `ProjectDiff`
-
-Initial validation can be CLI-based:
-
-```bash
-rpg validate examples/tiny-rpg
-rpg summarize examples/tiny-rpg
-rpg graph events town
-```
-
-### Phase 2: UX Kit seed
-
-Create reusable editor UX foundations:
-
-* `AppShell`
-* `SplitPane`
-* `InspectorPanel`
-* `PropertyGrid`
-* `CommandList`
-* `DiffCard`
-* `ReferencePicker`
-* `ValidationIssueList`
-
-### Phase 3: Web Runtime Preview
-
-Make `tiny-rpg` playable in the web runtime:
-
-* map rendering
-* player movement
-* collision
-* event trigger
-* `show_message`
-* `transfer_player`
-* `set_flag`
-
-### Phase 4: Editor App
-
-Use `ux-kit` to build the production UI:
-
-* map list
-* map canvas
-* event list
-* inspector
-* event command editor
-* preview pane
-
-### Phase 5: Godot Boundary Spike
-
-Read `tiny-rpg` map, player, and collision data in Godot C#:
-
-```text
-core-domain JSON
-  -> godot-export
-  -> Godot C# runtime
-  -> playable movement
-```
-
-This spike should happen early to prevent TypeScript-specific assumptions from leaking into the domain model.
-
-## Initial Implementation Order
-
-1. monorepo scaffold
-2. `docs/architecture.md`
-3. `docs/godot-boundary.md`
-4. `packages/core-domain` types and schemas
-5. `packages/ux-kit` base components
-6. `tiny-rpg` sample
-7. web-runtime preview
-8. editor app
-9. Godot boundary spike
+Start with docs and boundaries, then build the smallest useful domain model and sample project. Runtime preview and editor UI should prove the data model instead of replacing it.

@@ -1,205 +1,164 @@
 # Godot Boundary
 
-Godot migration depends on keeping `core-domain` clean and declarative.
+The Godot boundary exists so RPG Deck can start with a fast TypeScript prototype while keeping a future Godot runtime path open.
 
-The TypeScript runtime is a design probe. Godot is a production candidate. Neither should become the canonical source of game data.
+The TypeScript runtime is a design probe / prototype runtime. The Godot runtime is a future production candidate. The source of truth remains `packages/core-domain`.
 
 ## Ownership
 
-### Belongs to `core-domain`
+`core-domain` owns:
 
-* project model
-* map definitions
-* event definitions
-* event command schemas
-* asset IDs
-* grid coordinates
+* declarative project data
+* domain types
+* schemas
 * validation
-* diffing
-* event graph generation
-* YAML and JSON serialization
+* event command meaning
+* stable IDs
+* grid coordinates
+* asset manifest data
+* serialization
 
-### Belongs to `web-runtime`
+`web-runtime` owns:
 
 * browser rendering
 * browser input
-* prototype map movement
+* prototype movement
 * prototype collision
 * prototype event execution
-* dialogue preview
-* battle preview
-* save/load experiments
+* browser preview state
 
-### Belongs to Godot runtime
+Godot runtime owns:
 
+* Godot nodes
+* Godot sprites
 * Godot scene tree usage
-* Godot rendering
 * Godot input mapping
 * Godot physics integration
 * C# runtime state
 * loading exported data
-* translating domain concepts into nodes/resources
 
-### Belongs to `godot-export`
+`godot-export` owns:
 
-* export format
-* Godot-friendly JSON output
-* optional future `.tscn`, `.tres`, `.res`, or resource generation
-* asset path conversion
-* stable ID to Godot node-name mapping
+* converting `core-domain` projects into Godot-readable output
+* writing exported JSON
+* preparing future `.tscn`, `.tres`, `.res`, or resource strategies when needed
+* asset path conversion strategy
+* stable ID to Godot runtime mapping
 
-## Initial Export Format
+## Initial Export Strategy
 
-Start with JSON export:
+The first Godot integration should not generate large numbers of `.tscn` files.
 
-```text
-core-domain project
-  -> godot-export
-  -> godot-project/game_data/*.json
-```
+Use this path first:
 
-Godot C# runtime should read this JSON.
+    core-domain project
+      -> godot-export
+      -> godot-project/game_data/*.json
+      -> Godot C# runtime reads exported JSON
 
-Avoid generating many Godot scenes at first. Scene generation should wait until the runtime data boundary is proven.
+This keeps the boundary clear and avoids coupling the domain format to early Godot scene-generation assumptions.
 
-## Asset ID Rules
+## Runtime Objects
 
-Core data should reference assets by stable IDs.
+Godot-specific objects must not enter `core-domain`.
 
-Avoid:
+Forbidden in domain models:
 
-```yaml
-sprite: assets/sprites/mayor.png
-```
+* `Node`
+* `Sprite2D`
+* `AnimatedSprite2D`
+* `PackedScene`
+* Godot resource instances
+* Godot signal callbacks
 
-Prefer:
+Web-specific objects must not enter `core-domain`.
 
-```yaml
-sprite: mayor
-```
+Forbidden in domain models:
 
-Asset manifest:
+* React components
+* DOM nodes
+* Canvas objects
+* PixiJS sprites
+* browser events
+* closures for event behavior
 
-```yaml
-assets:
-  sprites:
-    mayor:
-      path: assets/sprites/characters/mayor.png
-      frameSize: [16, 16]
-```
+Domain models should store stable IDs and serializable data.
 
-`godot-export` can convert this to Godot paths such as `res://...`.
+## Asset Conversion
 
-## Coordinate Rules
+Core data uses stable asset IDs:
+
+    sprite: mayor
+
+The asset manifest resolves the source path:
+
+    assets:
+      sprites:
+        mayor:
+          path: assets/sprites/characters/mayor.png
+          frameSize: [16, 16]
+
+The exporter or Godot adapter is responsible for converting this to a Godot path such as:
+
+    res://game_assets/sprites/characters/mayor.png
+
+The exact output location can evolve. The rule is that runtime-specific paths are not the domain source of truth.
+
+## Coordinate Conversion
 
 Core coordinate convention:
 
-```text
-grid position = [x, y]
-x = right
-y = down
-tileSize = project setting
-```
+    grid position = [x, y]
+    x = right
+    y = down
+    tileSize = project setting
 
 Runtime conversion:
 
-```text
-worldX = gridX * tileSize
-worldY = gridY * tileSize
-```
+    worldX = gridX * tileSize
+    worldY = gridY * tileSize
 
-Godot should follow the same domain convention and perform runtime-specific conversion at the boundary.
+Godot can map those world coordinates into its own node transforms, but the domain convention should stay stable.
 
 ## EventCommand Portability
 
-Events must be command data, not runtime scripts.
+Event behavior must be declarative `EventCommand` data. Both web runtime and Godot runtime should implement the same command meaning.
 
-Portable example:
+Portable command example:
 
-```yaml
-commands:
-  - type: show_message
-    speaker: mayor
-    text: 北の洞窟には近づくな。
-  - type: set_flag
-    flag: cave_warning_seen
-```
+    - type: show_message
+      speaker: mayor
+      text: 北の洞窟には近づくな。
+    - type: transfer_player
+      map: cave_entrance
+      position: [3, 10]
 
-Avoid:
+Avoid runtime scripts or language-specific callbacks in event data.
 
-```yaml
-script: |
-  if player.level > 5:
-    showMessage("...")
-```
+## First Godot Boundary Spike
 
-Declarative commands allow:
+The first spike should prove the boundary, not complete a full port.
 
-* web execution
-* Godot execution
-* editor validation
-* graph generation
-* AI diff review
-* safer migration
+Scope:
 
-## Runtime API Alignment
+* export `tiny-rpg` map data from `core-domain`
+* export player start position
+* export collision data
+* read exported JSON in a Godot C# runtime
+* render or otherwise represent the map enough to move a player
+* allow the player to walk
+* keep event execution minimal
 
-Web runtime target:
+Success criteria:
 
-```ts
-interface GameRuntime {
-  loadProject(project: GameProject): Promise<void>;
-  startNewGame(): Promise<void>;
-  loadSave(save: SaveState): Promise<void>;
-  dispatch(input: PlayerInput): void;
-  tick(deltaMs: number): void;
-  getSnapshot(): RuntimeSnapshot;
-}
-```
+* Godot reads exported data without hand-translating the project
+* player movement uses exported map and collision information
+* asset IDs and coordinates survive the export boundary
+* no Godot-specific objects are required in `core-domain`
 
-Godot C# target:
+Non-goals:
 
-```csharp
-public interface IGameRuntime
-{
-    Task LoadProject(GameProject project);
-    Task StartNewGame();
-    void Dispatch(PlayerInput input);
-    void Tick(double deltaMs);
-    RuntimeSnapshot GetSnapshot();
-}
-```
-
-The signatures do not need to be identical. The concepts should stay aligned.
-
-## Boundary Spike
-
-Run an early Godot spike before the TypeScript implementation grows too large.
-
-Target:
-
-```text
-tiny-rpg map + player + collision in Godot C#
-```
-
-Flow:
-
-```text
-core-domain JSON
-  -> godot-export
-  -> Godot C# runtime
-  -> player can walk
-```
-
-This validates that the domain model is not accidentally tied to browser or TypeScript runtime assumptions.
-
-## Intentional Non-Goals For Now
-
-Avoid these early:
-
-* generating large numbers of Godot scenes
-* embedding PixiJS, Canvas, DOM, or React concepts into `core-domain`
-* storing Godot nodes or resources in domain models
-* arbitrary event scripts
-* runtime-specific asset paths in core data
-* making the web runtime the canonical semantics owner
+* complete event execution
+* full editor integration
+* mass `.tscn` generation
+* final production runtime architecture
