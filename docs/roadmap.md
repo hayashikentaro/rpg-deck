@@ -124,6 +124,10 @@ Target outcome:
 * validation issues are surfaced during review
 * accepted changes remain structured and serializable
 
+Initial implementation status:
+
+* `apps/editor` has started AI Diff Review with an editor-local mock project proposal, `core-domain` `ProjectDiff` generation, and `ux-kit` `DiffCard` actions for accept, reject, and hold.
+
 ## Phase 6: Godot Boundary Spike
 
 Scope:

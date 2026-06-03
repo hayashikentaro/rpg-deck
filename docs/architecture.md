@@ -101,6 +101,8 @@ Reusable authoring UI components. The kit should make editor UX quality improvab
 
 AI-generated changes should be represented as reviewable diffs, not silent mutations.
 
+The first diff-review surface can use mock project proposals produced inside the editor app. External AI integration is not required for the boundary: proposed project data is compared with `core-domain` diffing, rendered through generic UX components, and accepted only after human review.
+
 The expected workflow is:
 
 ```text

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ProjectSummary } from "@rpg-deck/core-domain";
 import type { RuntimeSnapshot } from "@rpg-deck/web-runtime";
 import { EditorOverview } from "../EditorOverview.js";
+import type { ProjectProposal } from "../proposals.js";
 
 const summary: ProjectSummary = {
   id: "tiny-rpg",
@@ -78,17 +79,72 @@ describe("EditorOverview", () => {
     expect(html).toContain("Right");
     expect(html).toContain("Interact");
   });
+
+  it("renders diff review section", () => {
+    const html = renderOverview();
+
+    expect(html).toContain("Diff Review");
+  });
+
+  it("renders create proposal button when no proposal exists", () => {
+    const html = renderOverview();
+
+    expect(html).toContain("Create mock proposal");
+  });
+
+  it("renders proposal title and change count when proposal exists", () => {
+    const html = renderOverview(mockProposal);
+
+    expect(html).toContain("Mayor follow-up guidance");
+    expect(html).toContain("Changes: 1");
+  });
+
+  it("renders proposal review action labels", () => {
+    const html = renderOverview(mockProposal);
+
+    expect(html).toContain("Accept");
+    expect(html).toContain("Reject");
+    expect(html).toContain("Hold");
+  });
 });
 
-function renderOverview() {
+const mockProposal: ProjectProposal = {
+  id: "mock",
+  title: "Mayor follow-up guidance",
+  summary: "Updates one dialogue line.",
+  status: "active",
+  beforeProject: {} as ProjectProposal["beforeProject"],
+  afterProject: {} as ProjectProposal["afterProject"],
+  diff: {
+    beforeProjectId: "tiny-rpg",
+    afterProjectId: "tiny-rpg",
+    changes: [
+      {
+        type: "changed",
+        entityType: "event",
+        entityId: "mayor_intro",
+        path: "events.mayor_intro",
+        before: { text: "old" },
+        after: { text: "new" }
+      }
+    ]
+  }
+};
+
+function renderOverview(proposal: ProjectProposal | null = null) {
   return renderToStaticMarkup(
     <EditorOverview
       eventLog={[]}
       mermaid={"flowchart TD\n  map_town[\"Town\"]\n"}
+      proposal={proposal}
       projectTitle="Tiny RPG"
       runtimeSnapshot={snapshot}
       summary={summary}
       validationIssues={[]}
+      onAcceptProposal={() => undefined}
+      onCreateProposal={() => undefined}
+      onHoldProposal={() => undefined}
+      onRejectProposal={() => undefined}
     />
   );
 }

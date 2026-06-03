@@ -4,10 +4,12 @@ import {
   AppShell,
   CanvasToolbar,
   CommandList,
+  DiffCard,
   InspectorPanel,
   PropertyGrid,
   ValidationIssueList
 } from "@rpg-deck/ux-kit";
+import type { ProjectProposal } from "./proposals.js";
 
 export type EditorOverviewProps = {
   projectTitle: string;
@@ -16,9 +18,14 @@ export type EditorOverviewProps = {
   mermaid: string;
   runtimeSnapshot: RuntimeSnapshot;
   eventLog: RuntimeEventLogEntry[];
+  proposal: ProjectProposal | null;
   onMove?: (direction: Direction) => void;
   onInteract?: () => void;
   onRestart?: () => void;
+  onCreateProposal?: () => void;
+  onAcceptProposal?: () => void;
+  onRejectProposal?: () => void;
+  onHoldProposal?: () => void;
 };
 
 export function EditorOverview({
@@ -28,9 +35,14 @@ export function EditorOverview({
   mermaid,
   runtimeSnapshot,
   eventLog,
+  proposal,
   onMove,
   onInteract,
-  onRestart
+  onRestart,
+  onCreateProposal,
+  onAcceptProposal,
+  onRejectProposal,
+  onHoldProposal
 }: EditorOverviewProps) {
   const issueItems = validationIssues.map((issue, index) => ({
     id: `${issue.code}-${issue.path}-${index}`,
@@ -109,6 +121,36 @@ export function EditorOverview({
                 description: entry.eventId ?? entry.mapId ?? entry.reason
               }))}
             />
+          </section>
+          <section>
+            <h2>Diff Review</h2>
+            {proposal ? (
+              <DiffCard
+                title={proposal.title}
+                summary={`${proposal.summary} Status: ${proposal.status}. Changes: ${proposal.diff.changes.length}.`}
+                changes={proposal.diff.changes.map((change) => ({
+                  id: `${change.type}-${change.path}`,
+                  type: change.type,
+                  entityType: change.entityType,
+                  entityId: change.entityId,
+                  path: change.path,
+                  before: change.before ? <pre>{JSON.stringify(change.before, null, 2)}</pre> : undefined,
+                  after: change.after ? <pre>{JSON.stringify(change.after, null, 2)}</pre> : undefined
+                }))}
+                actions={{
+                  onAccept: onAcceptProposal,
+                  onReject: onRejectProposal,
+                  onHold: onHoldProposal
+                }}
+              />
+            ) : (
+              <div className="empty-proposal">
+                <p>No active project proposal.</p>
+                <button type="button" onClick={onCreateProposal}>
+                  Create mock proposal
+                </button>
+              </div>
+            )}
           </section>
         </main>
       }
