@@ -210,6 +210,31 @@ For now:
 * no generated artifact is committed
 * no Godot project structure is created by RPG Deck
 
+## Current Skeleton
+
+The repository now includes `godot_spike/` as a non-canonical executable spike area.
+
+Current skeleton files:
+
+* `godot_spike/project.godot`
+* `godot_spike/data/README.md`
+* `godot_spike/scripts/ProjectLoader.cs`
+
+The expected manual handoff input path is:
+
+    godot_spike/data/project.json
+
+`ProjectLoader.cs` currently only loads `res://data/project.json`, parses JSON with Godot APIs, and logs a concise project summary:
+
+* project id
+* project title
+* start map
+* start position
+* map count
+* event count
+
+Map rendering, player movement, collision behavior, event interaction, and command execution remain the next steps. The `godot_spike/` directory is not an authoring source and must not become a schema fork.
+
 ## First Godot Spike Behavior
 
 The first spike should prove the boundary, not complete a full port.

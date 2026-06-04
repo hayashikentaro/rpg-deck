@@ -1,0 +1,11 @@
+; Engine configuration file.
+; This Godot project is a minimal RPG Deck boundary spike.
+; It intentionally has no default scene yet.
+
+config_version=5
+
+[application]
+
+config/name="RPG Deck Godot Spike"
+config/features=PackedStringArray("4.2", "C#")
+
