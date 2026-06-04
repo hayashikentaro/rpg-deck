@@ -136,11 +136,14 @@ describe("EditorOverview", () => {
   it("renders runtime controls labels", () => {
     const html = renderOverview();
 
+    expect(html).toContain("Runtime controls");
     expect(html).toContain("Up");
     expect(html).toContain("Down");
     expect(html).toContain("Left");
     expect(html).toContain("Right");
     expect(html).toContain("Interact");
+    expect(html).toContain("Restart");
+    expect(html).toContain("Arrow keys / WASD move, Space or Enter interacts, R restarts.");
   });
 
   it("renders diff review section", () => {

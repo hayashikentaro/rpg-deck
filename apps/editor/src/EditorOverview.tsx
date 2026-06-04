@@ -1,8 +1,8 @@
+import { useEffect } from "react";
 import type { EventDefinition, GameProject, ProjectSummary, ValidationIssue } from "@rpg-deck/core-domain";
 import type { Direction, RuntimeEventLogEntry, RuntimeSnapshot } from "@rpg-deck/web-runtime";
 import {
   AppShell,
-  CanvasToolbar,
   CommandList,
   DiffCard,
   InspectorPanel,
@@ -64,6 +64,24 @@ export function EditorOverview({
     entityType: issue.entityType
   }));
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditableTarget(event.target)) return;
+
+      const action = runtimeActionForKey(event.key);
+      if (!action) return;
+
+      if (action.preventDefault) event.preventDefault();
+
+      if (action.type === "move") onMove?.(action.direction);
+      else if (action.type === "interact") onInteract?.();
+      else onRestart?.();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onInteract, onMove, onRestart]);
+
   return (
     <AppShell
       className="editor-shell"
@@ -86,22 +104,52 @@ export function EditorOverview({
               { id: "flags", kind: "number", label: "Flags", value: summary.counts.flags }
             ]}
           />
-          <h2>Runtime controls</h2>
-          <CanvasToolbar
-            actions={[
-              { id: "up", label: "Up" },
-              { id: "down", label: "Down" },
-              { id: "left", label: "Left" },
-              { id: "right", label: "Right" },
-              { id: "interact", label: "Interact" },
-              { id: "restart", label: "Restart" }
-            ]}
-            onAction={(id) => {
-              if (id === "interact") onInteract?.();
-              else if (id === "restart") onRestart?.();
-              else onMove?.(id as Direction);
-            }}
-          />
+          <section className="runtime-controls" aria-labelledby="runtime-controls-title">
+            <h2 id="runtime-controls-title">Runtime controls</h2>
+            <div className="runtime-controls__pad" aria-label="Movement controls">
+              <button
+                className="runtime-controls__button"
+                data-direction="up"
+                type="button"
+                onClick={() => onMove?.("up")}
+              >
+                Up
+              </button>
+              <button
+                className="runtime-controls__button"
+                data-direction="left"
+                type="button"
+                onClick={() => onMove?.("left")}
+              >
+                Left
+              </button>
+              <button
+                className="runtime-controls__button"
+                data-direction="right"
+                type="button"
+                onClick={() => onMove?.("right")}
+              >
+                Right
+              </button>
+              <button
+                className="runtime-controls__button"
+                data-direction="down"
+                type="button"
+                onClick={() => onMove?.("down")}
+              >
+                Down
+              </button>
+            </div>
+            <div className="runtime-controls__actions">
+              <button className="runtime-controls__button" type="button" onClick={onInteract}>
+                Interact
+              </button>
+              <button className="runtime-controls__button" type="button" onClick={onRestart}>
+                Restart
+              </button>
+            </div>
+            <p className="runtime-controls__hint">Arrow keys / WASD move, Space or Enter interacts, R restarts.</p>
+          </section>
         </aside>
       }
       main={
@@ -186,4 +234,25 @@ export function EditorOverview({
       footer={<p>Editor app composes core-domain, web-runtime, and ux-kit. Domain and runtime logic stay in packages.</p>}
     />
   );
+}
+
+type RuntimeKeyboardAction =
+  | { type: "move"; direction: Direction; preventDefault: boolean }
+  | { type: "interact"; preventDefault: boolean }
+  | { type: "restart"; preventDefault: boolean };
+
+function runtimeActionForKey(key: string): RuntimeKeyboardAction | null {
+  if (key === "ArrowUp" || key.toLowerCase() === "w") return { type: "move", direction: "up", preventDefault: true };
+  if (key === "ArrowDown" || key.toLowerCase() === "s") return { type: "move", direction: "down", preventDefault: true };
+  if (key === "ArrowLeft" || key.toLowerCase() === "a") return { type: "move", direction: "left", preventDefault: true };
+  if (key === "ArrowRight" || key.toLowerCase() === "d") return { type: "move", direction: "right", preventDefault: true };
+  if (key === " " || key === "Enter") return { type: "interact", preventDefault: true };
+  if (key.toLowerCase() === "r") return { type: "restart", preventDefault: false };
+  return null;
+}
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  const tagName = target.tagName.toLowerCase();
+  return tagName === "input" || tagName === "select" || tagName === "textarea" || target.isContentEditable;
 }

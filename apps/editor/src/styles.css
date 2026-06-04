@@ -287,6 +287,69 @@ textarea {
   resize: vertical;
 }
 
+.runtime-controls {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.runtime-controls h2,
+.runtime-controls p {
+  margin: 0;
+}
+
+.runtime-controls__pad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(54px, 1fr));
+  grid-template-areas:
+    ". up ."
+    "left . right"
+    ". down .";
+  gap: 6px;
+}
+
+.runtime-controls__button {
+  min-height: 36px;
+  border: 1px solid #c9c9c2;
+  border-radius: 6px;
+  background: #fafaf8;
+  padding: 6px 8px;
+  color: #222;
+}
+
+.runtime-controls__button:hover {
+  border-color: #2266aa;
+  background: #eef6ff;
+}
+
+.runtime-controls__button[data-direction="up"] {
+  grid-area: up;
+}
+
+.runtime-controls__button[data-direction="left"] {
+  grid-area: left;
+}
+
+.runtime-controls__button[data-direction="right"] {
+  grid-area: right;
+}
+
+.runtime-controls__button[data-direction="down"] {
+  grid-area: down;
+}
+
+.runtime-controls__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.runtime-controls__hint {
+  color: #666;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .rdk-canvas-toolbar {
   display: flex;
   flex-wrap: wrap;

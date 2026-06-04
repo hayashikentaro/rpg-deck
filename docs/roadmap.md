@@ -187,6 +187,7 @@ Target confirmation:
 Initial implementation status:
 
 * `apps/editor` now has a minimal event list and inspector for editing event position, trigger, optional sprite ID, and the first direct `show_message` text. Project updates recreate the headless runtime so marker placement, trigger behavior, validation, graph output, and runtime messages can be confirmed against the playable preview.
+* Runtime controls now use a compact D-pad layout and support Arrow keys, WASD, Space, Enter, and R for faster playable confirmation.
 
 ## Phase 7: Minimal Command Editing + Runtime Confirmation
 
