@@ -1,6 +1,6 @@
 ; Engine configuration file.
 ; This Godot project is a minimal RPG Deck boundary spike.
-; It intentionally has no default scene yet.
+; It uses a minimal main scene that runs ProjectLoader.cs.
 
 config_version=5
 

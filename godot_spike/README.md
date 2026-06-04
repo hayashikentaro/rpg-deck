@@ -26,10 +26,27 @@ Non-goals for this skeleton:
 
 If `data/project.json` is missing, the loader should report a clear warning and not crash.
 
+## Manual Verification
+
+1. Copy Project JSON from the RPG Deck editor.
+2. Place it at `godot_spike/data/project.json`.
+3. Open `godot_spike` in Godot.
+4. Run the project.
+5. Confirm the output logs:
+   * project id
+   * project title
+   * start map
+   * start position
+   * map count
+   * event count
+6. Rename or remove `data/project.json`.
+7. Run the project again.
+8. Confirm the missing-file warning appears and the project does not crash.
+
 ## Current Skeleton
 
-The committed `scenes/ProjectLoaderScene.tscn` only runs `ProjectLoader.cs` on a plain `Node`.
+The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
 `ProjectLoader.cs` only reads, parses, and logs a project summary. Map rendering, player movement, collision behavior, event interaction, and command execution are intentionally left for later Phase 11 steps.
 
-Godot may create local generated files such as `.godot/`, `.csproj`, or `.sln` while opening or running the project. Do not commit those files unless a later task explicitly approves them.
+Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.
