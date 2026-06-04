@@ -103,6 +103,7 @@ export function App() {
       summary={summary}
       validationIssues={validationIssues}
       onAcceptProposal={acceptProposal}
+      onAdvance={() => dispatchRuntimeInput({ type: "advance" })}
       onCreateProposal={createProposal}
       onHoldProposal={holdProposal}
       onInteract={() => dispatchRuntimeInput({ type: "interact" })}

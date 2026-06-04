@@ -13,12 +13,18 @@ function loadSample(): GameProject {
   return parseProjectJson(readFileSync(samplePath, "utf8"));
 }
 
-function runtimeAtSampleMayorChoice() {
+function runtimeAtSampleMayorMessage() {
   const runtime = createRuntime(loadSample());
   runtime.startNewGame();
   runtime.dispatch({ type: "move", direction: "right" });
   runtime.dispatch({ type: "move", direction: "right" });
   runtime.dispatch({ type: "interact", direction: "right" });
+  return runtime;
+}
+
+function runtimeAtSampleMayorChoice() {
+  const runtime = runtimeAtSampleMayorMessage();
+  runtime.dispatch({ type: "advance" });
   return runtime;
 }
 
@@ -69,12 +75,37 @@ describe("headless web runtime", () => {
     expect(runtime.getEventLog()).toContainEqual(expect.objectContaining({ type: "movement_blocked", position: [1, 1] }));
   });
 
-  it("interacting with sample mayor event reaches choice state and updates bgm", () => {
-    const runtime = runtimeAtSampleMayorChoice();
+  it("interacting with sample mayor event pauses on message before choice", () => {
+    const runtime = runtimeAtSampleMayorMessage();
+
+    expect(runtime.getSnapshot()).toMatchObject({
+      status: "message",
+      currentBgm: "town_theme",
+      canAdvance: true,
+      currentMessage: {
+        speaker: "mayor_intro",
+        text: "北の洞窟には近づくな。"
+      },
+      currentChoice: null
+    });
+    expect(runtime.getEventLog()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: "message", eventId: "mayor_intro" }),
+        expect.objectContaining({ type: "sfx_played", assetId: "talk" })
+      ])
+    );
+    expect(runtime.getEventLog()).not.toContainEqual(expect.objectContaining({ type: "choice", eventId: "mayor_intro" }));
+  });
+
+  it("advancing the sample mayor message reaches choice state", () => {
+    const runtime = runtimeAtSampleMayorMessage();
+
+    runtime.dispatch({ type: "advance" });
 
     expect(runtime.getSnapshot()).toMatchObject({
       status: "choice",
-      currentBgm: "town_theme",
+      canAdvance: false,
+      currentMessage: null,
       currentChoice: {
         prompt: "それでも行くか？",
         options: [
@@ -85,9 +116,8 @@ describe("headless web runtime", () => {
     });
     expect(runtime.getEventLog()).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ type: "message", eventId: "mayor_intro" }),
-        expect.objectContaining({ type: "choice", eventId: "mayor_intro" }),
-        expect.objectContaining({ type: "sfx_played", assetId: "talk" })
+        expect.objectContaining({ type: "advanced", eventId: "mayor_intro" }),
+        expect.objectContaining({ type: "choice", eventId: "mayor_intro" })
       ])
     );
   });
@@ -101,6 +131,7 @@ describe("headless web runtime", () => {
       currentMapId: "cave_entrance",
       playerPosition: [3, 4],
       status: "message",
+      canAdvance: true,
       currentChoice: null,
       currentMessage: {
         speaker: "mayor_intro",
@@ -117,6 +148,22 @@ describe("headless web runtime", () => {
         expect.objectContaining({ type: "player_transferred", mapId: "cave_entrance", position: [3, 4] })
       ])
     );
+  });
+
+  it("advancing after a choice follow-up message clears the message", () => {
+    const runtime = runtimeAtSampleMayorChoice();
+    runtime.dispatch({ type: "choose", optionIndex: 0 });
+
+    runtime.dispatch({ type: "advance" });
+
+    expect(runtime.getSnapshot()).toMatchObject({
+      currentMapId: "cave_entrance",
+      playerPosition: [3, 4],
+      status: "idle",
+      currentMessage: null,
+      currentChoice: null,
+      canAdvance: false
+    });
   });
 
   it("ignores an invalid choice option index without crashing", () => {
@@ -145,6 +192,42 @@ describe("headless web runtime", () => {
     });
     expect(runtime.getEventLog()).toContainEqual(
       expect.objectContaining({ type: "choice_ignored", optionIndex: 0, reason: "no_current_choice" })
+    );
+  });
+
+  it("returns to idle after choosing an option with no commands", () => {
+    const runtime = createRuntime(
+      projectWithTouchEvent([
+        {
+          type: "choice",
+          prompt: "Stop here?",
+          options: [{ label: "Yes", commands: [] }]
+        }
+      ])
+    );
+    runtime.startNewGame();
+    runtime.dispatch({ type: "move", direction: "right" });
+
+    runtime.dispatch({ type: "choose", optionIndex: 0 });
+
+    expect(runtime.getSnapshot()).toMatchObject({
+      status: "idle",
+      currentChoice: null
+    });
+  });
+
+  it("ignores advance input when no message is active", () => {
+    const runtime = createRuntime(loadSample());
+    runtime.startNewGame();
+
+    expect(() => runtime.dispatch({ type: "advance" })).not.toThrow();
+    expect(runtime.getSnapshot()).toMatchObject({
+      status: "idle",
+      currentMessage: null,
+      canAdvance: false
+    });
+    expect(runtime.getEventLog()).toContainEqual(
+      expect.objectContaining({ type: "advance_ignored", reason: "no_current_message" })
     );
   });
 

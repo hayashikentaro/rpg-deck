@@ -14,6 +14,7 @@ export function snapshotFromState(state: RuntimeState): RuntimeSnapshot {
           options: state.currentChoice.options.map((option) => ({ ...option }))
         }
       : null,
+    canAdvance: state.currentMessage !== null,
     currentBattle: state.currentBattle ? { ...state.currentBattle } : null,
     flags: { ...state.flags },
     currentBgm: state.currentBgm

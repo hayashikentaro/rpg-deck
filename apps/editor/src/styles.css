@@ -235,6 +235,24 @@ textarea {
   background: #eef6ff;
 }
 
+.playable-preview__message-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.playable-preview__continue {
+  border: 1px solid #c9c9c2;
+  border-radius: 4px;
+  background: #fff;
+  padding: 6px 10px;
+  color: #222;
+}
+
+.playable-preview__continue:hover {
+  border-color: #2266aa;
+  background: #eef6ff;
+}
+
 .event-inspector {
   display: grid;
   gap: 10px;

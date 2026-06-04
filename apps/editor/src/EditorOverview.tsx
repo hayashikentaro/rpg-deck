@@ -25,6 +25,7 @@ export type EditorOverviewProps = {
   selectedEventId: string | null;
   onMove?: (direction: Direction) => void;
   onInteract?: () => void;
+  onAdvance?: () => void;
   onChooseOption?: (optionIndex: number) => void;
   onRestart?: () => void;
   onCreateProposal?: () => void;
@@ -47,6 +48,7 @@ export function EditorOverview({
   selectedEventId,
   onMove,
   onInteract,
+  onAdvance,
   onChooseOption,
   onRestart,
   onCreateProposal,
@@ -69,6 +71,7 @@ export function EditorOverview({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isEditableTarget(event.target)) return;
+      if (isNativeButtonActivation(event)) return;
 
       const action = runtimeActionForKey(event.key);
       if (!action) return;
@@ -76,13 +79,16 @@ export function EditorOverview({
       if (action.preventDefault) event.preventDefault();
 
       if (action.type === "move") onMove?.(action.direction);
-      else if (action.type === "interact") onInteract?.();
+      else if (action.type === "interact") {
+        if (runtimeSnapshot.canAdvance) onAdvance?.();
+        else onInteract?.();
+      }
       else onRestart?.();
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onInteract, onMove, onRestart]);
+  }, [onAdvance, onInteract, onMove, onRestart, runtimeSnapshot.canAdvance]);
 
   return (
     <AppShell
@@ -150,7 +156,9 @@ export function EditorOverview({
                 Restart
               </button>
             </div>
-            <p className="runtime-controls__hint">Arrow keys / WASD move, Space or Enter interacts, R restarts.</p>
+            <p className="runtime-controls__hint">
+              Arrow keys / WASD move, Space or Enter advances messages or interacts, R restarts.
+            </p>
           </section>
         </aside>
       }
@@ -160,6 +168,7 @@ export function EditorOverview({
             eventLog={eventLog}
             project={project}
             snapshot={runtimeSnapshot}
+            onAdvance={onAdvance}
             onChooseOption={onChooseOption}
           />
           <section>
@@ -262,4 +271,8 @@ function isEditableTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
   const tagName = target.tagName.toLowerCase();
   return tagName === "input" || tagName === "select" || tagName === "textarea" || target.isContentEditable;
+}
+
+function isNativeButtonActivation(event: KeyboardEvent) {
+  return event.target instanceof HTMLButtonElement && (event.key === " " || event.key === "Enter");
 }

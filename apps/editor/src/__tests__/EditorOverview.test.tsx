@@ -80,6 +80,7 @@ const snapshot: RuntimeSnapshot = {
   status: "idle",
   currentMessage: null,
   currentChoice: null,
+  canAdvance: false,
   currentBattle: null,
   flags: {},
   currentBgm: null
@@ -145,7 +146,7 @@ describe("EditorOverview", () => {
     expect(html).toContain("Right");
     expect(html).toContain("Interact");
     expect(html).toContain("Restart");
-    expect(html).toContain("Arrow keys / WASD move, Space or Enter interacts, R restarts.");
+    expect(html).toContain("Arrow keys / WASD move, Space or Enter advances messages or interacts, R restarts.");
   });
 
   it("renders current choice options in the playable preview", () => {
@@ -164,6 +165,20 @@ describe("EditorOverview", () => {
     expect(html).toContain("Choose a path?");
     expect(html).toContain("North");
     expect(html).toContain("South");
+  });
+
+  it("renders Continue for an advanceable runtime message", () => {
+    const html = renderOverview(null, {
+      ...snapshot,
+      status: "message",
+      currentMessage: {
+        text: "Advance this message."
+      },
+      canAdvance: true
+    });
+
+    expect(html).toContain("Advance this message.");
+    expect(html).toContain(">Continue<");
   });
 
   it("renders diff review section", () => {
@@ -230,6 +245,7 @@ function renderOverview(proposal: ProjectProposal | null = null, runtimeSnapshot
       summary={summary}
       validationIssues={[]}
       onAcceptProposal={() => undefined}
+      onAdvance={() => undefined}
       onCreateProposal={() => undefined}
       onHoldProposal={() => undefined}
       onChooseOption={() => undefined}

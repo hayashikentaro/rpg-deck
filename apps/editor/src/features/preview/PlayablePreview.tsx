@@ -6,6 +6,7 @@ export type PlayablePreviewProps = {
   project: GameProject;
   snapshot: RuntimeSnapshot;
   eventLog?: RuntimeEventLogEntry[];
+  onAdvance?: () => void;
   onChooseOption?: (optionIndex: number) => void;
   className?: string;
 };
@@ -17,7 +18,14 @@ type CellView = {
   label: string;
 };
 
-export function PlayablePreview({ project, snapshot, eventLog = [], onChooseOption, className }: PlayablePreviewProps) {
+export function PlayablePreview({
+  project,
+  snapshot,
+  eventLog = [],
+  onAdvance,
+  onChooseOption,
+  className
+}: PlayablePreviewProps) {
   const currentMap = project.maps[snapshot.currentMapId];
 
   if (!currentMap) {
@@ -78,6 +86,13 @@ export function PlayablePreview({ project, snapshot, eventLog = [], onChooseOpti
               <h4>Message</h4>
               {snapshot.currentMessage.speaker ? <strong>{snapshot.currentMessage.speaker}</strong> : null}
               <p>{snapshot.currentMessage.text}</p>
+              {snapshot.canAdvance && onAdvance ? (
+                <div className="playable-preview__message-actions">
+                  <button className="playable-preview__continue" type="button" onClick={onAdvance}>
+                    Continue
+                  </button>
+                </div>
+              ) : null}
             </section>
           ) : null}
           {snapshot.currentChoice ? (

@@ -12,9 +12,30 @@ export function executeEvent(state: RuntimeState, event: EventDefinition) {
 }
 
 export function executeCommands(state: RuntimeState, commands: EventCommand[], eventId?: string) {
-  for (const command of commands) {
-    executeCommand(state, command, eventId);
+  state.pendingCommands = {
+    eventId,
+    commands: [...commands],
+    nextIndex: 0
+  };
+  runPendingCommands(state);
+}
+
+export function advanceCurrentMessage(state: RuntimeState) {
+  if (!state.currentMessage) {
+    appendLog(state, {
+      type: "advance_ignored",
+      reason: "no_current_message"
+    });
+    return;
   }
+
+  state.currentMessage = null;
+  state.status = "idle";
+  appendLog(state, {
+    type: "advanced",
+    eventId: state.pendingCommands?.eventId
+  });
+  runPendingCommands(state);
 }
 
 export function chooseCurrentOption(state: RuntimeState, optionIndex: number) {
@@ -32,16 +53,44 @@ export function chooseCurrentOption(state: RuntimeState, optionIndex: number) {
 
   state.currentChoice = null;
   state.pendingChoice = null;
+  state.status = "idle";
   appendLog(state, {
     type: "choice_selected",
     eventId: pendingChoice.eventId,
     optionIndex,
     message: option.label
   });
+
+  if (state.pendingCommands) {
+    state.pendingCommands.commands.splice(state.pendingCommands.nextIndex, 0, ...option.commands);
+    runPendingCommands(state);
+    return;
+  }
+
   executeCommands(state, option.commands, pendingChoice.eventId);
 }
 
-function executeCommand(state: RuntimeState, command: EventCommand, eventId?: string) {
+function runPendingCommands(state: RuntimeState) {
+  const sequence = state.pendingCommands;
+  if (!sequence) return;
+
+  while (sequence.nextIndex < sequence.commands.length) {
+    const command = sequence.commands[sequence.nextIndex];
+    sequence.nextIndex += 1;
+
+    if (executeCommand(state, command, sequence)) return;
+  }
+
+  state.pendingCommands = null;
+}
+
+function executeCommand(
+  state: RuntimeState,
+  command: EventCommand,
+  sequence: NonNullable<RuntimeState["pendingCommands"]>
+): boolean {
+  const eventId = sequence.eventId;
+
   switch (command.type) {
     case "show_message":
       state.status = "message";
@@ -58,7 +107,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         commandType: command.type,
         message: command.text
       });
-      return;
+      return true;
 
     case "set_flag":
       state.flags[command.flag] = true;
@@ -69,7 +118,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         flag: command.flag,
         value: true
       });
-      return;
+      return false;
 
     case "unset_flag":
       state.flags[command.flag] = false;
@@ -80,7 +129,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         flag: command.flag,
         value: false
       });
-      return;
+      return false;
 
     case "play_bgm":
       state.currentBgm = command.bgm;
@@ -90,7 +139,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         commandType: command.type,
         assetId: command.bgm
       });
-      return;
+      return false;
 
     case "play_sfx":
       appendLog(state, {
@@ -99,7 +148,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         commandType: command.type,
         assetId: command.sfx
       });
-      return;
+      return false;
 
     case "transfer_player":
       state.status = "transferring";
@@ -116,7 +165,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         mapId: command.map,
         position: command.position
       });
-      return;
+      return false;
 
     case "start_battle":
       state.status = "battle";
@@ -132,7 +181,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         commandType: command.type,
         enemyId: command.enemy
       });
-      return;
+      return false;
 
     case "choice":
       state.status = "choice";
@@ -155,15 +204,15 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         commandType: command.type,
         message: command.prompt
       });
-      return;
+      return true;
 
     case "if_flag":
-      executeCommands(state, state.flags[command.flag] ? command.then : command.else ?? [], eventId);
-      return;
+      sequence.commands.splice(sequence.nextIndex, 0, ...(state.flags[command.flag] ? command.then : command.else ?? []));
+      return false;
 
     case "give_item":
     case "take_item":
-      return;
+      return false;
   }
 }
 

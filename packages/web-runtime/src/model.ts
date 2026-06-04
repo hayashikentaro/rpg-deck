@@ -5,7 +5,8 @@ export type Direction = "up" | "down" | "left" | "right";
 export type PlayerInput =
   | { type: "move"; direction: Direction }
   | { type: "interact"; direction?: Direction }
-  | { type: "choose"; optionIndex: number };
+  | { type: "choose"; optionIndex: number }
+  | { type: "advance" };
 
 export type RuntimeStatus = "idle" | "message" | "choice" | "battle" | "transferring";
 
@@ -30,6 +31,12 @@ export type RuntimePendingChoice = {
   }>;
 };
 
+export type RuntimePendingCommandSequence = {
+  eventId?: string;
+  commands: EventCommand[];
+  nextIndex: number;
+};
+
 export type RuntimeBattle = {
   enemyId: string;
 };
@@ -45,6 +52,8 @@ export type RuntimeEventLogEntry = {
     | "choice"
     | "choice_selected"
     | "choice_ignored"
+    | "advanced"
+    | "advance_ignored"
     | "flag_changed"
     | "bgm_changed"
     | "sfx_played"
@@ -73,6 +82,7 @@ export type RuntimeState = {
   currentMessage: RuntimeMessage | null;
   currentChoice: RuntimeChoice | null;
   pendingChoice: RuntimePendingChoice | null;
+  pendingCommands: RuntimePendingCommandSequence | null;
   currentBattle: RuntimeBattle | null;
   flags: Record<string, boolean>;
   currentBgm: string | null;
@@ -88,6 +98,7 @@ export type RuntimeSnapshot = {
   status: RuntimeStatus;
   currentMessage: RuntimeMessage | null;
   currentChoice: RuntimeChoice | null;
+  canAdvance: boolean;
   currentBattle: RuntimeBattle | null;
   flags: Record<string, boolean>;
   currentBgm: string | null;

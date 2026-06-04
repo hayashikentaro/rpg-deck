@@ -1,5 +1,5 @@
 import type { GameProject, GridPosition } from "@rpg-deck/core-domain";
-import { chooseCurrentOption, executeEvent } from "./commands.js";
+import { advanceCurrentMessage, chooseCurrentOption, executeEvent } from "./commands.js";
 import { findFirstEventAtPosition, isBlocked, nextPosition } from "./input.js";
 import type { Direction, GameRuntime, PlayerInput, RuntimeEventLogEntry, RuntimeState } from "./model.js";
 import { snapshotFromState } from "./snapshot.js";
@@ -36,6 +36,7 @@ function createInitialState(project: GameProject): RuntimeState {
     currentMessage: null,
     currentChoice: null,
     pendingChoice: null,
+    pendingCommands: null,
     currentBattle: null,
     flags: Object.fromEntries(Object.keys(project.flags).map((flagId) => [flagId, false])),
     currentBgm: null,
@@ -52,6 +53,7 @@ function resetForNewGame(state: RuntimeState) {
   state.currentMessage = null;
   state.currentChoice = null;
   state.pendingChoice = null;
+  state.pendingCommands = null;
   state.currentBattle = null;
   state.flags = Object.fromEntries(Object.keys(state.project.flags).map((flagId) => [flagId, false]));
   state.currentBgm = null;
@@ -72,6 +74,11 @@ function dispatchInput(state: RuntimeState, input: PlayerInput) {
 
   if (input.type === "choose") {
     chooseCurrentOption(state, input.optionIndex);
+    return;
+  }
+
+  if (input.type === "advance") {
+    advanceCurrentMessage(state);
     return;
   }
 
@@ -99,6 +106,7 @@ function movePlayer(state: RuntimeState, direction: Direction) {
   state.currentMessage = null;
   state.currentChoice = null;
   state.pendingChoice = null;
+  state.pendingCommands = null;
   state.currentBattle = null;
   appendRuntimeLog(state, {
     type: "player_moved",

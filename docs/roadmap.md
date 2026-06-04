@@ -222,6 +222,7 @@ Initial implementation status:
 * The Event Inspector now shows the selected event's top-level command sequence and edits simple direct `show_message`, flag, audio, transfer, and battle command fields.
 * Nested commands and unsupported command shapes remain intentionally read-only. Runtime confirmation continues through the Playable Grid Preview and manual controls.
 * The runtime preview can now choose current `choice` options, executing their nested commands through existing runtime semantics while nested command editing remains intentionally out of scope.
+* Runtime command execution now pauses on `show_message`; Continue or advance resumes pending commands before later choices or nested command results are shown.
 
 ## Phase 8: Mock Proposal / Diff Review + Preview Confirmation
 

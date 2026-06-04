@@ -63,6 +63,7 @@ const snapshot: RuntimeSnapshot = {
   status: "idle",
   currentMessage: null,
   currentChoice: null,
+  canAdvance: false,
   currentBattle: null,
   flags: {},
   currentBgm: null
@@ -101,9 +102,42 @@ describe("PlayablePreview", () => {
         currentMessage: {
           speaker: "npc",
           text: "Hello from the grid."
-        }
+        },
+        canAdvance: true
       })
     ).toContain("Hello from the grid.");
+  });
+
+  it("renders Continue when the current message can advance", () => {
+    const html = renderPreview(
+      {
+        ...snapshot,
+        status: "message",
+        currentMessage: {
+          text: "Continue this message."
+        },
+        canAdvance: true
+      },
+      undefined,
+      () => undefined
+    );
+
+    expect(html).toContain("Continue this message.");
+    expect(html).toContain(">Continue<");
+  });
+
+  it("does not render Continue when the current message cannot advance", () => {
+    const html = renderPreview({
+      ...snapshot,
+      status: "message",
+      currentMessage: {
+        text: "Read-only message."
+      },
+      canAdvance: false
+    });
+
+    expect(html).toContain("Read-only message.");
+    expect(html).not.toContain(">Continue<");
   });
 
   it("renders choice prompt and options when present", () => {
@@ -143,8 +177,12 @@ describe("PlayablePreview", () => {
   });
 });
 
-function renderPreview(nextSnapshot: RuntimeSnapshot = snapshot, onChooseOption?: (optionIndex: number) => void) {
+function renderPreview(
+  nextSnapshot: RuntimeSnapshot = snapshot,
+  onChooseOption?: (optionIndex: number) => void,
+  onAdvance?: () => void
+) {
   return renderToStaticMarkup(
-    <PlayablePreview project={project} snapshot={nextSnapshot} onChooseOption={onChooseOption} />
+    <PlayablePreview project={project} snapshot={nextSnapshot} onAdvance={onAdvance} onChooseOption={onChooseOption} />
   );
 }
