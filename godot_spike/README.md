@@ -9,8 +9,8 @@ Non-goals for this skeleton:
 * no bidirectional editing
 * no schema fork
 * no full game implementation
-* no command-backed event interaction yet
-* no command execution yet
+* no event command execution
+* no dialogue, choice, flag, transfer, battle, or audio behavior
 * no saved fixture JSON committed in this step
 
 ## Manual Setup
@@ -19,8 +19,8 @@ Non-goals for this skeleton:
 2. Confirm the current project JSON with `Preview Project JSON` if needed.
 3. Copy the current project JSON from the editor's `Project JSON` section.
 4. Place the copied JSON manually at `godot_spike/data/project.json`.
-5. Open `godot_spike` in Godot.
-6. Run the project.
+5. From the repository root, run `pnpm godot`.
+6. Confirm the project builds and runs.
 7. Confirm the loader logs project id, title, start map, start position, map count, and event count.
 
 If `data/project.json` is missing, the loader should report a clear warning and not crash.
@@ -88,6 +88,34 @@ GODOT_ARCH=arm64
 
 The script falls back to common macOS Godot and .NET locations when env vars are not set. On macOS arm64 hosts, including Rosetta-translated shells, it defaults the effective Godot architecture to `arm64` and launches through `arch -arm64`; set `GODOT_ARCH` explicitly when a different architecture is required. This keeps `pnpm godot` from inheriting an incompatible Node or pnpm process architecture. `.env.local` is ignored and must not be committed. `godot_spike/data/project.json` must already exist locally; the script checks for it but does not create it.
 
+## Current Behavior
+
+The spike consumes copied or exported RPG Deck Project JSON from ignored local file `godot_spike/data/project.json`. Project JSON remains the source of truth; Godot does not edit or save it back.
+
+The debug HUD shows a legend, status line, and grid. Markers are `^`, `v`, `<`, and `>` for player facing, `E` for events, `#` for collision, and `.` for empty cells.
+
+Current log/status-only behavior:
+
+* arrow keys and WASD move the player marker
+* facing updates even when movement is blocked
+* map bounds and `#` collision cells block movement
+* Enter, Space, or Z detects a `trigger: interact` event in the facing cell
+* successful entry into a `trigger: touch` event cell detects that event
+* event detection displays event id and position without executing commands
+* non-touch movement keeps the normal movement status; there is no `touch_event: none` output
+* blocked movement does not run touch detection
+
+## Current Manual Verification Status
+
+Verified on a host Godot run:
+
+* `pnpm godot` performs build then run
+* Apple Silicon Godot/.NET architecture alignment works
+* grid, legend, status line, and facing markers are visible without layout overlap
+* interact detection displays `interact_event: mayor_intro at [7, 6]`
+
+Touch verification is prepared, but not recorded as host-verified yet. An ignored local handoff JSON can add `touch_test` on `town` at `[5, 6]` with `trigger: touch` and `commands: []`.
+
 ## Manual Verification
 
 1. Copy Project JSON from the RPG Deck editor.
@@ -128,7 +156,7 @@ The script falls back to common macOS Godot and .NET locations when env vars are
 
 The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
-`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and moves a facing marker with arrow keys or WASD. The debug HUD places the marker legend first, the status line below it, and the grid below the HUD. The renderer includes a configurable `DebugCellSize` and a configurable `DebugMapOffset`. Player markers use ASCII `^`, `v`, `<`, and `>` for font-safe facing display. Marker priority is player over `E` over `#` over `.`. Facing updates even when movement is blocked. Movement is limited by map bounds and `#` collision cells. Pressing Enter, Space, or Z checks the facing cell for a `trigger: interact` event. Entering a `trigger: touch` event cell reports that event after successful movement. The status line mirrors the latest movement, interact, or touch result in the viewport; it is not dialogue UI. Event commands, dialogue UI, and command execution are intentionally left for later Phase 11 steps.
+`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and provides log/status-only event detection. The debug HUD places the marker legend first, the status line below it, and the grid below the HUD. The renderer includes a configurable `DebugCellSize` and a configurable `DebugMapOffset`. Marker priority is player over `E` over `#` over `.`. Event commands, dialogue UI, choices, flags, transfer, battle/audio, and command execution are intentionally left for later Phase 11 steps.
 
 Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.
 

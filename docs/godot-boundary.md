@@ -225,7 +225,7 @@ The expected manual handoff input path is:
 
     godot_spike/data/project.json
 
-`ProjectLoader.cs` currently only loads `res://data/project.json`, parses JSON with Godot APIs, and logs a concise project summary:
+`ProjectLoader.cs` loads `res://data/project.json`, parses JSON with Godot APIs, and logs a concise project summary:
 
 * project id
 * project title
@@ -237,9 +237,9 @@ The expected manual handoff input path is:
 * current map collision count
 * current map event count
 
-`project.godot` sets `res://scenes/ProjectLoaderScene.tscn` as the main scene. Running the project currently only executes `ProjectLoader.cs` on a plain `Node`.
+`project.godot` sets `res://scenes/ProjectLoaderScene.tscn` as the main scene. Running the project executes `ProjectLoader.cs` on a plain `Node`.
 
-The loader extracts these values defensively so missing or malformed fields warn and fall back instead of crashing. Map rendering, player movement, collision behavior, event interaction, and command execution remain the next steps. The `godot_spike/` directory is not an authoring source and must not become a schema fork.
+The loader extracts these values defensively so missing or malformed fields warn and fall back instead of crashing. It also extracts current-map collision positions plus event id, trigger, and position for debug rendering and log/status-only event detection. The `godot_spike/` directory is not an authoring source and must not become a schema fork.
 
 The spike now renders a static debug grid for the current/start map when valid map size data is available. The grid uses text markers only: `^`, `v`, `<`, and `>` for player facing, `E` for events, `#` for collision, and `.` for empty cells. It includes a visible legend, and `ProjectLoader` exposes `DebugCellSize` and `DebugMapOffset` so the grid spacing can be adjusted in the inspector.
 
@@ -248,6 +248,27 @@ The spike also supports minimal player marker movement on the debug grid. The in
 The spike can detect a `trigger: interact` event in the player's facing cell when Enter, Space, or Z is pressed, and it can detect a `trigger: touch` event after the player successfully enters its cell. Both paths log and display the event id and position only. The debug viewport status line shows the latest movement or event detection result so manual verification does not depend only on the Output log. Event commands, dialogue UI, and command execution remain out of scope.
 
 For mounted-repository host verification, prepare `godot_spike/data/project.json` from inside the container and use `pnpm godot` as the standard implementation verification command. It performs a headless C# build and launches the project only when the build succeeds; run-only remains available as `pnpm godot:run`. The underlying `godot_spike/scripts/host_verify.sh` supports the same workflow. Host-specific Godot, .NET, or architecture settings should come from `GODOT_BIN`, `DOTNET_ROOT`, `GODOT_ARCH`, or ignored `godot_spike/.env.local`, not tracked absolute paths. The script can force the effective Godot architecture so an x86_64 Node or pnpm process does not select an incompatible runtime on Apple Silicon. Local Godot outputs such as `.godot/`, `.mono/`, `.csproj`, `.sln`, the handoff `data/project.json`, and `.env.local` are ignored and non-canonical.
+
+## Current Verification Status
+
+Implemented in the repository:
+
+* Project JSON loading and defensive project summary extraction
+* current map size, collision, and event id/trigger/position extraction
+* debug grid, marker legend, status HUD, and player start placement
+* four-direction movement, facing display, map bounds blocking, and collision blocking
+* log/status-only `interact` detection in the facing cell
+* log/status-only `touch` detection after successful cell entry
+* portable host verification script and `pnpm godot` build-then-run workflow
+
+Manually verified on a host:
+
+* `pnpm godot` performs build then run
+* Apple Silicon Godot/.NET architecture alignment works
+* debug grid, legend, status HUD, and markers are visible without layout overlap
+* `interact` detection displays `interact_event: mayor_intro at [7, 6]`
+
+Touch verification is prepared through ignored local `godot_spike/data/project.json` using `touch_test` on `town` at `[5, 6]`. That local handoff artifact is not canonical and is not committed.
 
 ## First Godot Spike Behavior
 
@@ -277,53 +298,61 @@ Success criteria:
 
 Use this checklist to keep the first Godot loader spike small. Passing these items is enough for Phase 11 minimum success.
 
+Status labels:
+
+* **Implemented**: behavior exists in tracked source
+* **Host verified**: behavior has also been confirmed in a host Godot run
+* **Prepared**: manual verification input exists locally, but verification is not recorded as complete
+* **Pending**: not implemented or not required yet
+
 ### Project Loading
 
-* loader accepts RPG Deck project JSON copied from the editor
-* malformed JSON fails gracefully with a visible or debug error
-* unsupported future fields do not crash the loader
+* **Implemented**: loader accepts RPG Deck project JSON copied from the editor
+* **Implemented**: malformed JSON fails gracefully with a visible or debug error
+* **Implemented**: unsupported future fields do not crash the loader
 
 ### Map Loading
 
-* loader reads `settings.start.map`
-* loader creates the current map from `maps`
-* loader respects `maps[mapId].size`
-* loader can switch map if `transfer_player` is supported later
+* **Implemented**: loader reads `settings.start.map`
+* **Implemented**: loader creates the current map from `maps`
+* **Implemented**: loader respects `maps[mapId].size`
+* **Pending**: loader can switch map if `transfer_player` is supported later
 
 ### Player
 
-* player starts at `settings.start.position`
-* player grid movement works in four directions
-* player cannot move outside map bounds if implemented
-* player cannot move into `collision`
+* **Implemented**: player starts at `settings.start.position`
+* **Implemented**: player grid movement works in four directions
+* **Implemented**: player facing is displayed and updates even when movement is blocked
+* **Implemented**: player cannot move outside map bounds
+* **Implemented**: player cannot move into `collision`
 
 ### Collision
 
-* collision cells are visible in debug rendering
-* movement into collision is blocked
-* removing collision in RPG Deck JSON and reloading allows movement
+* **Implemented**: collision cells are visible in debug rendering
+* **Implemented**: movement into collision is blocked
+* **Implemented**: removing collision in RPG Deck JSON and reloading allows movement
 
 ### Events
 
-* event markers are placed using event `map` and `position`
-* event IDs are visible or logged for debugging
-* `interact` event can be detected from adjacent/facing position if implemented
-* `touch` event can be detected on entry if implemented
-* unsupported trigger behavior is logged, not allowed to crash the loader
+* **Implemented**: event markers are placed using event `map` and `position`
+* **Implemented**: event id, trigger, and position are extracted for the current map
+* **Host verified**: `interact` event detection reports `mayor_intro` from the adjacent facing cell
+* **Implemented / Prepared**: `touch` event detection reports an event after successful cell entry; ignored local `touch_test` input is ready for host verification
+* **Implemented**: event detection is log/status-only and does not execute commands
+* **Pending**: unsupported trigger behavior reporting beyond defensive parsing
 
 ### Commands
 
-* first loader can log `show_message`
-* first loader can log `choice` prompt/options
-* first loader can log or stub `start_battle`
-* first loader can log `play_bgm` and `play_sfx`
-* full command execution is not required for first acceptance unless explicitly added later
+* **Pending**: command execution boundary design note
+* **Pending**: `show_message`, `choice`, flags, transfer, battle, and audio behavior
+* **Pending**: full command execution; it remains out of scope until explicitly designed
 
 ### Boundary
 
-* no Godot-specific schema is required in RPG Deck project JSON
-* no changes to `core-domain` are required for first loader
-* no save-back from Godot is required
+* **Implemented**: no Godot-specific schema is required in RPG Deck project JSON
+* **Implemented**: no changes to `core-domain` are required for first loader
+* **Implemented**: no save-back from Godot is required
+* **Host verified**: `pnpm godot` performs build then run with Apple Silicon architecture support
 
 ### Manual QA Flow
 
@@ -336,10 +365,12 @@ Manual QA is enough for the first loader spike.
 5. Confirm player start position.
 6. Confirm collision blocks movement.
 7. Confirm event marker appears.
-8. Modify collision or event position in RPG Deck.
-9. Copy Project JSON again.
-10. Reload the Godot spike input.
-11. Confirm the change appears.
+8. Confirm facing-cell `interact` detection reports an event id and position.
+9. Use an ignored local handoff JSON with a current-map `touch` event and confirm entry detection reports an event id and position.
+10. Modify collision or event position in RPG Deck.
+11. Copy Project JSON again.
+12. Reload the Godot spike input.
+13. Confirm the change appears.
 
 ### Not Required for First Acceptance
 
@@ -349,8 +380,12 @@ The first loader does not need:
 * animation
 * full dialogue UI
 * choice UI
+* flag changes
+* player transfer
 * battle
 * audio playback
+* event blocking
+* event command execution
 * save/load from Godot
 * Godot editor tooling
 * bidirectional editing

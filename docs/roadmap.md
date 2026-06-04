@@ -335,3 +335,6 @@ Initial implementation status:
 * The Godot debug grid can now detect `trigger: interact` events in the player-facing cell with Enter, Space, or Z and logs the event id only. Dialogue UI, choices, flags, transfer, battle/audio, and command execution remain out of scope.
 * The Godot debug grid now shows a viewport status line for the latest movement or interact result, making manual verification easier without adding dialogue UI or command execution.
 * The Godot debug grid can now detect `trigger: touch` events after successful entry and shows the event id in the Output log and status line. Event commands, dialogue UI, choices, flags, transfer, battle/audio, and command execution remain out of scope.
+* The Phase 11 boundary spike has reached log/status-only event detection: `interact` and `touch` events are detected by id and position but their commands are not executed.
+* Standard host implementation verification is `pnpm godot`, which performs a C# build before launching the spike.
+* The recommended next implementation step is a command execution boundary design note that decides which command semantics Godot should log, stub, or execute before runtime code is added.
