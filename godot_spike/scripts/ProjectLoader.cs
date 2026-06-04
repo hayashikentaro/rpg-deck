@@ -229,6 +229,7 @@ public partial class ProjectLoader : Node
         var movedMessage = $"player moved to [{_currentPlayerPosition.X}, {_currentPlayerPosition.Y}] facing {FacingDirectionLabel()}";
         GD.Print(movedMessage);
         SetDebugStatus(movedMessage);
+        TryReportTouchEvent();
     }
 
     private void TryInteract()
@@ -252,6 +253,24 @@ public partial class ProjectLoader : Node
         var noneMessage = $"interact_event: none at [{targetPosition.X}, {targetPosition.Y}]";
         GD.Print(noneMessage);
         SetDebugStatus(noneMessage);
+    }
+
+    private void TryReportTouchEvent()
+    {
+        foreach (var eventSummary in _currentMapEvents)
+        {
+            if (
+                eventSummary.Trigger == "touch" &&
+                eventSummary.Position.X == _currentPlayerPosition.X &&
+                eventSummary.Position.Y == _currentPlayerPosition.Y
+            )
+            {
+                var message = $"touch_event: {eventSummary.Id} at [{_currentPlayerPosition.X}, {_currentPlayerPosition.Y}]";
+                GD.Print(message);
+                SetDebugStatus(message);
+                return;
+            }
+        }
     }
 
     private void SetDebugStatus(string message)

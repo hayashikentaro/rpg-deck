@@ -117,16 +117,18 @@ The script falls back to common macOS Godot and .NET locations when env vars are
 12. Confirm the player marker cannot move into `#` collision cells.
 13. Face an `E` event marker and press Enter, Space, or Z.
 14. Confirm `ProjectLoader` logs and shows `interact_event: <event_id> at [x, y]` only when the facing cell has a `trigger: interact` event.
-15. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
-16. Rename or remove `data/project.json`.
-17. Run the project again.
-18. Confirm the missing-file warning appears and the project does not crash.
+15. Use Project JSON with a `trigger: touch` event on the current map and move onto its cell.
+16. Confirm `ProjectLoader` logs and shows `touch_event: <event_id> at [x, y]` only after entering that cell.
+17. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
+18. Rename or remove `data/project.json`.
+19. Run the project again.
+20. Confirm the missing-file warning appears and the project does not crash.
 
 ## Current Skeleton
 
 The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
-`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and moves a facing marker with arrow keys or WASD. The debug HUD places the marker legend first, the status line below it, and the grid below the HUD. The renderer includes a configurable `DebugCellSize` and a configurable `DebugMapOffset`. Player markers use ASCII `^`, `v`, `<`, and `>` for font-safe facing display. Marker priority is player over `E` over `#` over `.`. Facing updates even when movement is blocked. Movement is limited by map bounds and `#` collision cells. Pressing Enter, Space, or Z checks the facing cell for a `trigger: interact` event and logs the event id when found. The status line mirrors the latest movement or interact result in the viewport; it is not dialogue UI. Event commands, dialogue UI, touch events, and command execution are intentionally left for later Phase 11 steps.
+`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and moves a facing marker with arrow keys or WASD. The debug HUD places the marker legend first, the status line below it, and the grid below the HUD. The renderer includes a configurable `DebugCellSize` and a configurable `DebugMapOffset`. Player markers use ASCII `^`, `v`, `<`, and `>` for font-safe facing display. Marker priority is player over `E` over `#` over `.`. Facing updates even when movement is blocked. Movement is limited by map bounds and `#` collision cells. Pressing Enter, Space, or Z checks the facing cell for a `trigger: interact` event. Entering a `trigger: touch` event cell reports that event after successful movement. The status line mirrors the latest movement, interact, or touch result in the viewport; it is not dialogue UI. Event commands, dialogue UI, and command execution are intentionally left for later Phase 11 steps.
 
 Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.
 
