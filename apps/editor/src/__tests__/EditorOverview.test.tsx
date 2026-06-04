@@ -128,6 +128,8 @@ describe("EditorOverview", () => {
 
     expect(html).toContain("Event Inspector");
     expect(html).toContain("<h3>mayor_intro</h3>");
+    expect(html).toContain("interact event mayor_intro at [7, 6], selected");
+    expect(html).toContain('data-selected="true"');
   });
 
   it("renders event graph section", () => {

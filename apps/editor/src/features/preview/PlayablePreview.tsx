@@ -9,6 +9,7 @@ export type PlayablePreviewProps = {
   onAdvance?: () => void;
   onCellClick?: (position: GridPosition) => void;
   onChooseOption?: (optionIndex: number) => void;
+  selectedEventId?: string | null;
   className?: string;
 };
 
@@ -17,6 +18,7 @@ type CellView = {
   marker: "↑" | "↓" | "←" | "→" | "#" | "N" | "T" | "A" | ".";
   kind: "player" | "collision" | "interact" | "touch" | "autorun" | "empty";
   label: string;
+  selected: boolean;
 };
 
 export function PlayablePreview({
@@ -26,6 +28,7 @@ export function PlayablePreview({
   onAdvance,
   onCellClick,
   onChooseOption,
+  selectedEventId,
   className
 }: PlayablePreviewProps) {
   const currentMap = project.maps[snapshot.currentMapId];
@@ -40,7 +43,7 @@ export function PlayablePreview({
   }
 
   const [width, height] = currentMap.size;
-  const cells = buildCells(project, snapshot);
+  const cells = buildCells(project, snapshot, selectedEventId);
 
   return (
     <section className={["playable-preview", className].filter(Boolean).join(" ")} aria-label="Playable preview">
@@ -62,6 +65,7 @@ export function PlayablePreview({
               aria-label={cell.label}
               className="playable-preview__cell"
               data-cell-kind={cell.kind}
+              data-selected={cell.selected || undefined}
               key={`${cell.position[0]}-${cell.position[1]}`}
               role="gridcell"
             >
@@ -69,6 +73,7 @@ export function PlayablePreview({
                 <button
                   aria-label={`Move selected event to ${positionLabel(cell.position)}. ${cell.label}`}
                   className="playable-preview__cell-button"
+                  data-selected={cell.selected || undefined}
                   type="button"
                   onClick={() => onCellClick(cell.position)}
                 >
@@ -150,7 +155,7 @@ export function PlayablePreview({
   );
 }
 
-function buildCells(project: GameProject, snapshot: RuntimeSnapshot): CellView[] {
+function buildCells(project: GameProject, snapshot: RuntimeSnapshot, selectedEventId?: string | null): CellView[] {
   const currentMap = project.maps[snapshot.currentMapId];
   if (!currentMap) return [];
 
@@ -160,31 +165,39 @@ function buildCells(project: GameProject, snapshot: RuntimeSnapshot): CellView[]
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       const position: GridPosition = [x, y];
-      cells.push(cellForPosition(project, snapshot, position));
+      cells.push(cellForPosition(project, snapshot, position, selectedEventId));
     }
   }
 
   return cells;
 }
 
-function cellForPosition(project: GameProject, snapshot: RuntimeSnapshot, position: GridPosition): CellView {
+function cellForPosition(
+  project: GameProject,
+  snapshot: RuntimeSnapshot,
+  position: GridPosition,
+  selectedEventId?: string | null
+): CellView {
   if (positionsEqual(position, snapshot.playerPosition)) {
     return {
       position,
       marker: playerMarker(snapshot.facingDirection),
       kind: "player",
-      label: `Player at ${positionLabel(position)}, facing ${snapshot.facingDirection}`
+      label: `Player at ${positionLabel(position)}, facing ${snapshot.facingDirection}`,
+      selected: false
     };
   }
 
   const event = eventAtPosition(project, snapshot.currentMapId, position);
   if (event) {
     const marker = event.trigger === "interact" ? "N" : event.trigger === "touch" ? "T" : "A";
+    const selected = event.id === selectedEventId;
     return {
       position,
       marker,
       kind: event.trigger,
-      label: `${event.trigger} event ${event.id} at ${positionLabel(position)}`
+      label: `${event.trigger} event ${event.id} at ${positionLabel(position)}${selected ? ", selected" : ""}`,
+      selected
     };
   }
 
@@ -195,7 +208,8 @@ function cellForPosition(project: GameProject, snapshot: RuntimeSnapshot, positi
       position,
       marker: "#",
       kind: "collision",
-      label: `Collision at ${positionLabel(position)}`
+      label: `Collision at ${positionLabel(position)}`,
+      selected: false
     };
   }
 
@@ -203,7 +217,8 @@ function cellForPosition(project: GameProject, snapshot: RuntimeSnapshot, positi
     position,
     marker: ".",
     kind: "empty",
-    label: `Empty floor at ${positionLabel(position)}`
+    label: `Empty floor at ${positionLabel(position)}`,
+    selected: false
   };
 }
 

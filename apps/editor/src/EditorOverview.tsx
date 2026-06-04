@@ -171,6 +171,7 @@ export function EditorOverview({
           <PlayablePreview
             eventLog={eventLog}
             project={project}
+            selectedEventId={selectedEventId}
             snapshot={runtimeSnapshot}
             onAdvance={onAdvance}
             onCellClick={selectedEventId ? onMoveSelectedEvent : undefined}

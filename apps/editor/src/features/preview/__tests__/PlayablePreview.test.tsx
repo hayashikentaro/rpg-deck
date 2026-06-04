@@ -190,13 +190,29 @@ describe("PlayablePreview", () => {
     expect(html).toContain("Move selected event to [0, 0]. Player at [0, 0], facing down");
     expect(html).toContain("Move selected event to [2, 0]. interact event npc at [2, 0]");
   });
+
+  it("marks the selected event in read-only rendering", () => {
+    const html = renderPreview(snapshot, undefined, undefined, undefined, "npc");
+
+    expect(html).toContain('data-selected="true"');
+    expect(html).toContain("interact event npc at [2, 0], selected");
+    expect(html).not.toContain("playable-preview__cell-button");
+  });
+
+  it("marks the selected event cell button in clickable rendering", () => {
+    const html = renderPreview(snapshot, undefined, undefined, () => undefined, "npc");
+
+    expect(html).toContain('class="playable-preview__cell-button" data-selected="true"');
+    expect(html).toContain("Move selected event to [2, 0]. interact event npc at [2, 0], selected");
+  });
 });
 
 function renderPreview(
   nextSnapshot: RuntimeSnapshot = snapshot,
   onChooseOption?: (optionIndex: number) => void,
   onAdvance?: () => void,
-  onCellClick?: (position: [number, number]) => void
+  onCellClick?: (position: [number, number]) => void,
+  selectedEventId?: string | null
 ) {
   return renderToStaticMarkup(
     <PlayablePreview
@@ -205,6 +221,7 @@ function renderPreview(
       onAdvance={onAdvance}
       onCellClick={onCellClick}
       onChooseOption={onChooseOption}
+      selectedEventId={selectedEventId}
     />
   );
 }
