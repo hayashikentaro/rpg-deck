@@ -6,6 +6,7 @@ export type PlayablePreviewProps = {
   project: GameProject;
   snapshot: RuntimeSnapshot;
   eventLog?: RuntimeEventLogEntry[];
+  onChooseOption?: (optionIndex: number) => void;
   className?: string;
 };
 
@@ -16,7 +17,7 @@ type CellView = {
   label: string;
 };
 
-export function PlayablePreview({ project, snapshot, eventLog = [], className }: PlayablePreviewProps) {
+export function PlayablePreview({ project, snapshot, eventLog = [], onChooseOption, className }: PlayablePreviewProps) {
   const currentMap = project.maps[snapshot.currentMapId];
 
   if (!currentMap) {
@@ -83,9 +84,22 @@ export function PlayablePreview({ project, snapshot, eventLog = [], className }:
             <section className="playable-preview__choice" aria-label="Current choice">
               <h4>Choice</h4>
               <p>{snapshot.currentChoice.prompt}</p>
-              <ol>
+              <ol className="playable-preview__choice-options">
                 {snapshot.currentChoice.options.map((option) => (
-                  <li key={option.index}>{option.label}</li>
+                  <li key={option.index}>
+                    {onChooseOption ? (
+                      <button
+                        aria-label={`Choose ${option.label}`}
+                        className="playable-preview__choice-option"
+                        type="button"
+                        onClick={() => onChooseOption(option.index)}
+                      >
+                        {option.label}
+                      </button>
+                    ) : (
+                      option.label
+                    )}
+                  </li>
                 ))}
               </ol>
             </section>

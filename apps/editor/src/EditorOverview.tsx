@@ -25,6 +25,7 @@ export type EditorOverviewProps = {
   selectedEventId: string | null;
   onMove?: (direction: Direction) => void;
   onInteract?: () => void;
+  onChooseOption?: (optionIndex: number) => void;
   onRestart?: () => void;
   onCreateProposal?: () => void;
   onAcceptProposal?: () => void;
@@ -46,6 +47,7 @@ export function EditorOverview({
   selectedEventId,
   onMove,
   onInteract,
+  onChooseOption,
   onRestart,
   onCreateProposal,
   onAcceptProposal,
@@ -154,7 +156,12 @@ export function EditorOverview({
       }
       main={
         <main className="editor-main">
-          <PlayablePreview eventLog={eventLog} project={project} snapshot={runtimeSnapshot} />
+          <PlayablePreview
+            eventLog={eventLog}
+            project={project}
+            snapshot={runtimeSnapshot}
+            onChooseOption={onChooseOption}
+          />
           <section>
             <h2>Runtime snapshot</h2>
             <pre>{JSON.stringify(runtimeSnapshot, null, 2)}</pre>

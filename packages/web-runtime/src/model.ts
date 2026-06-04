@@ -1,8 +1,11 @@
-import type { GameProject, GridPosition } from "@rpg-deck/core-domain";
+import type { EventCommand, GameProject, GridPosition } from "@rpg-deck/core-domain";
 
 export type Direction = "up" | "down" | "left" | "right";
 
-export type PlayerInput = { type: "move"; direction: Direction } | { type: "interact"; direction?: Direction };
+export type PlayerInput =
+  | { type: "move"; direction: Direction }
+  | { type: "interact"; direction?: Direction }
+  | { type: "choose"; optionIndex: number };
 
 export type RuntimeStatus = "idle" | "message" | "choice" | "battle" | "transferring";
 
@@ -19,6 +22,14 @@ export type RuntimeChoice = {
   }>;
 };
 
+export type RuntimePendingChoice = {
+  eventId?: string;
+  options: Array<{
+    label: string;
+    commands: EventCommand[];
+  }>;
+};
+
 export type RuntimeBattle = {
   enemyId: string;
 };
@@ -32,6 +43,8 @@ export type RuntimeEventLogEntry = {
     | "event_triggered"
     | "message"
     | "choice"
+    | "choice_selected"
+    | "choice_ignored"
     | "flag_changed"
     | "bgm_changed"
     | "sfx_played"
@@ -47,6 +60,7 @@ export type RuntimeEventLogEntry = {
   value?: boolean;
   assetId?: string;
   enemyId?: string;
+  optionIndex?: number;
   reason?: string;
 };
 
@@ -58,6 +72,7 @@ export type RuntimeState = {
   status: RuntimeStatus;
   currentMessage: RuntimeMessage | null;
   currentChoice: RuntimeChoice | null;
+  pendingChoice: RuntimePendingChoice | null;
   currentBattle: RuntimeBattle | null;
   flags: Record<string, boolean>;
   currentBgm: string | null;

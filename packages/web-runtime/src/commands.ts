@@ -17,6 +17,30 @@ export function executeCommands(state: RuntimeState, commands: EventCommand[], e
   }
 }
 
+export function chooseCurrentOption(state: RuntimeState, optionIndex: number) {
+  const pendingChoice = state.pendingChoice;
+  const option = pendingChoice?.options[optionIndex];
+
+  if (!pendingChoice || !option) {
+    appendLog(state, {
+      type: "choice_ignored",
+      optionIndex,
+      reason: pendingChoice ? "invalid_option_index" : "no_current_choice"
+    });
+    return;
+  }
+
+  state.currentChoice = null;
+  state.pendingChoice = null;
+  appendLog(state, {
+    type: "choice_selected",
+    eventId: pendingChoice.eventId,
+    optionIndex,
+    message: option.label
+  });
+  executeCommands(state, option.commands, pendingChoice.eventId);
+}
+
 function executeCommand(state: RuntimeState, command: EventCommand, eventId?: string) {
   switch (command.type) {
     case "show_message":
@@ -26,6 +50,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         text: command.text
       };
       state.currentChoice = null;
+      state.pendingChoice = null;
       state.currentBattle = null;
       appendLog(state, {
         type: "message",
@@ -82,6 +107,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
       state.playerPosition = [...command.position];
       state.currentMessage = null;
       state.currentChoice = null;
+      state.pendingChoice = null;
       state.currentBattle = null;
       appendLog(state, {
         type: "player_transferred",
@@ -99,6 +125,7 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
       };
       state.currentMessage = null;
       state.currentChoice = null;
+      state.pendingChoice = null;
       appendLog(state, {
         type: "battle_started",
         eventId,
@@ -116,6 +143,10 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
           label: option.label
         }))
       };
+      state.pendingChoice = {
+        eventId,
+        options: command.options
+      };
       state.currentMessage = null;
       state.currentBattle = null;
       appendLog(state, {
@@ -124,7 +155,6 @@ function executeCommand(state: RuntimeState, command: EventCommand, eventId?: st
         commandType: command.type,
         message: command.prompt
       });
-      // Branch selection is intentionally deferred until the editor/runtime has an input model for choices.
       return;
 
     case "if_flag":

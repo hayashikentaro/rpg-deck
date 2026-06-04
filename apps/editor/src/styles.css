@@ -212,9 +212,27 @@ textarea {
   background: #fafaf8;
 }
 
-.playable-preview__choice ol {
+.playable-preview__choice-options {
+  display: grid;
+  gap: 6px;
   margin: 0;
-  padding-left: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.playable-preview__choice-option {
+  width: 100%;
+  border: 1px solid #c9c9c2;
+  border-radius: 4px;
+  background: #fff;
+  padding: 6px 8px;
+  color: #222;
+  text-align: left;
+}
+
+.playable-preview__choice-option:hover {
+  border-color: #2266aa;
+  background: #eef6ff;
 }
 
 .event-inspector {

@@ -13,6 +13,15 @@ function loadSample(): GameProject {
   return parseProjectJson(readFileSync(samplePath, "utf8"));
 }
 
+function runtimeAtSampleMayorChoice() {
+  const runtime = createRuntime(loadSample());
+  runtime.startNewGame();
+  runtime.dispatch({ type: "move", direction: "right" });
+  runtime.dispatch({ type: "move", direction: "right" });
+  runtime.dispatch({ type: "interact", direction: "right" });
+  return runtime;
+}
+
 describe("headless web runtime", () => {
   it("starts new game at sample start map and position", () => {
     const runtime = createRuntime(loadSample());
@@ -61,12 +70,7 @@ describe("headless web runtime", () => {
   });
 
   it("interacting with sample mayor event reaches choice state and updates bgm", () => {
-    const runtime = createRuntime(loadSample());
-    runtime.startNewGame();
-    runtime.dispatch({ type: "move", direction: "right" });
-    runtime.dispatch({ type: "move", direction: "right" });
-
-    runtime.dispatch({ type: "interact", direction: "right" });
+    const runtime = runtimeAtSampleMayorChoice();
 
     expect(runtime.getSnapshot()).toMatchObject({
       status: "choice",
@@ -85,6 +89,62 @@ describe("headless web runtime", () => {
         expect.objectContaining({ type: "choice", eventId: "mayor_intro" }),
         expect.objectContaining({ type: "sfx_played", assetId: "talk" })
       ])
+    );
+  });
+
+  it("choosing a sample mayor option executes nested flag, transfer, and message commands", () => {
+    const runtime = runtimeAtSampleMayorChoice();
+
+    runtime.dispatch({ type: "choose", optionIndex: 0 });
+
+    expect(runtime.getSnapshot()).toMatchObject({
+      currentMapId: "cave_entrance",
+      playerPosition: [3, 4],
+      status: "message",
+      currentChoice: null,
+      currentMessage: {
+        speaker: "mayor_intro",
+        text: "ならば気をつけて行け。"
+      },
+      flags: {
+        cave_warning_ignored: true
+      }
+    });
+    expect(runtime.getEventLog()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: "choice_selected", optionIndex: 0, eventId: "mayor_intro" }),
+        expect.objectContaining({ type: "flag_changed", flag: "cave_warning_ignored", value: true }),
+        expect.objectContaining({ type: "player_transferred", mapId: "cave_entrance", position: [3, 4] })
+      ])
+    );
+  });
+
+  it("ignores an invalid choice option index without crashing", () => {
+    const runtime = runtimeAtSampleMayorChoice();
+
+    expect(() => runtime.dispatch({ type: "choose", optionIndex: 99 })).not.toThrow();
+    expect(runtime.getSnapshot()).toMatchObject({
+      status: "choice",
+      currentChoice: {
+        prompt: "それでも行くか？"
+      }
+    });
+    expect(runtime.getEventLog()).toContainEqual(
+      expect.objectContaining({ type: "choice_ignored", optionIndex: 99, reason: "invalid_option_index" })
+    );
+  });
+
+  it("ignores choose input when no choice is active", () => {
+    const runtime = createRuntime(loadSample());
+    runtime.startNewGame();
+
+    expect(() => runtime.dispatch({ type: "choose", optionIndex: 0 })).not.toThrow();
+    expect(runtime.getSnapshot()).toMatchObject({
+      status: "idle",
+      currentChoice: null
+    });
+    expect(runtime.getEventLog()).toContainEqual(
+      expect.objectContaining({ type: "choice_ignored", optionIndex: 0, reason: "no_current_choice" })
     );
   });
 

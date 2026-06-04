@@ -106,6 +106,7 @@ export function App() {
       onCreateProposal={createProposal}
       onHoldProposal={holdProposal}
       onInteract={() => dispatchRuntimeInput({ type: "interact" })}
+      onChooseOption={(optionIndex) => dispatchRuntimeInput({ type: "choose", optionIndex })}
       onMove={(direction: Direction) => dispatchRuntimeInput({ type: "move", direction })}
       onRejectProposal={rejectProposal}
       onRestart={restart}

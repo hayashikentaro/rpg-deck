@@ -148,6 +148,24 @@ describe("EditorOverview", () => {
     expect(html).toContain("Arrow keys / WASD move, Space or Enter interacts, R restarts.");
   });
 
+  it("renders current choice options in the playable preview", () => {
+    const html = renderOverview(null, {
+      ...snapshot,
+      status: "choice",
+      currentChoice: {
+        prompt: "Choose a path?",
+        options: [
+          { index: 0, label: "North" },
+          { index: 1, label: "South" }
+        ]
+      }
+    });
+
+    expect(html).toContain("Choose a path?");
+    expect(html).toContain("North");
+    expect(html).toContain("South");
+  });
+
   it("renders diff review section", () => {
     const html = renderOverview();
 
@@ -199,7 +217,7 @@ const mockProposal: ProjectProposal = {
   }
 };
 
-function renderOverview(proposal: ProjectProposal | null = null) {
+function renderOverview(proposal: ProjectProposal | null = null, runtimeSnapshot: RuntimeSnapshot = snapshot) {
   return renderToStaticMarkup(
     <EditorOverview
       eventLog={[]}
@@ -207,13 +225,14 @@ function renderOverview(proposal: ProjectProposal | null = null) {
       proposal={proposal}
       project={project}
       projectTitle="Tiny RPG"
-      runtimeSnapshot={snapshot}
+      runtimeSnapshot={runtimeSnapshot}
       selectedEventId="mayor_intro"
       summary={summary}
       validationIssues={[]}
       onAcceptProposal={() => undefined}
       onCreateProposal={() => undefined}
       onHoldProposal={() => undefined}
+      onChooseOption={() => undefined}
       onRejectProposal={() => undefined}
       onSelectEvent={() => undefined}
       onUpdateEvent={() => undefined}

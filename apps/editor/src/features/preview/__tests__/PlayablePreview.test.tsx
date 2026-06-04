@@ -107,21 +107,26 @@ describe("PlayablePreview", () => {
   });
 
   it("renders choice prompt and options when present", () => {
-    const html = renderPreview({
-      ...snapshot,
-      status: "choice",
-      currentChoice: {
-        prompt: "Choose a path?",
-        options: [
-          { index: 0, label: "North" },
-          { index: 1, label: "South" }
-        ]
-      }
-    });
+    const html = renderPreview(
+      {
+        ...snapshot,
+        status: "choice",
+        currentChoice: {
+          prompt: "Choose a path?",
+          options: [
+            { index: 0, label: "North" },
+            { index: 1, label: "South" }
+          ]
+        }
+      },
+      () => undefined
+    );
 
     expect(html).toContain("Choose a path?");
     expect(html).toContain("North");
     expect(html).toContain("South");
+    expect(html).toContain("<button");
+    expect(html).toContain("Choose North");
   });
 
   it("renders battle placeholder when present", () => {
@@ -138,6 +143,8 @@ describe("PlayablePreview", () => {
   });
 });
 
-function renderPreview(nextSnapshot: RuntimeSnapshot = snapshot) {
-  return renderToStaticMarkup(<PlayablePreview project={project} snapshot={nextSnapshot} />);
+function renderPreview(nextSnapshot: RuntimeSnapshot = snapshot, onChooseOption?: (optionIndex: number) => void) {
+  return renderToStaticMarkup(
+    <PlayablePreview project={project} snapshot={nextSnapshot} onChooseOption={onChooseOption} />
+  );
 }
