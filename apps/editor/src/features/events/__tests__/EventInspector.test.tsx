@@ -50,6 +50,23 @@ const project: GameProject = {
           text: "Welcome to town."
         },
         {
+          type: "set_flag",
+          flag: "helping"
+        },
+        {
+          type: "unset_flag",
+          flag: "intro_pending"
+        },
+        {
+          type: "transfer_player",
+          map: "cave_entrance",
+          position: [3, 4]
+        },
+        {
+          type: "start_battle",
+          enemy: "slime"
+        },
+        {
           type: "choice",
           prompt: "Will you help?",
           options: [
@@ -128,6 +145,10 @@ describe("EventInspector", () => {
     expect(html).toContain("play_bgm");
     expect(html).toContain("play_sfx");
     expect(html).toContain("show_message");
+    expect(html).toContain("set_flag");
+    expect(html).toContain("unset_flag");
+    expect(html).toContain("transfer_player");
+    expect(html).toContain("start_battle");
     expect(html).toContain("choice");
   });
 
@@ -147,6 +168,36 @@ describe("EventInspector", () => {
     expect(html).toContain('value="town_theme"');
     expect(html).toContain("SFX");
     expect(html).toContain('value="talk"');
+  });
+
+  it("renders editable flag command fields", () => {
+    const html = renderInspector("mayor");
+
+    expect(html).toContain("set_flag");
+    expect(html).toContain("unset_flag");
+    expect(html).toContain("Flag");
+    expect(html).toContain('value="helping"');
+    expect(html).toContain('value="intro_pending"');
+  });
+
+  it("renders editable transfer_player fields", () => {
+    const html = renderInspector("mayor");
+
+    expect(html).toContain("transfer_player");
+    expect(html).toContain("Map");
+    expect(html).toContain('value="cave_entrance"');
+    expect(html).toContain("Position X");
+    expect(html).toContain("Position Y");
+    expect(html).toContain('value="3"');
+    expect(html).toContain('value="4"');
+  });
+
+  it("renders editable start_battle field", () => {
+    const html = renderInspector("mayor");
+
+    expect(html).toContain("start_battle");
+    expect(html).toContain("Enemy");
+    expect(html).toContain('value="slime"');
   });
 
   it("renders choice command as read-only", () => {
