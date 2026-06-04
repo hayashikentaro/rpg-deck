@@ -7,6 +7,8 @@ ENV_FILE="$GODOT_SPIKE_DIR/.env.local"
 MODE="${1:-run}"
 LOG_PATH="/tmp/rpg-deck-godot-run.log"
 ENV_LOADED="no"
+HOST_ARCH="$(uname -m)"
+HOST_OS="$(uname -s)"
 
 if [[ -f "$ENV_FILE" ]]; then
   echo "Loading local env file: $ENV_FILE"
@@ -63,6 +65,21 @@ resolve_dotnet_root() {
 
 GODOT_BIN="$(resolve_godot_bin)"
 DOTNET_ROOT="$(resolve_dotnet_root)"
+EFFECTIVE_GODOT_ARCH="${GODOT_ARCH:-}"
+if [[ -z "$EFFECTIVE_GODOT_ARCH" && "$HOST_OS" == "Darwin" && "$HOST_ARCH" == "arm64" ]]; then
+  EFFECTIVE_GODOT_ARCH="arm64"
+fi
+if [[ -z "$EFFECTIVE_GODOT_ARCH" && "$HOST_OS" == "Darwin" ]]; then
+  if [[ "$(sysctl -in sysctl.proc_translated 2>/dev/null || true)" == "1" ]]; then
+    EFFECTIVE_GODOT_ARCH="arm64"
+  fi
+fi
+
+FORCE_ARCH="no"
+if [[ -n "$EFFECTIVE_GODOT_ARCH" ]]; then
+  FORCE_ARCH="yes"
+fi
+
 PROJECT_FILE="$GODOT_SPIKE_DIR/project.godot"
 PROJECT_JSON="$GODOT_SPIKE_DIR/data/project.json"
 
@@ -78,6 +95,7 @@ Godot binary was not found or is not executable.
 Set GODOT_BIN directly or create godot_spike/.env.local, for example:
 GODOT_BIN=/Applications/Godot_mono.app/Contents/MacOS/Godot
 DOTNET_ROOT=/usr/local/share/dotnet
+GODOT_ARCH=arm64
 EOF
   exit 1
 fi
@@ -88,7 +106,13 @@ DOTNET_ROOT was not found.
 Set DOTNET_ROOT directly or create godot_spike/.env.local, for example:
 GODOT_BIN=/Applications/Godot_mono.app/Contents/MacOS/Godot
 DOTNET_ROOT=/usr/local/share/dotnet
+GODOT_ARCH=arm64
 EOF
+  exit 1
+fi
+
+if [[ "$FORCE_ARCH" == "yes" && ! -x "$(command -v arch || true)" ]]; then
+  echo "Cannot force Godot architecture because the 'arch' command is unavailable." >&2
   exit 1
 fi
 
@@ -110,23 +134,35 @@ echo "  mode: $MODE"
 echo "  local env loaded: $ENV_LOADED"
 echo "  Godot binary: $GODOT_BIN"
 echo "  DOTNET_ROOT: $DOTNET_ROOT"
+echo "  host arch: $HOST_ARCH"
+echo "  effective Godot arch: ${EFFECTIVE_GODOT_ARCH:-default}"
+echo "  force arch: $FORCE_ARCH"
 echo "  Godot project path: $GODOT_SPIKE_DIR"
 echo "  project JSON: present"
 if [[ "$MODE" == "verbose" ]]; then
   echo "  verbose log: $LOG_PATH"
 fi
 
+run_godot() {
+  if [[ "$FORCE_ARCH" == "yes" ]]; then
+    DOTNET_ROOT="$DOTNET_ROOT" PATH="$DOTNET_ROOT:$PATH" arch "-$EFFECTIVE_GODOT_ARCH" "$GODOT_BIN" "$@"
+    return
+  fi
+
+  DOTNET_ROOT="$DOTNET_ROOT" PATH="$DOTNET_ROOT:$PATH" "$GODOT_BIN" "$@"
+}
+
 case "$MODE" in
   run)
-    DOTNET_ROOT="$DOTNET_ROOT" PATH="$DOTNET_ROOT:$PATH" "$GODOT_BIN" --path "$GODOT_SPIKE_DIR"
+    run_godot --path "$GODOT_SPIKE_DIR"
     ;;
   verbose)
-    DOTNET_ROOT="$DOTNET_ROOT" PATH="$DOTNET_ROOT:$PATH" "$GODOT_BIN" --verbose --path "$GODOT_SPIKE_DIR" 2>&1 | tee "$LOG_PATH"
+    run_godot --verbose --path "$GODOT_SPIKE_DIR" 2>&1 | tee "$LOG_PATH"
     ;;
   build)
-    DOTNET_ROOT="$DOTNET_ROOT" PATH="$DOTNET_ROOT:$PATH" "$GODOT_BIN" --headless --path "$GODOT_SPIKE_DIR" --build-solutions --quit
+    run_godot --headless --path "$GODOT_SPIKE_DIR" --build-solutions --quit
     ;;
   editor)
-    DOTNET_ROOT="$DOTNET_ROOT" PATH="$DOTNET_ROOT:$PATH" "$GODOT_BIN" --editor --path "$GODOT_SPIKE_DIR"
+    run_godot --editor --path "$GODOT_SPIKE_DIR"
     ;;
 esac

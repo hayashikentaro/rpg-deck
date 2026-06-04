@@ -69,7 +69,7 @@ The underlying script can also be called directly:
 Host-specific paths can be passed as environment variables:
 
 ```bash
-GODOT_BIN=/path/to/Godot DOTNET_ROOT=/path/to/dotnet pnpm godot
+GODOT_BIN=/path/to/Godot DOTNET_ROOT=/path/to/dotnet GODOT_ARCH=arm64 pnpm godot
 ```
 
 Or put them in ignored local file `godot_spike/.env.local`:
@@ -77,9 +77,10 @@ Or put them in ignored local file `godot_spike/.env.local`:
 ```bash
 GODOT_BIN=/Applications/Godot_mono.app/Contents/MacOS/Godot
 DOTNET_ROOT=/usr/local/share/dotnet
+GODOT_ARCH=arm64
 ```
 
-The script falls back to common macOS Godot and .NET locations when env vars are not set. `.env.local` is ignored and must not be committed. `godot_spike/data/project.json` must already exist locally; the script checks for it but does not create it.
+The script falls back to common macOS Godot and .NET locations when env vars are not set. On macOS arm64 hosts, including Rosetta-translated shells, it defaults the effective Godot architecture to `arm64` and launches through `arch -arm64`; set `GODOT_ARCH` explicitly when a different architecture is required. This keeps `pnpm godot` from inheriting an incompatible Node or pnpm process architecture. `.env.local` is ignored and must not be committed. `godot_spike/data/project.json` must already exist locally; the script checks for it but does not create it.
 
 ## Manual Verification
 
