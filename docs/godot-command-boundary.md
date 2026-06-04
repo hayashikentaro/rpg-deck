@@ -13,9 +13,10 @@ The Godot spike currently:
 * loads copied or exported RPG Deck Project JSON
 * detects `interact` and `touch` events
 * reports event id and position in the Output log and debug status HUD
-* does not inspect, preview, or execute event command effects
+* previews detected event top-level commands by index, type, and concise payload summary
+* does not execute event command effects
 
-The next phase should preserve event detection behavior and add command visibility before adding command effects.
+The next phase should preserve event detection and command preview behavior before adding any command effect.
 
 ## Source of Truth
 
@@ -38,16 +39,15 @@ All known command types should be safe to preview even when they are not executa
 
 ## First Executable Spike Recommendation
 
-The smallest safe next implementation is:
+The smallest safe first executable implementation is:
 
 1. Keep `interact` and `touch` event detection as-is.
-2. When an event is detected, inspect its top-level `commands` array.
-3. Add a log/status command preview that reports command index, type, and a concise payload summary.
-4. Do not execute every command in the array.
-5. Implement only `show_message` as the first executable command.
-6. Display `show_message` through a minimal debug message panel or equivalent visible spike UI.
-7. Require an explicit advance input before continuing past a displayed message if command sequencing is introduced.
-8. Leave choices, flags, conditions, inventory, transfer, battle, and audio as preview or placeholder behavior.
+2. Keep log/status command preview for every top-level command.
+3. Do not execute every command in the array.
+4. Implement only `show_message` as the first executable command.
+5. Display `show_message` through a minimal debug message panel or equivalent visible spike UI.
+6. Require an explicit advance input before continuing past a displayed message if command sequencing is introduced.
+7. Leave choices, flags, conditions, inventory, transfer, battle, and audio as preview or placeholder behavior.
 
 This path proves that Godot can read a command payload and present a visible effect without prematurely defining every runtime subsystem.
 
@@ -169,12 +169,10 @@ This design note does not include:
 
 ## Recommended Next Implementation Prompt
 
-Implement a Godot command preview step without changing Project JSON or executing command effects:
+After command preview is manually verified, implement a minimal Godot `show_message` executable spike without changing Project JSON or executing other command effects:
 
-* extend the current event summary extraction to retain each detected event's command array
-* after `interact` or `touch` detection, log/status-preview each top-level command with index, type, and concise payload
-* handle unknown or malformed commands without crashing
-* do not execute commands, nested commands, flags, transfer, battle, or audio
+* preserve current `interact`, `touch`, and top-level command preview behavior
+* add a separate debug message panel for `show_message` speaker and text
+* define explicit message active/inactive state and advance input before continuing a sequence
+* do not execute choices, nested commands, flags, inventory, transfer, battle, or audio
 * keep movement, collision, event detection, and host verification behavior unchanged
-
-After command preview is manually verified, create a separate implementation task for a minimal `show_message` debug message panel.

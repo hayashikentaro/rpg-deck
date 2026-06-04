@@ -247,7 +247,7 @@ The spike now renders a static debug grid for the current/start map when valid m
 
 The spike also supports minimal player marker movement on the debug grid. The initial position comes from `settings.start.position`, arrow keys and WASD move the player marker within map bounds, and cells restore their underlying `E`, `#`, or `.` marker when the player leaves. Facing direction updates from movement input even when movement is blocked by map bounds or collision. Collision cells from RPG Deck project JSON block debug player movement.
 
-The spike can detect a `trigger: interact` event in the player's facing cell when Enter, Space, or Z is pressed, and it can detect a `trigger: touch` event after the player successfully enters its cell. Both paths log and display the event id and position only. The debug viewport status line shows the latest movement or event detection result so manual verification does not depend only on the Output log. Event commands, dialogue UI, and command execution remain out of scope.
+The spike can detect a `trigger: interact` event in the player's facing cell when Enter, Space, or Z is pressed, and it can detect a `trigger: touch` event after the player successfully enters its cell. Both paths log and display the event id and position, then preview each top-level command by index, type, and concise payload summary. The debug viewport status line shows the latest movement, event detection, or command preview result so manual verification does not depend only on the Output log. Command effects, dialogue UI, and command execution remain out of scope.
 
 For mounted-repository host verification, prepare `godot_spike/data/project.json` from inside the container and use `pnpm godot` as the standard implementation verification command. It performs a headless C# build and launches the project only when the build succeeds; run-only remains available as `pnpm godot:run`. The underlying `godot_spike/scripts/host_verify.sh` supports the same workflow. Host-specific Godot, .NET, or architecture settings should come from `GODOT_BIN`, `DOTNET_ROOT`, `GODOT_ARCH`, or ignored `godot_spike/.env.local`, not tracked absolute paths. The script can force the effective Godot architecture so an x86_64 Node or pnpm process does not select an incompatible runtime on Apple Silicon. Local Godot outputs such as `.godot/`, `.mono/`, `.csproj`, `.sln`, the handoff `data/project.json`, and `.env.local` are ignored and non-canonical.
 
@@ -261,6 +261,7 @@ Implemented in the repository:
 * four-direction movement, facing display, map bounds blocking, and collision blocking
 * log/status-only `interact` detection in the facing cell
 * log/status-only `touch` detection after successful cell entry
+* log/status-only top-level command preview after event detection
 * portable host verification script and `pnpm godot` build-then-run workflow
 
 Manually verified on a host:
@@ -346,7 +347,7 @@ Status labels:
 ### Commands
 
 * **Implemented**: command execution boundary design note
-* **Pending**: log/status-only command preview
+* **Implemented**: log/status-only top-level command preview after `interact` or `touch` detection
 * **Pending**: `show_message`, `choice`, flags, transfer, battle, and audio behavior
 * **Pending**: full command execution; it remains out of scope until explicitly designed
 
@@ -369,11 +370,13 @@ Manual QA is enough for the first loader spike.
 6. Confirm collision blocks movement.
 7. Confirm event marker appears.
 8. Confirm facing-cell `interact` detection reports an event id and position.
-9. Use an ignored local handoff JSON with a current-map `touch` event and confirm entry detection reports an event id and position.
-10. Modify collision or event position in RPG Deck.
-11. Copy Project JSON again.
-12. Reload the Godot spike input.
-13. Confirm the change appears.
+9. Confirm detected event top-level commands are previewed by index, type, and concise payload without effects.
+10. Use an ignored local handoff JSON with a current-map `touch` event and confirm entry detection reports an event id and position.
+11. Confirm an empty command array reports `commands=0`.
+12. Modify collision or event position in RPG Deck.
+13. Copy Project JSON again.
+14. Reload the Godot spike input.
+15. Confirm the change appears.
 
 ### Not Required for First Acceptance
 

@@ -246,6 +246,7 @@ public partial class ProjectLoader : Node
                 var message = $"interact_event: {eventSummary.Id} at [{targetPosition.X}, {targetPosition.Y}]";
                 GD.Print(message);
                 SetDebugStatus(message);
+                PreviewEventCommands(eventSummary);
                 return;
             }
         }
@@ -268,9 +269,149 @@ public partial class ProjectLoader : Node
                 var message = $"touch_event: {eventSummary.Id} at [{_currentPlayerPosition.X}, {_currentPlayerPosition.Y}]";
                 GD.Print(message);
                 SetDebugStatus(message);
+                PreviewEventCommands(eventSummary);
                 return;
             }
         }
+    }
+
+    private void PreviewEventCommands(MapEventSummary eventSummary)
+    {
+        if (eventSummary.Commands.Count == 0)
+        {
+            var emptyMessage = $"command_preview: {eventSummary.Id} commands=0";
+            GD.Print(emptyMessage);
+            SetDebugStatus(emptyMessage);
+            return;
+        }
+
+        for (var index = 0; index < eventSummary.Commands.Count; index += 1)
+        {
+            GD.Print(FormatCommandPreview(eventSummary.Id, index, eventSummary.Commands[index]));
+        }
+
+        SetDebugStatus($"command_preview: {eventSummary.Id} commands={eventSummary.Commands.Count}");
+    }
+
+    private static string FormatCommandPreview(string eventId, int index, Variant commandValue)
+    {
+        var prefix = $"command_preview: {eventId}[{index}]";
+        if (commandValue.VariantType != Variant.Type.Dictionary)
+        {
+            return $"{prefix} malformed_command";
+        }
+
+        var command = commandValue.AsGodotDictionary();
+        var type = GetPreviewString(command, "type");
+
+        if (type == "show_message")
+        {
+            return $"{prefix} show_message speaker={GetPreviewString(command, "speaker")} " +
+                $"text=\"{GetPreviewText(command, "text")}\"";
+        }
+
+        if (type == "choice")
+        {
+            return $"{prefix} choice prompt=\"{GetPreviewText(command, "prompt")}\" " +
+                $"options={GetPreviewArrayCount(command, "options")}";
+        }
+
+        if (type == "set_flag" || type == "unset_flag" || type == "if_flag")
+        {
+            return $"{prefix} {type} flag={GetPreviewString(command, "flag")}";
+        }
+
+        if (type == "give_item" || type == "take_item")
+        {
+            return $"{prefix} {type} item={GetPreviewString(command, "item")} " +
+                $"quantity={GetPreviewNumber(command, "quantity")}";
+        }
+
+        if (type == "transfer_player")
+        {
+            return $"{prefix} transfer_player map={GetPreviewString(command, "map")} " +
+                $"position={GetPreviewPosition(command, "position")}";
+        }
+
+        if (type == "start_battle")
+        {
+            return $"{prefix} start_battle enemy={GetPreviewString(command, "enemy")}";
+        }
+
+        if (type == "play_bgm")
+        {
+            return $"{prefix} play_bgm bgm={GetPreviewString(command, "bgm")}";
+        }
+
+        if (type == "play_sfx")
+        {
+            return $"{prefix} play_sfx sfx={GetPreviewString(command, "sfx")}";
+        }
+
+        return $"{prefix} unsupported_command type={type}";
+    }
+
+    private static string GetPreviewString(Dictionary command, string key)
+    {
+        if (!command.ContainsKey(key) || command[key].VariantType != Variant.Type.String)
+        {
+            return "?";
+        }
+
+        return SanitizePreviewText(command[key].AsString());
+    }
+
+    private static string GetPreviewText(Dictionary command, string key)
+    {
+        return TruncatePreviewText(GetPreviewString(command, key));
+    }
+
+    private static string GetPreviewNumber(Dictionary command, string key)
+    {
+        if (!command.ContainsKey(key) || !IsNumber(command[key]))
+        {
+            return "?";
+        }
+
+        return command[key].ToString();
+    }
+
+    private static string GetPreviewArrayCount(Dictionary command, string key)
+    {
+        if (!command.ContainsKey(key) || command[key].VariantType != Variant.Type.Array)
+        {
+            return "?";
+        }
+
+        return command[key].AsGodotArray().Count.ToString();
+    }
+
+    private static string GetPreviewPosition(Dictionary command, string key)
+    {
+        if (!command.ContainsKey(key) || command[key].VariantType != Variant.Type.Array)
+        {
+            return "?";
+        }
+
+        var position = command[key].AsGodotArray();
+        if (position.Count < 2 || !IsNumber(position[0]) || !IsNumber(position[1]))
+        {
+            return "?";
+        }
+
+        return $"[{ToInt(position[0])}, {ToInt(position[1])}]";
+    }
+
+    private static string SanitizePreviewText(string value)
+    {
+        return value.Replace("\r", " ").Replace("\n", " ").Replace("\"", "\\\"");
+    }
+
+    private static string TruncatePreviewText(string value)
+    {
+        const int maxLength = 40;
+        const int prefixLength = 37;
+        return value.Length > maxLength ? $"{value.Substring(0, prefixLength)}..." : value;
     }
 
     private void SetDebugStatus(string message)
@@ -662,9 +803,10 @@ public partial class ProjectLoader : Node
             var eventId = GetString(eventDefinition, "id", eventEntry.Key.ToString(), $"events.{eventEntry.Key}.id");
             var trigger = GetString(eventDefinition, "trigger", "<missing trigger>", $"events.{eventEntry.Key}.trigger");
             var position = GetGridPosition(eventDefinition, "position", $"events.{eventEntry.Key}.position");
+            var commands = GetCommandArray(eventDefinition, $"events.{eventEntry.Key}.commands");
             if (position.IsValid)
             {
-                mapEvents.Add(new MapEventSummary(eventId, trigger, position));
+                mapEvents.Add(new MapEventSummary(eventId, trigger, position, commands));
             }
             else
             {
@@ -674,6 +816,24 @@ public partial class ProjectLoader : Node
 
         mapEvents.Sort((left, right) => string.CompareOrdinal(left.Id, right.Id));
         return mapEvents;
+    }
+
+    private static Array GetCommandArray(Dictionary eventDefinition, string path)
+    {
+        if (!eventDefinition.ContainsKey("commands"))
+        {
+            GD.PushWarning($"Missing array field '{path}'.");
+            return new Array();
+        }
+
+        var commands = eventDefinition["commands"];
+        if (commands.VariantType != Variant.Type.Array)
+        {
+            GD.PushWarning($"Field '{path}' must be an array.");
+            return new Array();
+        }
+
+        return commands.AsGodotArray();
     }
 
     private static bool IsNumber(Variant value)
@@ -773,16 +933,18 @@ public partial class ProjectLoader : Node
 
     private readonly struct MapEventSummary
     {
-        public MapEventSummary(string id, string trigger, GridPosition position)
+        public MapEventSummary(string id, string trigger, GridPosition position, Array commands)
         {
             Id = id;
             Trigger = trigger;
             Position = position;
+            Commands = commands;
         }
 
         public string Id { get; }
         public string Trigger { get; }
         public GridPosition Position { get; }
+        public Array Commands { get; }
     }
 
     private readonly struct GridPosition
