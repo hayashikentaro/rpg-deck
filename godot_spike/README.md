@@ -49,22 +49,28 @@ Supported modes:
 
 ```bash
 pnpm godot
+pnpm godot:verify
 pnpm godot:run
 pnpm godot:verbose
+pnpm godot:verbose-run
 pnpm godot:build
 pnpm godot:editor
 ```
 
-`run` is the default mode. `verbose` writes `/tmp/rpg-deck-godot-run.log`, `build` runs a headless C# build, and `editor` opens the Godot editor.
+`pnpm godot` and `pnpm godot:verify` are the standard implementation verification workflow: they run a headless C# build and launch the project only if the build succeeds. `pnpm godot:run` is run-only. `pnpm godot:verbose` builds and then launches a verbose run that writes `/tmp/rpg-deck-godot-run.log`, while `pnpm godot:verbose-run` is verbose run-only. `pnpm godot:build` is build-only, and `pnpm godot:editor` opens the Godot editor.
 
 The underlying script can also be called directly:
 
 ```bash
+./godot_spike/scripts/host_verify.sh verify
+./godot_spike/scripts/host_verify.sh verbose-verify
 ./godot_spike/scripts/host_verify.sh run
 ./godot_spike/scripts/host_verify.sh verbose
 ./godot_spike/scripts/host_verify.sh build
 ./godot_spike/scripts/host_verify.sh editor
 ```
+
+Direct script execution without a mode defaults to `verify`.
 
 Host-specific paths can be passed as environment variables:
 

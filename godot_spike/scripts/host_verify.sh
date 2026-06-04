@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GODOT_SPIKE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ENV_FILE="$GODOT_SPIKE_DIR/.env.local"
-MODE="${1:-run}"
+MODE="${1:-verify}"
 LOG_PATH="/tmp/rpg-deck-godot-run.log"
 ENV_LOADED="no"
 HOST_ARCH="$(uname -m)"
@@ -83,9 +83,9 @@ fi
 PROJECT_FILE="$GODOT_SPIKE_DIR/project.godot"
 PROJECT_JSON="$GODOT_SPIKE_DIR/data/project.json"
 
-if [[ "$MODE" != "run" && "$MODE" != "verbose" && "$MODE" != "build" && "$MODE" != "editor" ]]; then
+if [[ "$MODE" != "verify" && "$MODE" != "verbose-verify" && "$MODE" != "run" && "$MODE" != "verbose" && "$MODE" != "build" && "$MODE" != "editor" ]]; then
   echo "Unknown mode: $MODE" >&2
-  echo "Usage: $0 [run|verbose|build|editor]" >&2
+  echo "Usage: $0 [verify|verbose-verify|run|verbose|build|editor]" >&2
   exit 2
 fi
 
@@ -139,7 +139,7 @@ echo "  effective Godot arch: ${EFFECTIVE_GODOT_ARCH:-default}"
 echo "  force arch: $FORCE_ARCH"
 echo "  Godot project path: $GODOT_SPIKE_DIR"
 echo "  project JSON: present"
-if [[ "$MODE" == "verbose" ]]; then
+if [[ "$MODE" == "verbose" || "$MODE" == "verbose-verify" ]]; then
   echo "  verbose log: $LOG_PATH"
 fi
 
@@ -153,6 +153,14 @@ run_godot() {
 }
 
 case "$MODE" in
+  verify)
+    run_godot --headless --path "$GODOT_SPIKE_DIR" --build-solutions --quit
+    run_godot --path "$GODOT_SPIKE_DIR"
+    ;;
+  verbose-verify)
+    run_godot --headless --path "$GODOT_SPIKE_DIR" --build-solutions --quit
+    run_godot --verbose --path "$GODOT_SPIKE_DIR" 2>&1 | tee "$LOG_PATH"
+    ;;
   run)
     run_godot --path "$GODOT_SPIKE_DIR"
     ;;

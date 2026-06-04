@@ -6,9 +6,11 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "build": "corepack pnpm -r build",
-    "godot": "bash godot_spike/scripts/host_verify.sh run",
+    "godot": "bash godot_spike/scripts/host_verify.sh verify",
+    "godot:verify": "bash godot_spike/scripts/host_verify.sh verify",
     "godot:run": "bash godot_spike/scripts/host_verify.sh run",
-    "godot:verbose": "bash godot_spike/scripts/host_verify.sh verbose",
+    "godot:verbose": "bash godot_spike/scripts/host_verify.sh verbose-verify",
+    "godot:verbose-run": "bash godot_spike/scripts/host_verify.sh verbose",
     "godot:build": "bash godot_spike/scripts/host_verify.sh build",
     "godot:editor": "bash godot_spike/scripts/host_verify.sh editor",
     "typecheck": "corepack pnpm -r typecheck",
