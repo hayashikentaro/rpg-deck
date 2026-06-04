@@ -9,6 +9,7 @@ export type PlayablePreviewProps = {
   onAdvance?: () => void;
   onCellClick?: (position: GridPosition) => void;
   onChooseOption?: (optionIndex: number) => void;
+  onEventClick?: (eventId: string) => void;
   selectedEventId?: string | null;
   className?: string;
 };
@@ -19,6 +20,7 @@ type CellView = {
   kind: "player" | "collision" | "interact" | "touch" | "autorun" | "empty";
   label: string;
   selected: boolean;
+  eventId?: string;
 };
 
 export function PlayablePreview({
@@ -28,6 +30,7 @@ export function PlayablePreview({
   onAdvance,
   onCellClick,
   onChooseOption,
+  onEventClick,
   selectedEventId,
   className
 }: PlayablePreviewProps) {
@@ -69,13 +72,20 @@ export function PlayablePreview({
               key={`${cell.position[0]}-${cell.position[1]}`}
               role="gridcell"
             >
-              {onCellClick ? (
+              {onCellClick || (cell.eventId && onEventClick) ? (
                 <button
-                  aria-label={`Move selected event to ${positionLabel(cell.position)}. ${cell.label}`}
+                  aria-label={
+                    cell.eventId && onEventClick
+                      ? `Select event ${cell.eventId}. ${cell.label}`
+                      : `Move selected event to ${positionLabel(cell.position)}. ${cell.label}`
+                  }
                   className="playable-preview__cell-button"
                   data-selected={cell.selected || undefined}
                   type="button"
-                  onClick={() => onCellClick(cell.position)}
+                  onClick={() => {
+                    if (cell.eventId && onEventClick) onEventClick(cell.eventId);
+                    else onCellClick?.(cell.position);
+                  }}
                 >
                   {cell.marker}
                 </button>
@@ -197,7 +207,8 @@ function cellForPosition(
       marker,
       kind: event.trigger,
       label: `${event.trigger} event ${event.id} at ${positionLabel(position)}${selected ? ", selected" : ""}`,
-      selected
+      selected,
+      eventId: event.id
     };
   }
 

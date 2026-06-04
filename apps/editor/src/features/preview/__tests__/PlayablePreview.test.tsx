@@ -205,6 +205,14 @@ describe("PlayablePreview", () => {
     expect(html).toContain('class="playable-preview__cell-button" data-selected="true"');
     expect(html).toContain("Move selected event to [2, 0]. interact event npc at [2, 0], selected");
   });
+
+  it("uses event selection for event cells and movement for non-event cells", () => {
+    const html = renderPreview(snapshot, undefined, undefined, () => undefined, "npc", () => undefined);
+
+    expect(html).toContain("Select event npc. interact event npc at [2, 0], selected");
+    expect(html).toContain("Move selected event to [0, 0]. Player at [0, 0], facing down");
+    expect(html).not.toContain("Move selected event to [2, 0]. interact event npc");
+  });
 });
 
 function renderPreview(
@@ -212,7 +220,8 @@ function renderPreview(
   onChooseOption?: (optionIndex: number) => void,
   onAdvance?: () => void,
   onCellClick?: (position: [number, number]) => void,
-  selectedEventId?: string | null
+  selectedEventId?: string | null,
+  onEventClick?: (eventId: string) => void
 ) {
   return renderToStaticMarkup(
     <PlayablePreview
@@ -221,6 +230,7 @@ function renderPreview(
       onAdvance={onAdvance}
       onCellClick={onCellClick}
       onChooseOption={onChooseOption}
+      onEventClick={onEventClick}
       selectedEventId={selectedEventId}
     />
   );

@@ -117,7 +117,7 @@ describe("EditorOverview", () => {
     const html = renderOverview();
 
     expect(html).toContain("Playable Grid Preview");
-    expect(html).toContain("Click a grid cell to move the selected event.");
+    expect(html).toContain("Click an event marker to select it. Click another cell to move the selected event.");
     expect(html).toContain("Runtime Status");
     expect(html).toContain("↓");
     expect(html).toContain("Player at [4, 6], facing down");
@@ -129,6 +129,7 @@ describe("EditorOverview", () => {
     expect(html).toContain("Event Inspector");
     expect(html).toContain("<h3>mayor_intro</h3>");
     expect(html).toContain("interact event mayor_intro at [7, 6], selected");
+    expect(html).toContain("Select event mayor_intro. interact event mayor_intro at [7, 6], selected");
     expect(html).toContain('data-selected="true"');
   });
 

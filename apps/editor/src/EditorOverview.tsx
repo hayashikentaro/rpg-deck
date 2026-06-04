@@ -176,9 +176,12 @@ export function EditorOverview({
             onAdvance={onAdvance}
             onCellClick={selectedEventId ? onMoveSelectedEvent : undefined}
             onChooseOption={onChooseOption}
+            onEventClick={onSelectEvent}
           />
           {selectedEventId ? (
-            <p className="playable-preview__edit-hint">Click a grid cell to move the selected event.</p>
+            <p className="playable-preview__edit-hint">
+              Click an event marker to select it. Click another cell to move the selected event.
+            </p>
           ) : null}
           <section>
             <h2>Runtime snapshot</h2>
