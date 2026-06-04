@@ -243,7 +243,9 @@ The loader extracts these values defensively so missing or malformed fields warn
 
 The spike now renders a static debug grid for the current/start map when valid map size data is available. The grid uses text markers only: `P` for player start, `E` for events, `#` for collision, and `.` for empty cells. It includes a visible legend, and `ProjectLoader` exposes `DebugCellSize` and `DebugMapOffset` so the grid spacing can be adjusted in the inspector. This is visualization only; player movement, collision behavior, event interaction, and command execution remain separate follow-up work.
 
-The spike also supports minimal player marker movement on the debug grid. The initial position comes from `settings.start.position`, arrow keys and WASD move the `P` marker within map bounds, and cells restore their underlying `E`, `#`, or `.` marker when the player leaves. Collision remains visual-only and does not block movement yet.
+The spike also supports minimal player marker movement on the debug grid. The initial position comes from `settings.start.position`, arrow keys and WASD move the `P` marker within map bounds, and cells restore their underlying `E`, `#`, or `.` marker when the player leaves. Collision cells from RPG Deck project JSON now block debug player movement.
+
+Event markers remain visual-only. The Godot spike does not implement interact/touch event detection or command execution yet.
 
 For mounted-repository host verification, prepare `godot_spike/data/project.json` from inside the container and keep host-side Godot usage to opening and running the project. Local Godot outputs such as `.godot/`, `.mono/`, `.csproj`, `.sln`, and the handoff `data/project.json` are ignored and non-canonical.
 

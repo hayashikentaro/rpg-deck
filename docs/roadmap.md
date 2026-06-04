@@ -330,3 +330,4 @@ Initial implementation status:
 * The Godot spike now renders a static debug grid from current map data. Player start, event, collision, and empty cells are visualized with text markers while movement, collision behavior, and event interaction remain out of scope.
 * Static Godot debug rendering now includes a marker legend plus configurable `DebugCellSize` and `DebugMapOffset` values on `ProjectLoader`. Movement, collision behavior, and event interaction remain out of scope.
 * The Godot debug grid now supports minimal player marker movement from `settings.start.position` with arrow keys or WASD. Movement respects map bounds, while collision blocking, event interaction, and command execution remain out of scope.
+* The Godot debug grid now uses RPG Deck collision cells to block player movement. Map bounds and collision blocking are implemented for the debug grid, while event interaction and command execution remain out of scope.

@@ -186,6 +186,12 @@ public partial class ProjectLoader : Node
             return;
         }
 
+        if (_collisionPositions.Contains(PositionKey(nextPosition)))
+        {
+            GD.Print($"movement_blocked: collision [{nextPosition.X}, {nextPosition.Y}]");
+            return;
+        }
+
         var previousPosition = _currentPlayerPosition;
         _currentPlayerPosition = nextPosition;
         UpdateCell(previousPosition);

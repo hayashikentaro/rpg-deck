@@ -9,7 +9,6 @@ Non-goals for this skeleton:
 * no bidirectional editing
 * no schema fork
 * no full game implementation
-* no collision behavior yet
 * no event interaction yet
 * no command execution yet
 * no saved fixture JSON committed in this step
@@ -61,7 +60,7 @@ When this repository is mounted into the Codex container, prepare local handoff 
    * `#` collision
    * `.` empty
 8. Press arrow keys or WASD and confirm `P` moves within map bounds.
-9. Confirm `#` cells are still visual only and do not block movement yet.
+9. Confirm `P` cannot move into `#` collision cells.
 10. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
 11. Rename or remove `data/project.json`.
 12. Run the project again.
@@ -71,7 +70,7 @@ When this repository is mounted into the Codex container, prepare local handoff 
 
 The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
-`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and moves the `P` marker with arrow keys or WASD. The debug renderer includes a marker legend, a configurable `DebugCellSize`, and a configurable `DebugMapOffset`. Marker priority is `P` over `E` over `#` over `.`. Movement is limited by map bounds. Collision cells, event markers, event interaction, and command execution are intentionally left for later Phase 11 steps.
+`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and moves the `P` marker with arrow keys or WASD. The debug renderer includes a marker legend, a configurable `DebugCellSize`, and a configurable `DebugMapOffset`. Marker priority is `P` over `E` over `#` over `.`. Movement is limited by map bounds and `#` collision cells. Event markers, event interaction, and command execution are intentionally left for later Phase 11 steps.
 
 Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.
 
