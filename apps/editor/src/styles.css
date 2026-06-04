@@ -154,6 +154,7 @@ textarea {
   border-color: #2266aa;
   background: #dcecff;
   color: #0d4075;
+  font-size: 15px;
 }
 
 .playable-preview__cell[data-cell-kind="collision"] {

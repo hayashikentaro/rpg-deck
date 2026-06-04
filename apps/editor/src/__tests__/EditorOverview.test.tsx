@@ -117,6 +117,8 @@ describe("EditorOverview", () => {
 
     expect(html).toContain("Playable Grid Preview");
     expect(html).toContain("Runtime Status");
+    expect(html).toContain("↓");
+    expect(html).toContain("Player at [4, 6], facing down");
   });
 
   it("renders event inspector and selected event id", () => {

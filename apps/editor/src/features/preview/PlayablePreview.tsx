@@ -11,7 +11,7 @@ export type PlayablePreviewProps = {
 
 type CellView = {
   position: GridPosition;
-  marker: "P" | "#" | "N" | "T" | "A" | ".";
+  marker: "↑" | "↓" | "←" | "→" | "#" | "N" | "T" | "A" | ".";
   kind: "player" | "collision" | "interact" | "touch" | "autorun" | "empty";
   label: string;
 };
@@ -129,9 +129,9 @@ function cellForPosition(project: GameProject, snapshot: RuntimeSnapshot, positi
   if (positionsEqual(position, snapshot.playerPosition)) {
     return {
       position,
-      marker: "P",
+      marker: playerMarker(snapshot.facingDirection),
       kind: "player",
-      label: `Player at ${positionLabel(position)}`
+      label: `Player at ${positionLabel(position)}, facing ${snapshot.facingDirection}`
     };
   }
 
@@ -175,4 +175,11 @@ function positionsEqual(left: GridPosition, right: GridPosition) {
 
 function positionLabel(position: GridPosition) {
   return `[${position.join(", ")}]`;
+}
+
+function playerMarker(direction: RuntimeSnapshot["facingDirection"]) {
+  if (direction === "up") return "↑";
+  if (direction === "down") return "↓";
+  if (direction === "left") return "←";
+  return "→";
 }

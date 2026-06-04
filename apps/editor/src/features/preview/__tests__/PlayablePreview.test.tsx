@@ -74,8 +74,8 @@ describe("PlayablePreview", () => {
   });
 
   it("renders player marker", () => {
-    expect(renderPreview()).toContain("Player at [0, 0]");
-    expect(renderPreview()).toContain(">P<");
+    expect(renderPreview()).toContain("Player at [0, 0], facing down");
+    expect(renderPreview()).toContain(">↓<");
   });
 
   it("renders collision marker", () => {
