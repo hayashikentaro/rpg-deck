@@ -9,8 +9,9 @@ Non-goals for this skeleton:
 * no bidirectional editing
 * no schema fork
 * no full game implementation
-* no map rendering yet
 * no player movement yet
+* no collision behavior yet
+* no event interaction yet
 * no command execution yet
 * no saved fixture JSON committed in this step
 
@@ -42,14 +43,20 @@ If `data/project.json` is missing, the loader should report a clear warning and 
    * current map size
    * current map collision count
    * current map event count
-6. Rename or remove `data/project.json`.
-7. Run the project again.
-8. Confirm the missing-file warning appears and the project does not crash.
+6. Confirm a static debug grid appears when the current map size is valid.
+7. Confirm marker meanings:
+   * `P` player start
+   * `E` event
+   * `#` collision
+   * `.` empty
+8. Rename or remove `data/project.json`.
+9. Run the project again.
+10. Confirm the missing-file warning appears and the project does not crash.
 
 ## Current Skeleton
 
 The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
-`ProjectLoader.cs` only reads, parses, extracts first-loader summary data, and logs a project summary. It now includes current map size, current map collision count, and current map event count. Map rendering, player movement, collision behavior, event interaction, and command execution are intentionally left for later Phase 11 steps.
+`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, and renders a static debug grid for the current/start map. Marker priority is `P` over `E` over `#` over `.`. Player movement, collision behavior, event interaction, and command execution are intentionally left for later Phase 11 steps.
 
 Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.

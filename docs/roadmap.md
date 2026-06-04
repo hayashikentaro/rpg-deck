@@ -327,3 +327,4 @@ Initial implementation status:
 * A minimal `godot_spike/` project skeleton now exists. The manual Project JSON input path is documented, and `ProjectLoader.cs` only parses and logs project summary for now; map, player, and collision rendering remain the next step.
 * `godot_spike` now has a minimal main scene that runs `ProjectLoader.cs`. Running the project only parses and logs project summary; rendering and gameplay remain out of scope.
 * `ProjectLoader.cs` now defensively extracts the start map summary needed for the next rendering step, including current map size, collision count, and event count. Rendering, movement, and collision behavior remain out of scope.
+* The Godot spike now renders a static debug grid from current map data. Player start, event, collision, and empty cells are visualized with text markers while movement, collision behavior, and event interaction remain out of scope.

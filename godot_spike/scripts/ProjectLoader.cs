@@ -1,8 +1,11 @@
+using System.Collections.Generic;
 using Godot;
 using Godot.Collections;
 
 public partial class ProjectLoader : Node
 {
+    private const int DebugCellSize = 24;
+
     [Export]
     public string ProjectJsonPath { get; set; } = "res://data/project.json";
 
@@ -59,7 +62,70 @@ public partial class ProjectLoader : Node
         GD.Print($"  current map size: {summary.CurrentMap.Size}");
         GD.Print($"  current map collision count: {summary.CurrentMap.CollisionCount}");
         GD.Print($"  current map event count: {summary.CurrentMap.EventCount}");
-        GD.Print("ProjectLoader skeleton stops after summary logging. Map rendering and gameplay are not implemented yet.");
+
+        RenderDebugMap(summary);
+        GD.Print("ProjectLoader skeleton stops after static debug map rendering. Gameplay is not implemented yet.");
+    }
+
+    private void RenderDebugMap(ProjectSummary summary)
+    {
+        if (!summary.CurrentMap.SizePosition.IsValid)
+        {
+            GD.PushWarning("Cannot render debug map because current map size is invalid.");
+            return;
+        }
+
+        var debugMap = new Node2D
+        {
+            Name = "DebugMap"
+        };
+        AddChild(debugMap);
+
+        var collisions = ToPositionSet(summary.CurrentMap.CollisionPositions);
+        var events = ToPositionSet(summary.CurrentMap.EventPositions);
+
+        for (var y = 0; y < summary.CurrentMap.SizePosition.Y; y += 1)
+        {
+            for (var x = 0; x < summary.CurrentMap.SizePosition.X; x += 1)
+            {
+                var position = new GridPosition(x, y, true);
+                var marker = MarkerForPosition(position, summary.StartPositionValue, collisions, events);
+
+                var label = new Label
+                {
+                    Name = $"Cell_{x}_{y}",
+                    Text = marker,
+                    Position = new Vector2(x * DebugCellSize, y * DebugCellSize)
+                };
+                debugMap.AddChild(label);
+            }
+        }
+    }
+
+    private static string MarkerForPosition(
+        GridPosition position,
+        GridPosition playerStart,
+        HashSet<string> collisions,
+        HashSet<string> events
+    )
+    {
+        if (playerStart.IsValid && playerStart.X == position.X && playerStart.Y == position.Y)
+        {
+            return "P";
+        }
+
+        var key = PositionKey(position);
+        if (events.Contains(key))
+        {
+            return "E";
+        }
+
+        if (collisions.Contains(key))
+        {
+            return "#";
+        }
+
+        return ".";
     }
 
     private static ProjectSummary ExtractProjectSummary(Dictionary project)
@@ -70,13 +136,15 @@ public partial class ProjectLoader : Node
         var events = GetDictionary(project, "events", "project.events");
 
         var startMap = GetString(start, "map", "<missing start map>", "settings.start.map");
+        var startPosition = GetGridPosition(start, "position", "settings.start.position");
         var currentMap = GetMap(maps, startMap);
 
         return new ProjectSummary(
             GetString(project, "id", "<missing id>", "project.id"),
             GetString(project, "title", "<missing title>", "project.title"),
             startMap,
-            FormatGridPosition(start, "position", "settings.start.position"),
+            FormatGridPosition(startPosition),
+            startPosition,
             maps.Count,
             events.Count,
             ExtractMapSummary(currentMap, events, startMap)
@@ -87,13 +155,23 @@ public partial class ProjectLoader : Node
     {
         if (map.Count == 0)
         {
-            return new MapSummary("<missing current map>", 0, CountEventsOnMap(events, startMap));
+            return new MapSummary(
+                "<missing current map>",
+                GridPosition.Invalid,
+                new List<GridPosition>(),
+                GetEventPositionsOnMap(events, startMap)
+            );
         }
 
+        var mapSize = GetGridPosition(map, "size", $"maps.{startMap}.size");
+        var collisionPositions = GetGridPositionArray(map, "collision", $"maps.{startMap}.collision");
+        var eventPositions = GetEventPositionsOnMap(events, startMap);
+
         return new MapSummary(
-            FormatGridPosition(map, "size", $"maps.{startMap}.size"),
-            CountArray(map, "collision", $"maps.{startMap}.collision"),
-            CountEventsOnMap(events, startMap)
+            FormatGridPosition(mapSize),
+            mapSize,
+            collisionPositions,
+            eventPositions
         );
     }
 
@@ -168,75 +246,102 @@ public partial class ProjectLoader : Node
         return value.AsString();
     }
 
-    private static string FormatGridPosition(Dictionary parent, string key, string path)
+    private static string FormatGridPosition(GridPosition position)
+    {
+        return position.IsValid ? $"[{position.X}, {position.Y}]" : "<invalid position>";
+    }
+
+    private static GridPosition GetGridPosition(Dictionary parent, string key, string path)
     {
         if (parent.Count == 0)
         {
             GD.PushWarning($"Cannot read '{path}' because its parent object is missing or invalid.");
-            return "<missing position>";
+            return GridPosition.Invalid;
         }
 
         if (!parent.ContainsKey(key))
         {
             GD.PushWarning($"Missing grid position field '{path}'.");
-            return "<missing position>";
+            return GridPosition.Invalid;
         }
 
         var value = parent[key];
         if (value.VariantType != Variant.Type.Array)
         {
             GD.PushWarning($"Field '{path}' must be a two-value array.");
-            return "<invalid position>";
+            return GridPosition.Invalid;
         }
 
-        var position = value.AsGodotArray();
+        return GetGridPositionFromArray(value.AsGodotArray(), path);
+    }
+
+    private static GridPosition GetGridPositionFromArray(Array position, string path)
+    {
         if (position.Count < 2)
         {
             GD.PushWarning($"Field '{path}' must include x and y values.");
-            return "<invalid position>";
+            return GridPosition.Invalid;
         }
 
         if (!IsNumber(position[0]) || !IsNumber(position[1]))
         {
             GD.PushWarning($"Field '{path}' must contain numeric x and y values.");
-            return "<invalid position>";
+            return GridPosition.Invalid;
         }
 
-        return $"[{position[0]}, {position[1]}]";
+        return new GridPosition(ToInt(position[0]), ToInt(position[1]), true);
     }
 
-    private static int CountArray(Dictionary parent, string key, string path)
+    private static List<GridPosition> GetGridPositionArray(Dictionary parent, string key, string path)
     {
+        var positions = new List<GridPosition>();
         if (parent.Count == 0)
         {
             GD.PushWarning($"Cannot read '{path}' because its parent object is missing or invalid.");
-            return 0;
+            return positions;
         }
 
         if (!parent.ContainsKey(key))
         {
             GD.PushWarning($"Missing array field '{path}'.");
-            return 0;
+            return positions;
         }
 
         var value = parent[key];
         if (value.VariantType != Variant.Type.Array)
         {
             GD.PushWarning($"Field '{path}' must be an array.");
-            return 0;
+            return positions;
         }
 
-        return value.AsGodotArray().Count;
+        var array = value.AsGodotArray();
+        for (var index = 0; index < array.Count; index += 1)
+        {
+            var item = array[index];
+            if (item.VariantType != Variant.Type.Array)
+            {
+                GD.PushWarning($"Grid position entry '{path}[{index}]' must be an array.");
+                continue;
+            }
+
+            var position = GetGridPositionFromArray(item.AsGodotArray(), $"{path}[{index}]");
+            if (position.IsValid)
+            {
+                positions.Add(position);
+            }
+        }
+
+        return positions;
     }
 
-    private static int CountEventsOnMap(Dictionary events, string mapId)
+    private static List<GridPosition> GetEventPositionsOnMap(Dictionary events, string mapId)
     {
+        var positions = new List<GridPosition>();
         if (events.Count == 0 || mapId.StartsWith("<"))
         {
-            return 0;
+            return positions;
         }
 
-        var count = 0;
         foreach (var eventEntry in events)
         {
             var eventValue = eventEntry.Value;
@@ -260,18 +365,49 @@ public partial class ProjectLoader : Node
                 continue;
             }
 
-            if (eventMap.AsString() == mapId)
+            if (eventMap.AsString() != mapId)
             {
-                count += 1;
+                continue;
+            }
+
+            var position = GetGridPosition(eventDefinition, "position", $"events.{eventEntry.Key}.position");
+            if (position.IsValid)
+            {
+                positions.Add(position);
+            }
+            else
+            {
+                GD.PushWarning($"Skipping event marker '{eventEntry.Key}' because its position is invalid.");
             }
         }
 
-        return count;
+        return positions;
     }
 
     private static bool IsNumber(Variant value)
     {
         return value.VariantType == Variant.Type.Int || value.VariantType == Variant.Type.Float;
+    }
+
+    private static int ToInt(Variant value)
+    {
+        return value.VariantType == Variant.Type.Int ? value.AsInt32() : (int)value.AsDouble();
+    }
+
+    private static HashSet<string> ToPositionSet(List<GridPosition> positions)
+    {
+        var set = new HashSet<string>();
+        foreach (var position in positions)
+        {
+            set.Add(PositionKey(position));
+        }
+
+        return set;
+    }
+
+    private static string PositionKey(GridPosition position)
+    {
+        return $"{position.X},{position.Y}";
     }
 
     private readonly struct ProjectSummary
@@ -281,6 +417,7 @@ public partial class ProjectLoader : Node
             string title,
             string startMap,
             string startPosition,
+            GridPosition startPositionValue,
             int mapCount,
             int eventCount,
             MapSummary currentMap
@@ -290,6 +427,7 @@ public partial class ProjectLoader : Node
             Title = title;
             StartMap = startMap;
             StartPosition = startPosition;
+            StartPositionValue = startPositionValue;
             MapCount = mapCount;
             EventCount = eventCount;
             CurrentMap = currentMap;
@@ -299,6 +437,7 @@ public partial class ProjectLoader : Node
         public string Title { get; }
         public string StartMap { get; }
         public string StartPosition { get; }
+        public GridPosition StartPositionValue { get; }
         public int MapCount { get; }
         public int EventCount { get; }
         public MapSummary CurrentMap { get; }
@@ -306,15 +445,40 @@ public partial class ProjectLoader : Node
 
     private readonly struct MapSummary
     {
-        public MapSummary(string size, int collisionCount, int eventCount)
+        public MapSummary(
+            string size,
+            GridPosition sizePosition,
+            List<GridPosition> collisionPositions,
+            List<GridPosition> eventPositions
+        )
         {
             Size = size;
-            CollisionCount = collisionCount;
-            EventCount = eventCount;
+            SizePosition = sizePosition;
+            CollisionPositions = collisionPositions;
+            EventPositions = eventPositions;
         }
 
         public string Size { get; }
-        public int CollisionCount { get; }
-        public int EventCount { get; }
+        public GridPosition SizePosition { get; }
+        public List<GridPosition> CollisionPositions { get; }
+        public List<GridPosition> EventPositions { get; }
+        public int CollisionCount => CollisionPositions.Count;
+        public int EventCount => EventPositions.Count;
+    }
+
+    private readonly struct GridPosition
+    {
+        public static readonly GridPosition Invalid = new GridPosition(0, 0, false);
+
+        public GridPosition(int x, int y, bool isValid)
+        {
+            X = x;
+            Y = y;
+            IsValid = isValid;
+        }
+
+        public int X { get; }
+        public int Y { get; }
+        public bool IsValid { get; }
     }
 }

@@ -241,6 +241,8 @@ The expected manual handoff input path is:
 
 The loader extracts these values defensively so missing or malformed fields warn and fall back instead of crashing. Map rendering, player movement, collision behavior, event interaction, and command execution remain the next steps. The `godot_spike/` directory is not an authoring source and must not become a schema fork.
 
+The spike now renders a static debug grid for the current/start map when valid map size data is available. The grid uses text markers only: `P` for player start, `E` for events, `#` for collision, and `.` for empty cells. This is visualization only; player movement, collision behavior, event interaction, and command execution remain separate follow-up work.
+
 ## First Godot Spike Behavior
 
 The first spike should prove the boundary, not complete a full port.
