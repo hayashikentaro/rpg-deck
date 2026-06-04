@@ -55,7 +55,12 @@ const project: GameProject = {
       map: "town",
       position: [7, 6],
       trigger: "interact",
-      commands: []
+      commands: [
+        {
+          type: "show_message",
+          text: "Welcome to Tiny RPG."
+        }
+      ]
     }
   },
   actors: {},
@@ -112,6 +117,13 @@ describe("EditorOverview", () => {
 
     expect(html).toContain("Playable Grid Preview");
     expect(html).toContain("Runtime Status");
+  });
+
+  it("renders event inspector and selected event id", () => {
+    const html = renderOverview();
+
+    expect(html).toContain("Event Inspector");
+    expect(html).toContain("<h3>mayor_intro</h3>");
   });
 
   it("renders event graph section", () => {
@@ -191,12 +203,15 @@ function renderOverview(proposal: ProjectProposal | null = null) {
       project={project}
       projectTitle="Tiny RPG"
       runtimeSnapshot={snapshot}
+      selectedEventId="mayor_intro"
       summary={summary}
       validationIssues={[]}
       onAcceptProposal={() => undefined}
       onCreateProposal={() => undefined}
       onHoldProposal={() => undefined}
       onRejectProposal={() => undefined}
+      onSelectEvent={() => undefined}
+      onUpdateEvent={() => undefined}
     />
   );
 }

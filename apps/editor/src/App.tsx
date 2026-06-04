@@ -4,7 +4,8 @@ import {
   eventGraphToMermaid,
   parseProjectJson,
   summarizeProject,
-  validateProject
+  validateProject,
+  type EventDefinition
 } from "@rpg-deck/core-domain";
 import { createRuntime, type Direction, type PlayerInput } from "@rpg-deck/web-runtime";
 import sampleProjectJson from "../../../packages/sample-projects/tiny-rpg/project.json" with { type: "json" };
@@ -16,6 +17,7 @@ const sampleProject = parseProjectJson(JSON.stringify(sampleProjectJson));
 export function App() {
   const [project, setProject] = useState(sampleProject);
   const [proposal, setProposal] = useState<ProjectProposal | null>(() => createMockProposal(sampleProject));
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(() => Object.keys(sampleProject.events)[0] ?? null);
   const summary = useMemo(() => summarizeProject(project), [project]);
   const validationIssues = useMemo(() => validateProject(project), [project]);
   const graph = useMemo(() => buildEventGraph(project), [project]);
@@ -32,6 +34,11 @@ export function App() {
     setSnapshot(runtime.getSnapshot());
     setEventLog(runtime.getEventLog());
   }, [runtime]);
+
+  useEffect(() => {
+    if (selectedEventId && project.events[selectedEventId]) return;
+    setSelectedEventId(Object.keys(project.events)[0] ?? null);
+  }, [project, selectedEventId]);
 
   const dispatchRuntimeInput = (input: PlayerInput) => {
     runtime.dispatch(input);
@@ -69,6 +76,21 @@ export function App() {
     });
   };
 
+  const updateEvent = (eventId: string, updater: (event: EventDefinition) => EventDefinition) => {
+    setProject((currentProject) => {
+      const currentEvent = currentProject.events[eventId];
+      if (!currentEvent) return currentProject;
+
+      return {
+        ...currentProject,
+        events: {
+          ...currentProject.events,
+          [eventId]: updater(currentEvent)
+        }
+      };
+    });
+  };
+
   return (
     <EditorOverview
       eventLog={eventLog.slice(-8).reverse()}
@@ -77,6 +99,7 @@ export function App() {
       project={project}
       projectTitle={project.title}
       runtimeSnapshot={snapshot}
+      selectedEventId={selectedEventId}
       summary={summary}
       validationIssues={validationIssues}
       onAcceptProposal={acceptProposal}
@@ -86,6 +109,8 @@ export function App() {
       onMove={(direction: Direction) => dispatchRuntimeInput({ type: "move", direction })}
       onRejectProposal={rejectProposal}
       onRestart={restart}
+      onSelectEvent={setSelectedEventId}
+      onUpdateEvent={updateEvent}
     />
   );
 }

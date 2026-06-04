@@ -184,6 +184,10 @@ Target confirmation:
 * editing message text changes what appears when interacting
 * changing trigger affects how the event is activated
 
+Initial implementation status:
+
+* `apps/editor` now has a minimal event list and inspector for editing event position, trigger, optional sprite ID, and the first direct `show_message` text. Project updates recreate the headless runtime so marker placement, trigger behavior, validation, graph output, and runtime messages can be confirmed against the playable preview.
+
 ## Phase 7: Minimal Command Editing + Runtime Confirmation
 
 Purpose:

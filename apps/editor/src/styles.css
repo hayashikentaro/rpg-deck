@@ -11,7 +11,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -213,6 +214,77 @@ select {
 .playable-preview__choice ol {
   margin: 0;
   padding-left: 20px;
+}
+
+.event-inspector {
+  display: grid;
+  gap: 10px;
+}
+
+.event-inspector h2,
+.event-inspector h3,
+.event-inspector p {
+  margin: 0;
+}
+
+.event-inspector__layout,
+.event-inspector__fields {
+  display: grid;
+  gap: 10px;
+}
+
+.event-inspector__list ul {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.event-inspector__list button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  border: 1px solid #deded8;
+  border-radius: 6px;
+  background: #fafaf8;
+  padding: 8px;
+  text-align: left;
+}
+
+.event-inspector__list button[data-selected="true"] {
+  border-color: #2266aa;
+  background: #eef6ff;
+}
+
+.event-inspector__list button span {
+  color: #666;
+  font-size: 12px;
+}
+
+.event-inspector__fields label {
+  display: grid;
+  gap: 4px;
+  color: #555;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.event-inspector__fields input,
+.event-inspector__fields select,
+.event-inspector__fields textarea {
+  min-width: 0;
+  border: 1px solid #c9c9c2;
+  border-radius: 4px;
+  background: #fff;
+  padding: 6px 8px;
+  color: #222;
+}
+
+.event-inspector__fields textarea {
+  min-height: 72px;
+  resize: vertical;
 }
 
 .rdk-canvas-toolbar {

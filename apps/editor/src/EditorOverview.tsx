@@ -1,4 +1,4 @@
-import type { GameProject, ProjectSummary, ValidationIssue } from "@rpg-deck/core-domain";
+import type { EventDefinition, GameProject, ProjectSummary, ValidationIssue } from "@rpg-deck/core-domain";
 import type { Direction, RuntimeEventLogEntry, RuntimeSnapshot } from "@rpg-deck/web-runtime";
 import {
   AppShell,
@@ -9,6 +9,7 @@ import {
   PropertyGrid,
   ValidationIssueList
 } from "@rpg-deck/ux-kit";
+import { EventInspector } from "./features/events/EventInspector.js";
 import { PlayablePreview } from "./features/preview/PlayablePreview.js";
 import type { ProjectProposal } from "./proposals.js";
 
@@ -21,6 +22,7 @@ export type EditorOverviewProps = {
   runtimeSnapshot: RuntimeSnapshot;
   eventLog: RuntimeEventLogEntry[];
   proposal: ProjectProposal | null;
+  selectedEventId: string | null;
   onMove?: (direction: Direction) => void;
   onInteract?: () => void;
   onRestart?: () => void;
@@ -28,6 +30,8 @@ export type EditorOverviewProps = {
   onAcceptProposal?: () => void;
   onRejectProposal?: () => void;
   onHoldProposal?: () => void;
+  onSelectEvent?: (eventId: string) => void;
+  onUpdateEvent?: (eventId: string, updater: (event: EventDefinition) => EventDefinition) => void;
 };
 
 export function EditorOverview({
@@ -39,13 +43,16 @@ export function EditorOverview({
   runtimeSnapshot,
   eventLog,
   proposal,
+  selectedEventId,
   onMove,
   onInteract,
   onRestart,
   onCreateProposal,
   onAcceptProposal,
   onRejectProposal,
-  onHoldProposal
+  onHoldProposal,
+  onSelectEvent,
+  onUpdateEvent
 }: EditorOverviewProps) {
   const issueItems = validationIssues.map((issue, index) => ({
     id: `${issue.code}-${issue.path}-${index}`,
@@ -148,9 +155,21 @@ export function EditorOverview({
       }
       inspector={
         <InspectorPanel
-          title="Project checks"
-          subtitle="Validation and graph output from core-domain."
+          title="Project Inspector"
+          subtitle="Event authoring, validation, and graph output."
           sections={[
+            {
+              id: "events",
+              title: "Events",
+              children: (
+                <EventInspector
+                  project={project}
+                  selectedEventId={selectedEventId}
+                  onSelectEvent={onSelectEvent}
+                  onUpdateEvent={onUpdateEvent}
+                />
+              )
+            },
             {
               id: "validation",
               title: "Validation issues",
