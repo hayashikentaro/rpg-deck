@@ -234,6 +234,90 @@ Success criteria:
 * malformed or unsupported data fails gracefully
 * no Godot-specific objects are required in `core-domain`
 
+## Loader Acceptance Checklist
+
+Use this checklist to keep the first Godot loader spike small. Passing these items is enough for Phase 11 minimum success.
+
+### Project Loading
+
+* loader accepts RPG Deck project JSON copied from the editor
+* malformed JSON fails gracefully with a visible or debug error
+* unsupported future fields do not crash the loader
+
+### Map Loading
+
+* loader reads `settings.start.map`
+* loader creates the current map from `maps`
+* loader respects `maps[mapId].size`
+* loader can switch map if `transfer_player` is supported later
+
+### Player
+
+* player starts at `settings.start.position`
+* player grid movement works in four directions
+* player cannot move outside map bounds if implemented
+* player cannot move into `collision`
+
+### Collision
+
+* collision cells are visible in debug rendering
+* movement into collision is blocked
+* removing collision in RPG Deck JSON and reloading allows movement
+
+### Events
+
+* event markers are placed using event `map` and `position`
+* event IDs are visible or logged for debugging
+* `interact` event can be detected from adjacent/facing position if implemented
+* `touch` event can be detected on entry if implemented
+* unsupported trigger behavior is logged, not allowed to crash the loader
+
+### Commands
+
+* first loader can log `show_message`
+* first loader can log `choice` prompt/options
+* first loader can log or stub `start_battle`
+* first loader can log `play_bgm` and `play_sfx`
+* full command execution is not required for first acceptance unless explicitly added later
+
+### Boundary
+
+* no Godot-specific schema is required in RPG Deck project JSON
+* no changes to `core-domain` are required for first loader
+* no save-back from Godot is required
+
+### Manual QA Flow
+
+Manual QA is enough for the first loader spike.
+
+1. Copy current Project JSON from the RPG Deck editor.
+2. Put it into the Godot spike input location.
+3. Start the Godot spike.
+4. Confirm map size/debug grid.
+5. Confirm player start position.
+6. Confirm collision blocks movement.
+7. Confirm event marker appears.
+8. Modify collision or event position in RPG Deck.
+9. Copy Project JSON again.
+10. Reload the Godot spike input.
+11. Confirm the change appears.
+
+### Not Required for First Acceptance
+
+The first loader does not need:
+
+* sprite artwork
+* animation
+* full dialogue UI
+* choice UI
+* battle
+* audio playback
+* save/load from Godot
+* Godot editor tooling
+* bidirectional editing
+* generated scenes/resources
+* exporter package
+
 ## Validation Expectations
 
 Before sending JSON to Godot:

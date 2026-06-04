@@ -323,3 +323,4 @@ Initial implementation status:
 
 * The Godot boundary contract is documented. RPG Deck project JSON remains the source of truth, and the first Godot spike should load project, map, player start, collision, and event marker data from copied or exported project JSON. Godot implementation remains out of scope for this step.
 * The manual Godot JSON handoff procedure is documented. The current Project JSON UI is the handoff path for the first loader spike, and no Godot project, exporter package, or generated fixture is created in this step.
+* The Godot loader acceptance checklist is documented. First loader success is scoped to project, map, player, collision, event marker, and debug command handling while sprite art, full command UI, battle/audio, exporter package, and save-back remain out of scope.
