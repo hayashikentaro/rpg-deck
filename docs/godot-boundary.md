@@ -19,7 +19,7 @@ For now, editor import/export remains browser-based JSON:
 
 The Godot loader should read the same project shape that `packages/core-domain` parses and validates. If a derived Godot export format becomes useful later, it should be introduced explicitly as an exporter output, not silently treated as the canonical schema.
 
-The next command-handling phase is defined separately in [`godot-command-boundary.md`](./godot-command-boundary.md). That note keeps event command work scoped to command preview first, followed by a minimal `show_message` executable spike.
+The command-handling phase is defined separately in [`godot-command-boundary.md`](./godot-command-boundary.md). That note keeps the minimal `show_message` debug panel separate from later sequencing and other command effects.
 
 ## Ownership
 
@@ -247,7 +247,7 @@ The spike now renders a static debug grid for the current/start map when valid m
 
 The spike also supports minimal player marker movement on the debug grid. The initial position comes from `settings.start.position`, arrow keys and WASD move the player marker within map bounds, and cells restore their underlying `E`, `#`, or `.` marker when the player leaves. Facing direction updates from movement input even when movement is blocked by map bounds or collision. Collision cells from RPG Deck project JSON block debug player movement.
 
-The spike can detect a `trigger: interact` event in the player's facing cell when Enter, Space, or Z is pressed, and it can detect a `trigger: touch` event after the player successfully enters its cell. Both paths log and display the event id and position, then preview each top-level command by index, type, and concise payload summary. The debug viewport status line shows the latest movement, event detection, or command preview result so manual verification does not depend only on the Output log. Command effects, dialogue UI, and command execution remain out of scope.
+The spike can detect a `trigger: interact` event in the player's facing cell when Enter, Space, or Z is pressed, and it can detect a `trigger: touch` event after the player successfully enters its cell. Both paths log and display the event id and position, then preview each top-level command by index, type, and concise payload summary. A separate debug message panel displays the first top-level `show_message` from the most recently detected event. It has no advance input or sequencing and is not full dialogue UI. Choices, flags, transfer, battle/audio, and all other command effects remain out of scope.
 
 For mounted-repository host verification, prepare `godot_spike/data/project.json` from inside the container and use `pnpm godot` as the standard implementation verification command. It performs a headless C# build and launches the project only when the build succeeds; run-only remains available as `pnpm godot:run`. The underlying `godot_spike/scripts/host_verify.sh` supports the same workflow. Host-specific Godot, .NET, or architecture settings should come from `GODOT_BIN`, `DOTNET_ROOT`, `GODOT_ARCH`, or ignored `godot_spike/.env.local`, not tracked absolute paths. The script can force the effective Godot architecture so an x86_64 Node or pnpm process does not select an incompatible runtime on Apple Silicon. Local Godot outputs such as `.godot/`, `.mono/`, `.csproj`, `.sln`, the handoff `data/project.json`, and `.env.local` are ignored and non-canonical.
 
@@ -262,6 +262,7 @@ Implemented in the repository:
 * log/status-only `interact` detection in the facing cell
 * log/status-only `touch` detection after successful cell entry
 * log/status-only top-level command preview after event detection
+* minimal debug message panel for the first top-level `show_message`
 * portable host verification script and `pnpm godot` build-then-run workflow
 
 Manually verified on a host:
@@ -274,7 +275,7 @@ Manually verified on a host:
 * empty touch command preview displays `command_preview: touch_test commands=0`
 * `interact` detection displays `interact_event: mayor_intro at [7, 6]`
 * command preview includes `command_preview: mayor_intro[2] show_message speaker=mayor_intro text="北の洞窟には近づくな。"`
-* command effects do not run
+* command preview has no effects; the new message panel is not yet included in this host verification record
 
 Touch verification used ignored local `godot_spike/data/project.json` with `touch_test` on `town` at `[5, 6]`. That local handoff artifact is non-canonical and is not committed.
 
@@ -353,7 +354,8 @@ Status labels:
 
 * **Implemented**: command execution boundary design note
 * **Host verified**: log/status-only top-level command preview after `interact` or `touch` detection
-* **Pending**: `show_message`, `choice`, flags, transfer, battle, and audio behavior
+* **Implemented**: first top-level `show_message` is displayed in a minimal debug message panel
+* **Pending**: message sequencing, advance input, `choice`, flags, transfer, battle, and audio behavior
 * **Pending**: full command execution; it remains out of scope until explicitly designed
 
 ### Boundary
@@ -378,10 +380,11 @@ Manual QA is enough for the first loader spike.
 9. Confirm detected event top-level commands are previewed by index, type, and concise payload without effects.
 10. Use an ignored local handoff JSON with a current-map `touch` event and confirm entry detection reports an event id and position.
 11. Confirm an empty command array reports `commands=0`.
-12. Modify collision or event position in RPG Deck.
-13. Copy Project JSON again.
-14. Reload the Godot spike input.
-15. Confirm the change appears.
+12. Confirm the first top-level `show_message` appears in the separate debug message panel without sequencing.
+13. Modify collision or event position in RPG Deck.
+14. Copy Project JSON again.
+15. Reload the Godot spike input.
+16. Confirm the change appears.
 
 ### Not Required for First Acceptance
 

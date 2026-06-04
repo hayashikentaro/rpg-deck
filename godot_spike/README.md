@@ -9,7 +9,7 @@ Non-goals for this skeleton:
 * no bidirectional editing
 * no schema fork
 * no full game implementation
-* no event command execution
+* no full event command execution
 * no dialogue, choice, flag, transfer, battle, or audio behavior
 * no saved fixture JSON committed in this step
 
@@ -92,7 +92,7 @@ The script falls back to common macOS Godot and .NET locations when env vars are
 
 The spike consumes copied or exported RPG Deck Project JSON from ignored local file `godot_spike/data/project.json`. Project JSON remains the source of truth; Godot does not edit or save it back.
 
-The debug HUD shows a legend, status line, and grid. Markers are `^`, `v`, `<`, and `>` for player facing, `E` for events, `#` for collision, and `.` for empty cells.
+The debug HUD shows a legend, status line, debug message panel, and grid. Markers are `^`, `v`, `<`, and `>` for player facing, `E` for events, `#` for collision, and `.` for empty cells.
 
 Current log/status-only behavior:
 
@@ -102,11 +102,13 @@ Current log/status-only behavior:
 * Enter, Space, or Z detects a `trigger: interact` event in the facing cell
 * successful entry into a `trigger: touch` event cell detects that event
 * detected events preview each top-level command by index, type, and concise payload summary
-* command preview is Output log and debug status only; command effects are not executed
+* command preview remains Output log and debug status only
+* the debug message panel displays the first top-level `show_message` from the most recently detected event
+* all other command effects remain unexecuted
 * non-touch movement keeps the normal movement status; there is no `touch_event: none` output
 * blocked movement does not run touch detection
 
-The command-handling boundary is documented in [`docs/godot-command-boundary.md`](../docs/godot-command-boundary.md). Command preview is host verified, and the next recommended executable step is a separate minimal `show_message` debug message panel spike.
+The command-handling boundary is documented in [`docs/godot-command-boundary.md`](../docs/godot-command-boundary.md). The message panel is a spike UI, not full dialogue UI: it has no advance input, sequencing, choices, or movement blocking.
 
 ## Current Manual Verification Status
 
@@ -122,9 +124,11 @@ Verified on a host Godot run:
 * interact detection displays `interact_event: mayor_intro at [7, 6]`
 * a facing cell without an interact event displays `interact_event: none at [5, 6]`
 * `mayor_intro` command preview reports `play_bgm`, `play_sfx`, `show_message`, and `choice`
-* command effects do not run
+* command effects did not run during command preview verification
 
 Touch verification used ignored local handoff JSON with `touch_test` on `town` at `[5, 6]`, `trigger: touch`, and `commands: []`. That file is non-canonical and is not committed.
+
+The debug message panel is implemented but not yet included in the host verification record above.
 
 ## Manual Verification
 
@@ -143,7 +147,7 @@ Touch verification used ignored local handoff JSON with `touch_test` on `town` a
    * current map collision count
    * current map event count
 6. Confirm a static debug grid appears when the current map size is valid.
-7. Confirm the legend and `Status: ready` debug status line appear above the grid.
+7. Confirm the legend, `Status: ready` status line, and `Message: <none>` debug message panel appear above the grid.
 8. Confirm the legend explains marker meanings:
    * `^`, `v`, `<`, `>` player facing
    * `E` event
@@ -159,17 +163,18 @@ Touch verification used ignored local handoff JSON with `touch_test` on `town` a
 16. Use Project JSON with a `trigger: touch` event on the current map and move onto its cell.
 17. Confirm `ProjectLoader` logs and shows `touch_event: <event_id> at [x, y]` only after entering that cell.
 18. Confirm an event with an empty command array shows `command_preview: <event_id> commands=0`.
-19. Confirm no command effect, message panel, dialogue UI, flag change, transfer, battle, or audio behavior occurs.
-20. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
-21. Rename or remove `data/project.json`.
-22. Run the project again.
-23. Confirm the missing-file warning appears and the project does not crash.
+19. Confirm an event with a top-level `show_message` displays its first speaker and text in the debug message panel.
+20. Confirm no dialogue UI, message sequencing, flag change, transfer, battle, or audio behavior occurs.
+21. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
+22. Rename or remove `data/project.json`.
+23. Run the project again.
+24. Confirm the missing-file warning appears and the project does not crash.
 
 ## Current Skeleton
 
 The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
-`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and provides log/status-only event detection plus top-level command preview. The debug HUD places the marker legend first, the status line below it, and the grid below the HUD. The renderer includes a configurable `DebugCellSize` and a configurable `DebugMapOffset`. Marker priority is player over `E` over `#` over `.`. Command effects, dialogue UI, choices, flags, transfer, battle/audio, and command execution are intentionally left for later Phase 11 steps.
+`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and provides log/status-only event detection plus top-level command preview. The debug HUD places the marker legend first, the status line and debug message panel below it, and the grid below the HUD. The renderer includes a configurable `DebugCellSize` and a configurable `DebugMapOffset`. Marker priority is player over `E` over `#` over `.`. The first top-level `show_message` is displayed without sequencing; dialogue UI, choices, flags, transfer, battle/audio, and all other command effects are intentionally left for later Phase 11 steps.
 
 Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.
 

@@ -7,6 +7,7 @@ public partial class ProjectLoader : Node
     private readonly System.Collections.Generic.Dictionary<string, Label> _debugCells =
         new System.Collections.Generic.Dictionary<string, Label>();
     private Label _debugStatusLabel;
+    private Label _debugMessageLabel;
     private HashSet<string> _collisionPositions = new HashSet<string>();
     private HashSet<string> _eventPositions = new HashSet<string>();
     private List<MapEventSummary> _currentMapEvents = new List<MapEventSummary>();
@@ -22,7 +23,7 @@ public partial class ProjectLoader : Node
     public int DebugCellSize { get; set; } = 24;
 
     [Export]
-    public Vector2 DebugMapOffset { get; set; } = new Vector2(24, 120);
+    public Vector2 DebugMapOffset { get; set; } = new Vector2(24, 152);
 
     public override void _Ready()
     {
@@ -111,6 +112,7 @@ public partial class ProjectLoader : Node
     {
         RenderDebugLegend();
         RenderDebugStatus();
+        RenderDebugMessage();
 
         if (!summary.CurrentMap.SizePosition.IsValid)
         {
@@ -172,6 +174,17 @@ public partial class ProjectLoader : Node
             Position = new Vector2(24, 72)
         };
         AddChild(_debugStatusLabel);
+    }
+
+    private void RenderDebugMessage()
+    {
+        _debugMessageLabel = new Label
+        {
+            Name = "DebugMessage",
+            Text = "Message: <none>",
+            Position = new Vector2(24, 96)
+        };
+        AddChild(_debugMessageLabel);
     }
 
     private string MarkerForPosition(GridPosition position)
@@ -247,6 +260,7 @@ public partial class ProjectLoader : Node
                 GD.Print(message);
                 SetDebugStatus(message);
                 PreviewEventCommands(eventSummary);
+                DisplayFirstShowMessage(eventSummary);
                 return;
             }
         }
@@ -270,6 +284,7 @@ public partial class ProjectLoader : Node
                 GD.Print(message);
                 SetDebugStatus(message);
                 PreviewEventCommands(eventSummary);
+                DisplayFirstShowMessage(eventSummary);
                 return;
             }
         }
@@ -291,6 +306,30 @@ public partial class ProjectLoader : Node
         }
 
         SetDebugStatus($"command_preview: {eventSummary.Id} commands={eventSummary.Commands.Count}");
+    }
+
+    private void DisplayFirstShowMessage(MapEventSummary eventSummary)
+    {
+        foreach (var commandValue in eventSummary.Commands)
+        {
+            if (commandValue.VariantType != Variant.Type.Dictionary)
+            {
+                continue;
+            }
+
+            var command = commandValue.AsGodotDictionary();
+            if (GetPreviewString(command, "type") != "show_message")
+            {
+                continue;
+            }
+
+            var speaker = GetMessageField(command, "speaker", "<unknown>");
+            var text = GetMessageField(command, "text", "?");
+            SetDebugMessage($"{speaker}: {text}");
+            return;
+        }
+
+        SetDebugMessage("<none>");
     }
 
     private static string FormatCommandPreview(string eventId, int index, Variant commandValue)
@@ -414,11 +453,41 @@ public partial class ProjectLoader : Node
         return value.Length > maxLength ? $"{value.Substring(0, prefixLength)}..." : value;
     }
 
+    private static string GetMessageField(Dictionary command, string key, string fallback)
+    {
+        if (!command.ContainsKey(key) || command[key].VariantType != Variant.Type.String)
+        {
+            return fallback;
+        }
+
+        return TruncateMessageText(SanitizeMessageText(command[key].AsString()));
+    }
+
+    private static string SanitizeMessageText(string value)
+    {
+        return value.Replace("\r", " ").Replace("\n", " ");
+    }
+
+    private static string TruncateMessageText(string value)
+    {
+        const int maxLength = 80;
+        const int prefixLength = 77;
+        return value.Length > maxLength ? $"{value.Substring(0, prefixLength)}..." : value;
+    }
+
     private void SetDebugStatus(string message)
     {
         if (_debugStatusLabel != null)
         {
             _debugStatusLabel.Text = $"Status: {message}";
+        }
+    }
+
+    private void SetDebugMessage(string message)
+    {
+        if (_debugMessageLabel != null)
+        {
+            _debugMessageLabel.Text = $"Message: {message}";
         }
     }
 

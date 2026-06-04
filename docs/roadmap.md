@@ -338,6 +338,7 @@ Initial implementation status:
 * The Phase 11 boundary spike has reached log/status-only event detection: `interact` and `touch` events are detected by id and position but their commands are not executed.
 * Standard host implementation verification is `pnpm godot`, which performs a C# build before launching the spike.
 * The Godot command execution boundary is now documented in `docs/godot-command-boundary.md`. It classifies current command types as preview, placeholder, later executable, or out of scope for the first executable spike.
-* The Godot spike now previews detected event top-level commands in the Output log by command index, type, and concise payload summary, while the debug status shows the previewed command count. Command effects are not executed.
+* The Godot spike now previews detected event top-level commands in the Output log by command index, type, and concise payload summary, while the debug status shows the previewed command count.
 * Host verification confirms `touch` detection using ignored local handoff JSON and confirms log/status-only command preview for both touch and interact events.
-* The recommended next implementation step is a separate minimal `show_message` debug message panel spike. Choices, flags, transfer, battle/audio, and full command execution remain deferred.
+* The Godot spike now displays the first top-level `show_message` from the most recently detected event in a separate debug message panel. It does not add message sequencing, advance input, movement blocking, or full dialogue UI.
+* After host verification, the next step should be either a verification documentation update or an explicit message sequencing design. Choices, flags, transfer, battle/audio, and full command execution remain deferred.

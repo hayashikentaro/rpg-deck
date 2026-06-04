@@ -14,9 +14,10 @@ The Godot spike currently:
 * detects `interact` and `touch` events
 * reports event id and position in the Output log and debug status HUD
 * previews detected event top-level commands by index, type, and concise payload summary
-* does not execute event command effects
+* displays the first top-level `show_message` in a separate debug message panel
+* does not execute other event command effects
 
-Command preview is implemented and host verified for both interact and touch event detection. The next phase should preserve that behavior before adding any command effect.
+Command preview is implemented and host verified for both interact and touch event detection. The minimal `show_message` debug message panel is implemented without sequencing, advance input, or full dialogue UI.
 
 ## Source of Truth
 
@@ -39,14 +40,14 @@ All known command types should be safe to preview even when they are not executa
 
 ## First Executable Spike Recommendation
 
-The smallest safe first executable implementation is:
+The first executable spike is intentionally limited to:
 
 1. Keep `interact` and `touch` event detection as-is.
 2. Keep log/status command preview for every top-level command.
 3. Do not execute every command in the array.
-4. Implement only `show_message` as the first executable command.
-5. Display `show_message` through a minimal debug message panel or equivalent visible spike UI.
-6. Require an explicit advance input before continuing past a displayed message if command sequencing is introduced.
+4. Display only the first top-level `show_message` through a minimal debug message panel.
+5. Do not introduce command sequencing or advance input in the panel spike.
+6. Require an explicit sequencing design before continuing commands after a displayed message.
 7. Leave choices, flags, conditions, inventory, transfer, battle, and audio as preview or placeholder behavior.
 
 This path proves that Godot can read a command payload and present a visible effect without prematurely defining every runtime subsystem.
@@ -59,7 +60,7 @@ The current `EventCommand` union includes the following command types.
 
 | Command type | Category after preview | First executable spike | Later prerequisite |
 | --- | --- | --- | --- |
-| `show_message` | First executable candidate | Implement a minimal debug message panel for speaker and text | Explicit message advance and command sequence pause/resume |
+| `show_message` | First executable candidate | Minimal debug message panel implemented | Explicit message advance and command sequence pause/resume |
 | `choice` | Log-only command preview; executable later | Explicitly out of scope | Choice input, focus, selection, nested command sequencing |
 | `set_flag` | Executable later | Explicitly out of scope | Local flag state, initialization, inspection, and deterministic sequencing |
 | `unset_flag` | Executable later | Explicitly out of scope | Local flag state, initialization, inspection, and deterministic sequencing |
@@ -107,7 +108,7 @@ Before executing commands that depend on ordering or pause/resume behavior, defi
 
 The existing debug status HUD reports the latest movement or event detection result. It is not dialogue UI.
 
-A simple debug message panel is acceptable for the first `show_message` executable spike when it:
+The first `show_message` executable spike uses a simple debug message panel that:
 
 * displays speaker and text
 * is visibly separate from movement/interact status
@@ -146,7 +147,8 @@ When execution is added, the implementation should make the stop/continue rule e
 
 This design note does not include:
 
-* command execution implementation
+* full command execution implementation
+* message sequencing or advance input
 * full dialogue UI
 * choice UI or nested choice command execution
 * flag or condition execution
@@ -169,10 +171,10 @@ This design note does not include:
 
 ## Recommended Next Implementation Prompt
 
-Implement a minimal Godot `show_message` executable spike without changing Project JSON or executing other command effects:
+After host verification of the debug message panel, define explicit message sequencing before executing additional command effects:
 
-* preserve current `interact`, `touch`, and top-level command preview behavior
-* add a separate debug message panel for `show_message` speaker and text
-* define explicit message active/inactive state and advance input before continuing a sequence
+* preserve current `interact`, `touch`, top-level command preview, and debug message panel behavior
+* decide message active/inactive state and advance input before continuing a sequence
+* decide whether movement remains available while a message is active
 * do not execute choices, nested commands, flags, inventory, transfer, battle, or audio
 * keep movement, collision, event detection, and host verification behavior unchanged
