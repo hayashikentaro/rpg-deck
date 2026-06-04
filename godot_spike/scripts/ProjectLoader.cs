@@ -10,6 +10,7 @@ public partial class ProjectLoader : Node
     private HashSet<string> _eventPositions = new HashSet<string>();
     private GridPosition _currentPlayerPosition = GridPosition.Invalid;
     private GridPosition _currentMapSize = GridPosition.Invalid;
+    private FacingDirection _currentFacingDirection = FacingDirection.Down;
     private bool _debugMapLoaded;
 
     [Export]
@@ -40,7 +41,7 @@ public partial class ProjectLoader : Node
             return;
         }
 
-        TryMovePlayer(delta);
+        TryMovePlayer(delta, FacingDirectionForDelta(delta));
         GetViewport().SetInputAsHandled();
     }
 
@@ -145,7 +146,7 @@ public partial class ProjectLoader : Node
         var legend = new Label
         {
             Name = "DebugLegend",
-            Text = "RPG Deck Debug Map\nP player start  E event  # collision  . empty",
+            Text = "RPG Deck Debug Map\n^v<> player facing  E event  # collision  . empty",
             Position = new Vector2(24, 24)
         };
         AddChild(legend);
@@ -155,7 +156,7 @@ public partial class ProjectLoader : Node
     {
         if (_currentPlayerPosition.IsValid && _currentPlayerPosition.X == position.X && _currentPlayerPosition.Y == position.Y)
         {
-            return "P";
+            return PlayerMarkerForFacing();
         }
 
         var key = PositionKey(position);
@@ -172,8 +173,11 @@ public partial class ProjectLoader : Node
         return ".";
     }
 
-    private void TryMovePlayer(GridPosition delta)
+    private void TryMovePlayer(GridPosition delta, FacingDirection facingDirection)
     {
+        _currentFacingDirection = facingDirection;
+        UpdateCell(_currentPlayerPosition);
+
         var nextPosition = new GridPosition(
             _currentPlayerPosition.X + delta.X,
             _currentPlayerPosition.Y + delta.Y,
@@ -182,13 +186,13 @@ public partial class ProjectLoader : Node
 
         if (!IsWithinMapBounds(nextPosition))
         {
-            GD.Print($"movement_blocked: map_bounds [{nextPosition.X}, {nextPosition.Y}]");
+            GD.Print($"movement_blocked: map_bounds [{nextPosition.X}, {nextPosition.Y}] facing {FacingDirectionLabel()}");
             return;
         }
 
         if (_collisionPositions.Contains(PositionKey(nextPosition)))
         {
-            GD.Print($"movement_blocked: collision [{nextPosition.X}, {nextPosition.Y}]");
+            GD.Print($"movement_blocked: collision [{nextPosition.X}, {nextPosition.Y}] facing {FacingDirectionLabel()}");
             return;
         }
 
@@ -196,7 +200,7 @@ public partial class ProjectLoader : Node
         _currentPlayerPosition = nextPosition;
         UpdateCell(previousPosition);
         UpdateCell(_currentPlayerPosition);
-        GD.Print($"player moved to [{_currentPlayerPosition.X}, {_currentPlayerPosition.Y}]");
+        GD.Print($"player moved to [{_currentPlayerPosition.X}, {_currentPlayerPosition.Y}] facing {FacingDirectionLabel()}");
     }
 
     private void UpdateCell(GridPosition position)
@@ -213,6 +217,46 @@ public partial class ProjectLoader : Node
             position.Y >= 0 &&
             position.X < _currentMapSize.X &&
             position.Y < _currentMapSize.Y;
+    }
+
+    private string PlayerMarkerForFacing()
+    {
+        if (_currentFacingDirection == FacingDirection.Up)
+        {
+            return "^";
+        }
+
+        if (_currentFacingDirection == FacingDirection.Down)
+        {
+            return "v";
+        }
+
+        if (_currentFacingDirection == FacingDirection.Left)
+        {
+            return "<";
+        }
+
+        return ">";
+    }
+
+    private string FacingDirectionLabel()
+    {
+        if (_currentFacingDirection == FacingDirection.Up)
+        {
+            return "up";
+        }
+
+        if (_currentFacingDirection == FacingDirection.Down)
+        {
+            return "down";
+        }
+
+        if (_currentFacingDirection == FacingDirection.Left)
+        {
+            return "left";
+        }
+
+        return "right";
     }
 
     private static GridPosition MovementDeltaForKey(Key key)
@@ -238,6 +282,26 @@ public partial class ProjectLoader : Node
         }
 
         return GridPosition.Invalid;
+    }
+
+    private static FacingDirection FacingDirectionForDelta(GridPosition delta)
+    {
+        if (delta.Y < 0)
+        {
+            return FacingDirection.Up;
+        }
+
+        if (delta.Y > 0)
+        {
+            return FacingDirection.Down;
+        }
+
+        if (delta.X < 0)
+        {
+            return FacingDirection.Left;
+        }
+
+        return FacingDirection.Right;
     }
 
     private static ProjectSummary ExtractProjectSummary(Dictionary project)
@@ -592,5 +656,13 @@ public partial class ProjectLoader : Node
         public int X { get; }
         public int Y { get; }
         public bool IsValid { get; }
+    }
+
+    private enum FacingDirection
+    {
+        Up,
+        Down,
+        Left,
+        Right
     }
 }

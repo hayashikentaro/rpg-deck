@@ -241,9 +241,9 @@ The expected manual handoff input path is:
 
 The loader extracts these values defensively so missing or malformed fields warn and fall back instead of crashing. Map rendering, player movement, collision behavior, event interaction, and command execution remain the next steps. The `godot_spike/` directory is not an authoring source and must not become a schema fork.
 
-The spike now renders a static debug grid for the current/start map when valid map size data is available. The grid uses text markers only: `P` for player start, `E` for events, `#` for collision, and `.` for empty cells. It includes a visible legend, and `ProjectLoader` exposes `DebugCellSize` and `DebugMapOffset` so the grid spacing can be adjusted in the inspector. This is visualization only; player movement, collision behavior, event interaction, and command execution remain separate follow-up work.
+The spike now renders a static debug grid for the current/start map when valid map size data is available. The grid uses text markers only: `^`, `v`, `<`, and `>` for player facing, `E` for events, `#` for collision, and `.` for empty cells. It includes a visible legend, and `ProjectLoader` exposes `DebugCellSize` and `DebugMapOffset` so the grid spacing can be adjusted in the inspector.
 
-The spike also supports minimal player marker movement on the debug grid. The initial position comes from `settings.start.position`, arrow keys and WASD move the `P` marker within map bounds, and cells restore their underlying `E`, `#`, or `.` marker when the player leaves. Collision cells from RPG Deck project JSON now block debug player movement.
+The spike also supports minimal player marker movement on the debug grid. The initial position comes from `settings.start.position`, arrow keys and WASD move the player marker within map bounds, and cells restore their underlying `E`, `#`, or `.` marker when the player leaves. Facing direction updates from movement input even when movement is blocked by map bounds or collision. Collision cells from RPG Deck project JSON block debug player movement.
 
 Event markers remain visual-only. The Godot spike does not implement interact/touch event detection or command execution yet.
 
