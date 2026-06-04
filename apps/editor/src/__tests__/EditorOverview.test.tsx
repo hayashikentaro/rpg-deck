@@ -117,10 +117,14 @@ describe("EditorOverview", () => {
     const html = renderOverview();
 
     expect(html).toContain("Project JSON");
+    expect(html).toContain("View and copy the current edited project data.");
+    expect(html).toContain("Runtime, proposal, and UI state are not included.");
     expect(html).toContain("Copy Project JSON");
     expect(html).toContain("Current project JSON");
     expect(html).toContain("&quot;id&quot;: &quot;tiny-rpg&quot;");
     expect(html).toContain("&quot;title&quot;: &quot;Tiny RPG&quot;");
+    expect(html).toContain("&quot;events&quot;");
+    expect(html).toContain("Welcome to Tiny RPG.");
   });
 
   it("renders playable grid preview section", () => {
