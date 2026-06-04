@@ -136,6 +136,12 @@ textarea {
   background: #eeeeea;
 }
 
+.playable-preview__grid-column {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
 .playable-preview__cell {
   display: grid;
   min-width: 18px;
@@ -211,6 +217,49 @@ textarea {
   border-color: #5b3e91;
   background: #eee4ff;
   color: #432777;
+}
+
+.playable-preview__legend {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #deded8;
+  border-radius: 6px;
+  background: #fafaf8;
+}
+
+.playable-preview__legend h3,
+.playable-preview__legend dl,
+.playable-preview__legend dd {
+  margin: 0;
+}
+
+.playable-preview__legend h3 {
+  color: #444;
+  font-size: 13px;
+}
+
+.playable-preview__legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  color: #555;
+  font-size: 12px;
+}
+
+.playable-preview__legend-list div {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.playable-preview__legend-marker {
+  display: inline-grid;
+  min-width: 22px;
+  place-items: center;
+  color: #222;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700;
 }
 
 .playable-preview__status {

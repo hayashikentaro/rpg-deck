@@ -59,43 +59,86 @@ export function PlayablePreview({
         </p>
       </div>
       <div className="playable-preview__body">
-        <div
-          aria-label={`Current map grid ${currentMap.id}`}
-          className="playable-preview__grid"
-          role="grid"
-          style={{ "--grid-columns": width } as CSSProperties}
-        >
-          {cells.map((cell) => (
-            <div
-              aria-label={cell.label}
-              className="playable-preview__cell"
-              data-cell-kind={cell.kind}
-              data-selected={cell.selected || undefined}
-              key={`${cell.position[0]}-${cell.position[1]}`}
-              role="gridcell"
-            >
-              {onCellClick || (cell.eventId && onEventClick) ? (
-                <button
-                  aria-label={
-                    cell.eventId && onEventClick
-                      ? `Select event ${cell.eventId}. ${cell.label}`
-                      : `${cellActionLabel(cellClickAction, cell.position)}. ${cell.label}`
-                  }
-                  className="playable-preview__cell-button"
-                  data-selected={cell.selected || undefined}
-                  type="button"
-                  onClick={() => {
-                    if (cell.eventId && onEventClick) onEventClick(cell.eventId);
-                    else onCellClick?.(cell.position);
-                  }}
-                >
-                  {cell.marker}
-                </button>
-              ) : (
-                cell.marker
-              )}
-            </div>
-          ))}
+        <div className="playable-preview__grid-column">
+          <div
+            aria-label={`Current map grid ${currentMap.id}`}
+            className="playable-preview__grid"
+            role="grid"
+            style={{ "--grid-columns": width } as CSSProperties}
+          >
+            {cells.map((cell) => (
+              <div
+                aria-label={cell.label}
+                className="playable-preview__cell"
+                data-cell-kind={cell.kind}
+                data-selected={cell.selected || undefined}
+                key={`${cell.position[0]}-${cell.position[1]}`}
+                role="gridcell"
+              >
+                {onCellClick || (cell.eventId && onEventClick) ? (
+                  <button
+                    aria-label={
+                      cell.eventId && onEventClick
+                        ? `Select event ${cell.eventId}. ${cell.label}`
+                        : `${cellActionLabel(cellClickAction, cell.position)}. ${cell.label}`
+                    }
+                    className="playable-preview__cell-button"
+                    data-selected={cell.selected || undefined}
+                    type="button"
+                    onClick={() => {
+                      if (cell.eventId && onEventClick) onEventClick(cell.eventId);
+                      else onCellClick?.(cell.position);
+                    }}
+                  >
+                    {cell.marker}
+                  </button>
+                ) : (
+                  cell.marker
+                )}
+              </div>
+            ))}
+          </div>
+          <section className="playable-preview__legend" aria-label="Grid marker legend">
+            <h3>Legend</h3>
+            <dl className="playable-preview__legend-list">
+              <div>
+                <dt>
+                  <span className="playable-preview__legend-marker">↑↓←→</span>
+                </dt>
+                <dd>Player facing</dd>
+              </div>
+              <div>
+                <dt>
+                  <span className="playable-preview__legend-marker">N</span>
+                </dt>
+                <dd>Interact event</dd>
+              </div>
+              <div>
+                <dt>
+                  <span className="playable-preview__legend-marker">T</span>
+                </dt>
+                <dd>Touch event</dd>
+              </div>
+              <div>
+                <dt>
+                  <span className="playable-preview__legend-marker">A</span>
+                </dt>
+                <dd>Autorun event</dd>
+              </div>
+              <div>
+                <dt>
+                  <span className="playable-preview__legend-marker">#</span>
+                </dt>
+                <dd>Collision</dd>
+              </div>
+              <div>
+                <dt>
+                  <span className="playable-preview__legend-marker">.</span>
+                </dt>
+                <dd>Empty</dd>
+              </div>
+            </dl>
+          </section>
         </div>
         <aside className="playable-preview__status" aria-label="Runtime status panel">
           <h3>Runtime Status</h3>

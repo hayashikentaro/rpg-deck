@@ -298,6 +298,10 @@ Scope:
 * optional asset-aware labels
 * no heavy renderer unless explicitly chosen later
 
+Initial implementation status:
+
+* Playable Preview now includes a marker legend for player direction, event markers, collision, and empty cells. The renderer remains the existing HTML grid backed by project data and runtime snapshots; sprite rendering, tile artwork, Canvas, and renderer replacement remain out of scope.
+
 ## Phase 11: Godot Boundary Spike
 
 Purpose:

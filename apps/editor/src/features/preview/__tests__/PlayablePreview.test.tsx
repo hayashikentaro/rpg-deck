@@ -74,6 +74,18 @@ describe("PlayablePreview", () => {
     expect(renderPreview()).toContain("test_map");
   });
 
+  it("renders marker legend", () => {
+    const html = renderPreview();
+
+    expect(html).toContain("Legend");
+    expect(html).toContain("Player facing");
+    expect(html).toContain("Interact event");
+    expect(html).toContain("Touch event");
+    expect(html).toContain("Autorun event");
+    expect(html).toContain("Collision");
+    expect(html).toContain("Empty");
+  });
+
   it("renders player marker", () => {
     expect(renderPreview()).toContain("Player at [0, 0], facing down");
     expect(renderPreview()).toContain(">↓<");
