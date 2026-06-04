@@ -318,3 +318,7 @@ Scope:
 * Godot C# loader
 * map/player/collision movement spike
 * no full Godot game implementation
+
+Initial implementation status:
+
+* The Godot boundary contract is documented. RPG Deck project JSON remains the source of truth, and the first Godot spike should load project, map, player start, collision, and event marker data from copied or exported project JSON. Godot implementation remains out of scope for this step.
