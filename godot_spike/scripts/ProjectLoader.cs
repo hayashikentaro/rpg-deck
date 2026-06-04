@@ -8,6 +8,7 @@ public partial class ProjectLoader : Node
         new System.Collections.Generic.Dictionary<string, Label>();
     private HashSet<string> _collisionPositions = new HashSet<string>();
     private HashSet<string> _eventPositions = new HashSet<string>();
+    private List<MapEventSummary> _currentMapEvents = new List<MapEventSummary>();
     private GridPosition _currentPlayerPosition = GridPosition.Invalid;
     private GridPosition _currentMapSize = GridPosition.Invalid;
     private FacingDirection _currentFacingDirection = FacingDirection.Down;
@@ -32,6 +33,13 @@ public partial class ProjectLoader : Node
         var keyEvent = @event as InputEventKey;
         if (!_debugMapLoaded || keyEvent == null || !keyEvent.Pressed || keyEvent.Echo)
         {
+            return;
+        }
+
+        if (IsInteractKey(keyEvent.Keycode))
+        {
+            TryInteract();
+            GetViewport().SetInputAsHandled();
             return;
         }
 
@@ -118,6 +126,7 @@ public partial class ProjectLoader : Node
         _debugCells.Clear();
         _collisionPositions = ToPositionSet(summary.CurrentMap.CollisionPositions);
         _eventPositions = ToPositionSet(summary.CurrentMap.EventPositions);
+        _currentMapEvents = summary.CurrentMap.Events;
         _currentPlayerPosition = summary.StartPositionValue;
         _currentMapSize = summary.CurrentMap.SizePosition;
         _debugMapLoaded = _currentPlayerPosition.IsValid;
@@ -203,6 +212,25 @@ public partial class ProjectLoader : Node
         GD.Print($"player moved to [{_currentPlayerPosition.X}, {_currentPlayerPosition.Y}] facing {FacingDirectionLabel()}");
     }
 
+    private void TryInteract()
+    {
+        var targetPosition = FacingTargetPosition();
+        foreach (var eventSummary in _currentMapEvents)
+        {
+            if (
+                eventSummary.Trigger == "interact" &&
+                eventSummary.Position.X == targetPosition.X &&
+                eventSummary.Position.Y == targetPosition.Y
+            )
+            {
+                GD.Print($"interact_event: {eventSummary.Id} at [{targetPosition.X}, {targetPosition.Y}]");
+                return;
+            }
+        }
+
+        GD.Print($"interact_event: none at [{targetPosition.X}, {targetPosition.Y}]");
+    }
+
     private void UpdateCell(GridPosition position)
     {
         if (_debugCells.TryGetValue(PositionKey(position), out var label))
@@ -259,6 +287,36 @@ public partial class ProjectLoader : Node
         return "right";
     }
 
+    private GridPosition FacingTargetPosition()
+    {
+        var delta = DeltaForFacingDirection();
+        return new GridPosition(
+            _currentPlayerPosition.X + delta.X,
+            _currentPlayerPosition.Y + delta.Y,
+            true
+        );
+    }
+
+    private GridPosition DeltaForFacingDirection()
+    {
+        if (_currentFacingDirection == FacingDirection.Up)
+        {
+            return new GridPosition(0, -1, true);
+        }
+
+        if (_currentFacingDirection == FacingDirection.Down)
+        {
+            return new GridPosition(0, 1, true);
+        }
+
+        if (_currentFacingDirection == FacingDirection.Left)
+        {
+            return new GridPosition(-1, 0, true);
+        }
+
+        return new GridPosition(1, 0, true);
+    }
+
     private static GridPosition MovementDeltaForKey(Key key)
     {
         if (key == Key.Up || key == Key.W)
@@ -282,6 +340,11 @@ public partial class ProjectLoader : Node
         }
 
         return GridPosition.Invalid;
+    }
+
+    private static bool IsInteractKey(Key key)
+    {
+        return key == Key.Enter || key == Key.Space || key == Key.Z;
     }
 
     private static FacingDirection FacingDirectionForDelta(GridPosition delta)
@@ -335,19 +398,19 @@ public partial class ProjectLoader : Node
                 "<missing current map>",
                 GridPosition.Invalid,
                 new List<GridPosition>(),
-                GetEventPositionsOnMap(events, startMap)
+                GetEventsOnMap(events, startMap)
             );
         }
 
         var mapSize = GetGridPosition(map, "size", $"maps.{startMap}.size");
         var collisionPositions = GetGridPositionArray(map, "collision", $"maps.{startMap}.collision");
-        var eventPositions = GetEventPositionsOnMap(events, startMap);
+        var mapEvents = GetEventsOnMap(events, startMap);
 
         return new MapSummary(
             FormatGridPosition(mapSize),
             mapSize,
             collisionPositions,
-            eventPositions
+            mapEvents
         );
     }
 
@@ -510,12 +573,12 @@ public partial class ProjectLoader : Node
         return positions;
     }
 
-    private static List<GridPosition> GetEventPositionsOnMap(Dictionary events, string mapId)
+    private static List<MapEventSummary> GetEventsOnMap(Dictionary events, string mapId)
     {
-        var positions = new List<GridPosition>();
+        var mapEvents = new List<MapEventSummary>();
         if (events.Count == 0 || mapId.StartsWith("<"))
         {
-            return positions;
+            return mapEvents;
         }
 
         foreach (var eventEntry in events)
@@ -546,10 +609,12 @@ public partial class ProjectLoader : Node
                 continue;
             }
 
+            var eventId = GetString(eventDefinition, "id", eventEntry.Key.ToString(), $"events.{eventEntry.Key}.id");
+            var trigger = GetString(eventDefinition, "trigger", "<missing trigger>", $"events.{eventEntry.Key}.trigger");
             var position = GetGridPosition(eventDefinition, "position", $"events.{eventEntry.Key}.position");
             if (position.IsValid)
             {
-                positions.Add(position);
+                mapEvents.Add(new MapEventSummary(eventId, trigger, position));
             }
             else
             {
@@ -557,7 +622,8 @@ public partial class ProjectLoader : Node
             }
         }
 
-        return positions;
+        mapEvents.Sort((left, right) => string.CompareOrdinal(left.Id, right.Id));
+        return mapEvents;
     }
 
     private static bool IsNumber(Variant value)
@@ -625,21 +691,48 @@ public partial class ProjectLoader : Node
             string size,
             GridPosition sizePosition,
             List<GridPosition> collisionPositions,
-            List<GridPosition> eventPositions
+            List<MapEventSummary> events
         )
         {
             Size = size;
             SizePosition = sizePosition;
             CollisionPositions = collisionPositions;
-            EventPositions = eventPositions;
+            Events = events;
         }
 
         public string Size { get; }
         public GridPosition SizePosition { get; }
         public List<GridPosition> CollisionPositions { get; }
-        public List<GridPosition> EventPositions { get; }
+        public List<MapEventSummary> Events { get; }
+        public List<GridPosition> EventPositions
+        {
+            get
+            {
+                var positions = new List<GridPosition>();
+                foreach (var eventSummary in Events)
+                {
+                    positions.Add(eventSummary.Position);
+                }
+
+                return positions;
+            }
+        }
         public int CollisionCount => CollisionPositions.Count;
-        public int EventCount => EventPositions.Count;
+        public int EventCount => Events.Count;
+    }
+
+    private readonly struct MapEventSummary
+    {
+        public MapEventSummary(string id, string trigger, GridPosition position)
+        {
+            Id = id;
+            Trigger = trigger;
+            Position = position;
+        }
+
+        public string Id { get; }
+        public string Trigger { get; }
+        public GridPosition Position { get; }
     }
 
     private readonly struct GridPosition
