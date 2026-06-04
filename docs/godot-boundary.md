@@ -269,9 +269,14 @@ Manually verified on a host:
 * `pnpm godot` performs build then run
 * Apple Silicon Godot/.NET architecture alignment works
 * debug grid, legend, status HUD, and markers are visible without layout overlap
+* movement and collision blocking remain working
+* `touch` detection displays `touch_event: touch_test at [5, 6]`
+* empty touch command preview displays `command_preview: touch_test commands=0`
 * `interact` detection displays `interact_event: mayor_intro at [7, 6]`
+* command preview includes `command_preview: mayor_intro[2] show_message speaker=mayor_intro text="北の洞窟には近づくな。"`
+* command effects do not run
 
-Touch verification is prepared through ignored local `godot_spike/data/project.json` using `touch_test` on `town` at `[5, 6]`. That local handoff artifact is not canonical and is not committed.
+Touch verification used ignored local `godot_spike/data/project.json` with `touch_test` on `town` at `[5, 6]`. That local handoff artifact is non-canonical and is not committed.
 
 ## First Godot Spike Behavior
 
@@ -340,14 +345,14 @@ Status labels:
 * **Implemented**: event markers are placed using event `map` and `position`
 * **Implemented**: event id, trigger, and position are extracted for the current map
 * **Host verified**: `interact` event detection reports `mayor_intro` from the adjacent facing cell
-* **Implemented / Prepared**: `touch` event detection reports an event after successful cell entry; ignored local `touch_test` input is ready for host verification
+* **Host verified**: `touch` event detection reports `touch_test` after successful cell entry using ignored local handoff JSON
 * **Implemented**: event detection is log/status-only and does not execute commands
 * **Pending**: unsupported trigger behavior reporting beyond defensive parsing
 
 ### Commands
 
 * **Implemented**: command execution boundary design note
-* **Implemented**: log/status-only top-level command preview after `interact` or `touch` detection
+* **Host verified**: log/status-only top-level command preview after `interact` or `touch` detection
 * **Pending**: `show_message`, `choice`, flags, transfer, battle, and audio behavior
 * **Pending**: full command execution; it remains out of scope until explicitly designed
 

@@ -339,4 +339,5 @@ Initial implementation status:
 * Standard host implementation verification is `pnpm godot`, which performs a C# build before launching the spike.
 * The Godot command execution boundary is now documented in `docs/godot-command-boundary.md`. It classifies current command types as preview, placeholder, later executable, or out of scope for the first executable spike.
 * The Godot spike now previews detected event top-level commands in the Output log by command index, type, and concise payload summary, while the debug status shows the previewed command count. Command effects are not executed.
-* After command preview is manually verified, the recommended next implementation step is a separate minimal `show_message` debug message panel spike. Choices, flags, transfer, battle/audio, and full command execution remain deferred.
+* Host verification confirms `touch` detection using ignored local handoff JSON and confirms log/status-only command preview for both touch and interact events.
+* The recommended next implementation step is a separate minimal `show_message` debug message panel spike. Choices, flags, transfer, battle/audio, and full command execution remain deferred.

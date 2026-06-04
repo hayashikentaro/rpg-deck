@@ -16,7 +16,7 @@ The Godot spike currently:
 * previews detected event top-level commands by index, type, and concise payload summary
 * does not execute event command effects
 
-The next phase should preserve event detection and command preview behavior before adding any command effect.
+Command preview is implemented and host verified for both interact and touch event detection. The next phase should preserve that behavior before adding any command effect.
 
 ## Source of Truth
 
@@ -169,7 +169,7 @@ This design note does not include:
 
 ## Recommended Next Implementation Prompt
 
-After command preview is manually verified, implement a minimal Godot `show_message` executable spike without changing Project JSON or executing other command effects:
+Implement a minimal Godot `show_message` executable spike without changing Project JSON or executing other command effects:
 
 * preserve current `interact`, `touch`, and top-level command preview behavior
 * add a separate debug message panel for `show_message` speaker and text

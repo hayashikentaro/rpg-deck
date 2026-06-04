@@ -106,7 +106,7 @@ Current log/status-only behavior:
 * non-touch movement keeps the normal movement status; there is no `touch_event: none` output
 * blocked movement does not run touch detection
 
-The command-handling boundary is documented in [`docs/godot-command-boundary.md`](../docs/godot-command-boundary.md). After command preview is manually verified, the next recommended executable step is a separate minimal `show_message` debug message panel spike.
+The command-handling boundary is documented in [`docs/godot-command-boundary.md`](../docs/godot-command-boundary.md). Command preview is host verified, and the next recommended executable step is a separate minimal `show_message` debug message panel spike.
 
 ## Current Manual Verification Status
 
@@ -115,9 +115,16 @@ Verified on a host Godot run:
 * `pnpm godot` performs build then run
 * Apple Silicon Godot/.NET architecture alignment works
 * grid, legend, status line, and facing markers are visible without layout overlap
+* movement and collision blocking remain working
+* collision blocking displays `movement_blocked: collision [2, 1] facing up`
+* touch detection displays `touch_event: touch_test at [5, 6]`
+* an empty touch command array displays `command_preview: touch_test commands=0`
 * interact detection displays `interact_event: mayor_intro at [7, 6]`
+* a facing cell without an interact event displays `interact_event: none at [5, 6]`
+* `mayor_intro` command preview reports `play_bgm`, `play_sfx`, `show_message`, and `choice`
+* command effects do not run
 
-Touch verification is prepared, but not recorded as host-verified yet. An ignored local handoff JSON can add `touch_test` on `town` at `[5, 6]` with `trigger: touch` and `commands: []`.
+Touch verification used ignored local handoff JSON with `touch_test` on `town` at `[5, 6]`, `trigger: touch`, and `commands: []`. That file is non-canonical and is not committed.
 
 ## Manual Verification
 
