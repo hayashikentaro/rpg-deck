@@ -15,6 +15,21 @@ import type { ProjectProposal } from "./proposals.js";
 
 export type MapEditMode = "move_event" | "toggle_collision";
 
+export type ProjectJsonPreviewResult =
+  | {
+      ok: true;
+      summary: {
+        id: string;
+        title: string;
+        maps: number;
+        events: number;
+        flags: number;
+        validationIssues: number;
+      };
+      message: string;
+    }
+  | { ok: false; message: string };
+
 export type EditorOverviewProps = {
   projectTitle: string;
   project: GameProject;
@@ -40,6 +55,7 @@ export type EditorOverviewProps = {
   onRejectProposal?: () => void;
   onHoldProposal?: () => void;
   onImportProjectJson?: (json: string) => { ok: true } | { ok: false; message: string };
+  onPreviewProjectJson?: (json: string) => ProjectJsonPreviewResult;
   onSelectEvent?: (eventId: string) => void;
   onUpdateEvent?: (eventId: string, updater: (event: EventDefinition) => EventDefinition) => void;
 };
@@ -69,6 +85,7 @@ export function EditorOverview({
   onRejectProposal,
   onHoldProposal,
   onImportProjectJson,
+  onPreviewProjectJson,
   onSelectEvent,
   onUpdateEvent
 }: EditorOverviewProps) {
@@ -78,6 +95,7 @@ export function EditorOverview({
     kind: "success" | "error";
     message: string;
   } | null>(null);
+  const [projectJsonPreviewStatus, setProjectJsonPreviewStatus] = useState<ProjectJsonPreviewResult | null>(null);
   const projectJson = JSON.stringify(project, null, 2);
   const issueItems = validationIssues.map((issue, index) => ({
     id: `${issue.code}-${issue.path}-${index}`,
@@ -127,6 +145,7 @@ export function EditorOverview({
     const result = onImportProjectJson(projectJsonImportText);
     if (result.ok) {
       setProjectJsonImportText("");
+      setProjectJsonPreviewStatus(null);
       setProjectJsonImportStatus({
         kind: "success",
         message: "Project JSON loaded."
@@ -137,6 +156,19 @@ export function EditorOverview({
         message: result.message
       });
     }
+  };
+
+  const previewProjectJson = () => {
+    if (!onPreviewProjectJson) return;
+
+    setProjectJsonImportStatus(null);
+    setProjectJsonPreviewStatus(onPreviewProjectJson(projectJsonImportText));
+  };
+
+  const updateProjectJsonImportText = (value: string) => {
+    setProjectJsonImportText(value);
+    setProjectJsonImportStatus(null);
+    setProjectJsonPreviewStatus(null);
   };
 
   return (
@@ -346,14 +378,56 @@ export function EditorOverview({
                 <textarea
                   className="project-json__textarea"
                   value={projectJsonImportText}
-                  onChange={(event) => setProjectJsonImportText(event.currentTarget.value)}
+                  onChange={(event) => updateProjectJsonImportText(event.currentTarget.value)}
                 />
               </label>
-              <div className="project-json__actions">
+              <div className="project-json__import-actions">
+                <button className="project-json__button" type="button" onClick={previewProjectJson}>
+                  Preview Project JSON
+                </button>
                 <button className="project-json__button" type="button" onClick={loadProjectJson}>
                   Load Project JSON
                 </button>
               </div>
+              {projectJsonPreviewStatus ? (
+                projectJsonPreviewStatus.ok ? (
+                  <div className="project-json__preview">
+                    <p className="project-json__status" data-kind="success" role="status">
+                      {projectJsonPreviewStatus.message}
+                    </p>
+                    <dl className="project-json__preview-fields">
+                      <div>
+                        <dt>ID</dt>
+                        <dd>{projectJsonPreviewStatus.summary.id}</dd>
+                      </div>
+                      <div>
+                        <dt>Title</dt>
+                        <dd>{projectJsonPreviewStatus.summary.title}</dd>
+                      </div>
+                      <div>
+                        <dt>Maps</dt>
+                        <dd>{projectJsonPreviewStatus.summary.maps}</dd>
+                      </div>
+                      <div>
+                        <dt>Events</dt>
+                        <dd>{projectJsonPreviewStatus.summary.events}</dd>
+                      </div>
+                      <div>
+                        <dt>Flags</dt>
+                        <dd>{projectJsonPreviewStatus.summary.flags}</dd>
+                      </div>
+                      <div>
+                        <dt>Validation issues</dt>
+                        <dd>{projectJsonPreviewStatus.summary.validationIssues}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                ) : (
+                  <p className="project-json__status" data-kind="error" role="status">
+                    {projectJsonPreviewStatus.message}
+                  </p>
+                )
+              ) : null}
               {projectJsonImportStatus ? (
                 <p className="project-json__status" data-kind={projectJsonImportStatus.kind} role="status">
                   {projectJsonImportStatus.message}

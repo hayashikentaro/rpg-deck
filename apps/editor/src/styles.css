@@ -651,6 +651,12 @@ textarea {
   gap: 6px;
 }
 
+.project-json__import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .project-json__button {
   border: 1px solid #c9c9c2;
   border-radius: 6px;
@@ -703,6 +709,37 @@ textarea {
   margin: 0;
   color: #333;
   font-size: 14px;
+}
+
+.project-json__preview {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #deded8;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.project-json__preview-fields {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.project-json__preview-fields div {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.project-json__preview-fields dt {
+  color: #666;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.project-json__preview-fields dd {
+  margin: 0;
 }
 
 .project-json__status[data-kind="success"] {

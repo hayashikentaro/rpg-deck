@@ -107,6 +107,47 @@ export function App() {
     }
   };
 
+  const previewProjectJson = (
+    json: string
+  ):
+    | {
+        ok: true;
+        summary: {
+          id: string;
+          title: string;
+          maps: number;
+          events: number;
+          flags: number;
+          validationIssues: number;
+        };
+        message: string;
+      }
+    | { ok: false; message: string } => {
+    try {
+      const previewProject = parseProjectJson(json);
+      const previewSummary = summarizeProject(previewProject);
+      const previewValidationIssues = validateProject(previewProject);
+
+      return {
+        ok: true,
+        summary: {
+          id: previewSummary.id,
+          title: previewSummary.title,
+          maps: previewSummary.counts.maps,
+          events: previewSummary.counts.events,
+          flags: previewSummary.counts.flags,
+          validationIssues: previewValidationIssues.length
+        },
+        message: "Preview ready."
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        message: `Preview failed. Paste valid RPG Deck project JSON.${formatImportError(error)}`
+      };
+    }
+  };
+
   const updateEvent = (eventId: string, updater: (event: EventDefinition) => EventDefinition) => {
     setProject((currentProject) => {
       const currentEvent = currentProject.events[eventId];
@@ -175,6 +216,7 @@ export function App() {
       onHoldProposal={holdProposal}
       onImportProjectJson={importProjectJson}
       onInteract={() => dispatchRuntimeInput({ type: "interact" })}
+      onPreviewProjectJson={previewProjectJson}
       onChooseOption={(optionIndex) => dispatchRuntimeInput({ type: "choose", optionIndex })}
       onMapEditModeChange={setMapEditMode}
       onMove={(direction: Direction) => dispatchRuntimeInput({ type: "move", direction })}

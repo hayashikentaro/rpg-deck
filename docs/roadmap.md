@@ -304,6 +304,7 @@ Initial implementation status:
 * Authoring status now shows the current map edit mode, selected event, and grid click action near the preview. This improves authoring clarity without changing runtime or map-editing behavior, and the renderer remains HTML grid based.
 * The editor can now show and copy the current project JSON as a first export-like artifact. File save, download, and persistence remain out of scope.
 * Current project JSON can now be pasted and loaded through the editor using the domain parser. Import replaces current project state and recreates runtime through the existing project flow while file save/load, download, localStorage, and persistence remain out of scope.
+* Pasted Project JSON can now be previewed before loading. Preview uses the domain parser, shows project summary and validation issue count, and does not replace the current project; loading remains an explicit action.
 
 ## Phase 11: Godot Boundary Spike
 
