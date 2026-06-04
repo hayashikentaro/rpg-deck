@@ -326,3 +326,4 @@ Initial implementation status:
 * The Godot loader acceptance checklist is documented. First loader success is scoped to project, map, player, collision, event marker, and debug command handling while sprite art, full command UI, battle/audio, exporter package, and save-back remain out of scope.
 * A minimal `godot_spike/` project skeleton now exists. The manual Project JSON input path is documented, and `ProjectLoader.cs` only parses and logs project summary for now; map, player, and collision rendering remain the next step.
 * `godot_spike` now has a minimal main scene that runs `ProjectLoader.cs`. Running the project only parses and logs project summary; rendering and gameplay remain out of scope.
+* `ProjectLoader.cs` now defensively extracts the start map summary needed for the next rendering step, including current map size, collision count, and event count. Rendering, movement, and collision behavior remain out of scope.

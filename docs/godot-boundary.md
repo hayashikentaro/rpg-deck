@@ -233,10 +233,13 @@ The expected manual handoff input path is:
 * start position
 * map count
 * event count
+* current map size
+* current map collision count
+* current map event count
 
 `project.godot` sets `res://scenes/ProjectLoaderScene.tscn` as the main scene. Running the project currently only executes `ProjectLoader.cs` on a plain `Node`.
 
-Map rendering, player movement, collision behavior, event interaction, and command execution remain the next steps. The `godot_spike/` directory is not an authoring source and must not become a schema fork.
+The loader extracts these values defensively so missing or malformed fields warn and fall back instead of crashing. Map rendering, player movement, collision behavior, event interaction, and command execution remain the next steps. The `godot_spike/` directory is not an authoring source and must not become a schema fork.
 
 ## First Godot Spike Behavior
 

@@ -39,6 +39,9 @@ If `data/project.json` is missing, the loader should report a clear warning and 
    * start position
    * map count
    * event count
+   * current map size
+   * current map collision count
+   * current map event count
 6. Rename or remove `data/project.json`.
 7. Run the project again.
 8. Confirm the missing-file warning appears and the project does not crash.
@@ -47,6 +50,6 @@ If `data/project.json` is missing, the loader should report a clear warning and 
 
 The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
-`ProjectLoader.cs` only reads, parses, and logs a project summary. Map rendering, player movement, collision behavior, event interaction, and command execution are intentionally left for later Phase 11 steps.
+`ProjectLoader.cs` only reads, parses, extracts first-loader summary data, and logs a project summary. It now includes current map size, current map collision count, and current map event count. Map rendering, player movement, collision behavior, event interaction, and command execution are intentionally left for later Phase 11 steps.
 
 Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.
