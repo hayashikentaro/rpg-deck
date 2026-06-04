@@ -1,11 +1,19 @@
 ; Engine configuration file.
-; This Godot project is a minimal RPG Deck boundary spike.
-; It uses a minimal main scene that runs ProjectLoader.cs.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
 [application]
 
 config/name="RPG Deck Godot Spike"
-config/features=PackedStringArray("4.2", "C#")
 run/main_scene="res://scenes/ProjectLoaderScene.tscn"
+config/features=PackedStringArray("4.6", "C#")
+
+[dotnet]
+
+project/assembly_name="RPG Deck Godot Spike"
