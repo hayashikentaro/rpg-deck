@@ -185,6 +185,7 @@ describe("EditorOverview", () => {
     const html = renderOverview();
 
     expect(html).toContain("Diff Review");
+    expect(html).toContain("Confirm accepted changes in Event Inspector and Playable Preview.");
   });
 
   it("renders create proposal button when no proposal exists", () => {
@@ -198,6 +199,7 @@ describe("EditorOverview", () => {
 
     expect(html).toContain("Mayor follow-up guidance");
     expect(html).toContain("Changes: 1");
+    expect(html).toContain("Proposal status: active");
   });
 
   it("renders proposal review action labels", () => {
@@ -206,6 +208,21 @@ describe("EditorOverview", () => {
     expect(html).toContain("Accept");
     expect(html).toContain("Reject");
     expect(html).toContain("Hold");
+  });
+
+  it("renders held proposal status", () => {
+    const html = renderOverview({
+      ...mockProposal,
+      status: "held"
+    });
+
+    expect(html).toContain("Proposal status: held");
+  });
+
+  it("renders proposal confirmation notice", () => {
+    const html = renderOverview(null, snapshot, "Accepted proposal applied. Confirm the updated event.");
+
+    expect(html).toContain("Accepted proposal applied. Confirm the updated event.");
   });
 });
 
@@ -232,12 +249,17 @@ const mockProposal: ProjectProposal = {
   }
 };
 
-function renderOverview(proposal: ProjectProposal | null = null, runtimeSnapshot: RuntimeSnapshot = snapshot) {
+function renderOverview(
+  proposal: ProjectProposal | null = null,
+  runtimeSnapshot: RuntimeSnapshot = snapshot,
+  proposalNotice: string | null = null
+) {
   return renderToStaticMarkup(
     <EditorOverview
       eventLog={[]}
       mermaid={"flowchart TD\n  map_town[\"Town\"]\n"}
       proposal={proposal}
+      proposalNotice={proposalNotice}
       project={project}
       projectTitle="Tiny RPG"
       runtimeSnapshot={runtimeSnapshot}

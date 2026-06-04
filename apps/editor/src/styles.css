@@ -435,6 +435,31 @@ textarea {
   line-height: 1.4;
 }
 
+.diff-review__guidance,
+.diff-review__notice,
+.diff-review__status {
+  margin: 8px 0;
+}
+
+.diff-review__guidance,
+.diff-review__status {
+  color: #666;
+  font-size: 13px;
+}
+
+.diff-review__notice {
+  padding: 8px 10px;
+  border: 1px solid #c9c9c2;
+  border-radius: 6px;
+  background: #fafaf8;
+  color: #444;
+}
+
+.diff-review__status[data-proposal-status="held"] {
+  color: #735500;
+  font-weight: 700;
+}
+
 .rdk-canvas-toolbar {
   display: flex;
   flex-wrap: wrap;

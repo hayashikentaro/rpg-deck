@@ -251,6 +251,10 @@ Historical note:
 
 * The editor already has an initial mock proposal and `DiffCard` surface. Future work should connect that review to visible preview confirmation before expanding the diff-review workflow.
 
+Initial implementation status:
+
+* The mock proposal now targets a preview-confirmable direct event dialogue change. Accept applies it to the current project for Event Inspector and Playable Preview confirmation, Reject leaves the project unchanged, and Hold keeps the proposal visible. Real AI integration remains out of scope.
+
 ## Phase 9: HTML Grid Map Editing + Runtime Confirmation
 
 Purpose:

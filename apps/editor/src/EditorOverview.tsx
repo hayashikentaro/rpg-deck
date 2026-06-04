@@ -22,6 +22,7 @@ export type EditorOverviewProps = {
   runtimeSnapshot: RuntimeSnapshot;
   eventLog: RuntimeEventLogEntry[];
   proposal: ProjectProposal | null;
+  proposalNotice?: string | null;
   selectedEventId: string | null;
   onMove?: (direction: Direction) => void;
   onInteract?: () => void;
@@ -45,6 +46,7 @@ export function EditorOverview({
   runtimeSnapshot,
   eventLog,
   proposal,
+  proposalNotice,
   selectedEventId,
   onMove,
   onInteract,
@@ -187,28 +189,37 @@ export function EditorOverview({
           </section>
           <section>
             <h2>Diff Review</h2>
+            <p className="diff-review__guidance">
+              Accept applies the proposed project change. Confirm accepted changes in Event Inspector and Playable Preview.
+            </p>
+            {proposalNotice ? <p className="diff-review__notice">{proposalNotice}</p> : null}
             {proposal ? (
-              <DiffCard
-                title={proposal.title}
-                summary={`${proposal.summary} Status: ${proposal.status}. Changes: ${proposal.diff.changes.length}.`}
-                changes={proposal.diff.changes.map((change) => ({
-                  id: `${change.type}-${change.path}`,
-                  type: change.type,
-                  entityType: change.entityType,
-                  entityId: change.entityId,
-                  path: change.path,
-                  before: change.before ? <pre>{JSON.stringify(change.before, null, 2)}</pre> : undefined,
-                  after: change.after ? <pre>{JSON.stringify(change.after, null, 2)}</pre> : undefined
-                }))}
-                actions={{
-                  onAccept: onAcceptProposal,
-                  onReject: onRejectProposal,
-                  onHold: onHoldProposal
-                }}
-              />
+              <div className="diff-review__proposal">
+                <p className="diff-review__status" data-proposal-status={proposal.status}>
+                  Proposal status: {proposal.status}
+                </p>
+                <DiffCard
+                  title={proposal.title}
+                  summary={`${proposal.summary} Changes: ${proposal.diff.changes.length}.`}
+                  changes={proposal.diff.changes.map((change) => ({
+                    id: `${change.type}-${change.path}`,
+                    type: change.type,
+                    entityType: change.entityType,
+                    entityId: change.entityId,
+                    path: change.path,
+                    before: change.before ? <pre>{JSON.stringify(change.before, null, 2)}</pre> : undefined,
+                    after: change.after ? <pre>{JSON.stringify(change.after, null, 2)}</pre> : undefined
+                  }))}
+                  actions={{
+                    onAccept: onAcceptProposal,
+                    onReject: onRejectProposal,
+                    onHold: onHoldProposal
+                  }}
+                />
+              </div>
             ) : (
               <div className="empty-proposal">
-                <p>No active project proposal.</p>
+                <p>No active mock project proposal.</p>
                 <button type="button" onClick={onCreateProposal}>
                   Create mock proposal
                 </button>

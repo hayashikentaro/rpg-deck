@@ -17,6 +17,7 @@ const sampleProject = parseProjectJson(JSON.stringify(sampleProjectJson));
 export function App() {
   const [project, setProject] = useState(sampleProject);
   const [proposal, setProposal] = useState<ProjectProposal | null>(() => createMockProposal(sampleProject));
+  const [proposalNotice, setProposalNotice] = useState<string | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(() => Object.keys(sampleProject.events)[0] ?? null);
   const summary = useMemo(() => summarizeProject(project), [project]);
   const validationIssues = useMemo(() => validateProject(project), [project]);
@@ -54,17 +55,22 @@ export function App() {
 
   const createProposal = () => {
     setProposal(createMockProposal(project));
+    setProposalNotice(null);
   };
 
   const acceptProposal = () => {
     if (!proposal) return;
 
+    const affectedEventId = proposal.diff.changes.find((change) => change.entityType === "event")?.entityId;
     setProject(proposal.afterProject);
+    if (affectedEventId) setSelectedEventId(affectedEventId);
     setProposal(null);
+    setProposalNotice("Accepted proposal applied. Confirm the updated event in Event Inspector and Playable Preview.");
   };
 
   const rejectProposal = () => {
     setProposal(null);
+    setProposalNotice("Mock proposal rejected. The current project was not changed.");
   };
 
   const holdProposal = () => {
@@ -74,6 +80,7 @@ export function App() {
       ...proposal,
       status: "held"
     });
+    setProposalNotice(null);
   };
 
   const updateEvent = (eventId: string, updater: (event: EventDefinition) => EventDefinition) => {
@@ -96,6 +103,7 @@ export function App() {
       eventLog={eventLog.slice(-8).reverse()}
       mermaid={mermaid}
       proposal={proposal}
+      proposalNotice={proposalNotice}
       project={project}
       projectTitle={project.title}
       runtimeSnapshot={snapshot}

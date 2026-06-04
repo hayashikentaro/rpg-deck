@@ -14,20 +14,13 @@ export type ProjectProposal = {
 
 export function createMockProposal(project: GameProject): ProjectProposal {
   const afterProject = cloneProject(project);
+  const targetEvent = findMessageEvent(afterProject);
 
-  if (afterProject.flags.mayor_follow_up_unlocked) {
-    afterProject.items = {
-      ...afterProject.items,
-      antidote: {
-        id: "antidote",
-        name: "Antidote"
-      }
-    };
-
+  if (!targetEvent) {
     return {
-      id: "mock-add-antidote",
-      title: "Add antidote item",
-      summary: "Adds a small database item so future proposal review can inspect added entities.",
+      id: "mock-no-previewable-dialogue",
+      title: "No preview-confirmable dialogue found",
+      summary: "No event with a direct show_message command was found, so this mock proposal makes no changes.",
       status: "active",
       beforeProject: project,
       afterProject,
@@ -35,22 +28,16 @@ export function createMockProposal(project: GameProject): ProjectProposal {
     };
   }
 
-  afterProject.flags = {
-    ...afterProject.flags,
-    mayor_follow_up_unlocked: {
-      id: "mayor_follow_up_unlocked",
-      name: "Mayor follow-up unlocked"
-    }
-  };
+  const messageIndex = targetEvent.commands.findIndex((command) => command.type === "show_message");
   afterProject.events = {
     ...afterProject.events,
-    mayor_intro: {
-      ...afterProject.events.mayor_intro,
-      commands: afterProject.events.mayor_intro.commands.map((command) =>
-        command.type === "show_message"
+    [targetEvent.id]: {
+      ...targetEvent,
+      commands: targetEvent.commands.map((command, index) =>
+        index === messageIndex && command.type === "show_message"
           ? {
               ...command,
-              text: "北の洞窟には近づくな。準備ができたら、もう一度わしに話しかけなさい。"
+              text: "北の洞窟にはまだ近づくな。準備ができたら戻ってこい。"
             }
           : command
       )
@@ -58,9 +45,9 @@ export function createMockProposal(project: GameProject): ProjectProposal {
   };
 
   return {
-    id: "mock-mayor-follow-up",
-    title: "Mayor follow-up guidance",
-    summary: "Updates the mayor warning text and adds a stable flag for a future follow-up branch.",
+    id: `mock-dialogue-${targetEvent.id}`,
+    title: `Clarify dialogue for ${targetEvent.id}`,
+    summary: `Updates the first direct show_message in '${targetEvent.id}' so the proposal can be confirmed in Event Inspector and Playable Preview.`,
     status: "active",
     beforeProject: project,
     afterProject,
@@ -70,4 +57,13 @@ export function createMockProposal(project: GameProject): ProjectProposal {
 
 function cloneProject(project: GameProject): GameProject {
   return JSON.parse(JSON.stringify(project)) as GameProject;
+}
+
+function findMessageEvent(project: GameProject) {
+  const mayorIntro = project.events.mayor_intro;
+  if (mayorIntro?.commands.some((command) => command.type === "show_message")) return mayorIntro;
+
+  return Object.values(project.events).find((event) =>
+    event.commands.some((command) => command.type === "show_message")
+  );
 }
