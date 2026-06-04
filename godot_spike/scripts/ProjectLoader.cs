@@ -22,7 +22,7 @@ public partial class ProjectLoader : Node
     public int DebugCellSize { get; set; } = 24;
 
     [Export]
-    public Vector2 DebugMapOffset { get; set; } = new Vector2(24, 80);
+    public Vector2 DebugMapOffset { get; set; } = new Vector2(24, 120);
 
     public override void _Ready()
     {
@@ -169,7 +169,7 @@ public partial class ProjectLoader : Node
         {
             Name = "DebugStatus",
             Text = "Status: ready",
-            Position = new Vector2(24, 56)
+            Position = new Vector2(24, 72)
         };
         AddChild(_debugStatusLabel);
     }
