@@ -247,7 +247,7 @@ The spike also supports minimal player marker movement on the debug grid. The in
 
 The spike can detect a `trigger: interact` event in the player's facing cell when Enter, Space, or Z is pressed. It logs the event id and position only. The debug viewport also shows a status line with the latest movement or interact result so manual verification does not depend only on the Output log. Event commands, dialogue UI, touch event detection, and command execution remain out of scope.
 
-For mounted-repository host verification, prepare `godot_spike/data/project.json` from inside the container and prefer `godot_spike/scripts/host_verify.sh` for host-side Godot runs. Host-specific Godot or .NET paths should come from environment variables or ignored `godot_spike/.env.local`, not tracked docs or scripts. Local Godot outputs such as `.godot/`, `.mono/`, `.csproj`, `.sln`, the handoff `data/project.json`, and `.env.local` are ignored and non-canonical.
+For mounted-repository host verification, prepare `godot_spike/data/project.json` from inside the container and prefer root package scripts such as `pnpm godot` or the underlying `godot_spike/scripts/host_verify.sh` for host-side Godot runs. Host-specific Godot or .NET paths should come from environment variables or ignored `godot_spike/.env.local`, not tracked docs or scripts. Local Godot outputs such as `.godot/`, `.mono/`, `.csproj`, `.sln`, the handoff `data/project.json`, and `.env.local` are ignored and non-canonical.
 
 ## First Godot Spike Behavior
 

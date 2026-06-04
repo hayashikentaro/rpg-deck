@@ -42,10 +42,22 @@ When this repository is mounted into the Codex container, prepare local handoff 
 From the repository root, run:
 
 ```bash
-./godot_spike/scripts/host_verify.sh
+pnpm godot
 ```
 
 Supported modes:
+
+```bash
+pnpm godot
+pnpm godot:run
+pnpm godot:verbose
+pnpm godot:build
+pnpm godot:editor
+```
+
+`run` is the default mode. `verbose` writes `/tmp/rpg-deck-godot-run.log`, `build` runs a headless C# build, and `editor` opens the Godot editor.
+
+The underlying script can also be called directly:
 
 ```bash
 ./godot_spike/scripts/host_verify.sh run
@@ -54,12 +66,10 @@ Supported modes:
 ./godot_spike/scripts/host_verify.sh editor
 ```
 
-`run` is the default mode. `verbose` writes `/tmp/rpg-deck-godot-run.log`, `build` runs a headless C# build, and `editor` opens the Godot editor.
-
 Host-specific paths can be passed as environment variables:
 
 ```bash
-GODOT_BIN=/path/to/Godot DOTNET_ROOT=/path/to/dotnet ./godot_spike/scripts/host_verify.sh run
+GODOT_BIN=/path/to/Godot DOTNET_ROOT=/path/to/dotnet pnpm godot
 ```
 
 Or put them in ignored local file `godot_spike/.env.local`:
