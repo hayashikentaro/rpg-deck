@@ -213,6 +213,14 @@ describe("PlayablePreview", () => {
     expect(html).toContain("Move selected event to [0, 0]. Player at [0, 0], facing down");
     expect(html).not.toContain("Move selected event to [2, 0]. interact event npc");
   });
+
+  it("uses collision action labels when collision toggle mode is active", () => {
+    const html = renderPreview(snapshot, undefined, undefined, () => undefined, "npc", undefined, "toggle_collision");
+
+    expect(html).toContain("Toggle collision at [0, 0]. Player at [0, 0], facing down");
+    expect(html).toContain("Toggle collision at [1, 0]. Collision at [1, 0]");
+    expect(html).toContain("Toggle collision at [2, 0]. interact event npc at [2, 0], selected");
+  });
 });
 
 function renderPreview(
@@ -221,7 +229,8 @@ function renderPreview(
   onAdvance?: () => void,
   onCellClick?: (position: [number, number]) => void,
   selectedEventId?: string | null,
-  onEventClick?: (eventId: string) => void
+  onEventClick?: (eventId: string) => void,
+  cellClickAction?: "move_selected_event" | "toggle_collision"
 ) {
   return renderToStaticMarkup(
     <PlayablePreview
@@ -231,6 +240,7 @@ function renderPreview(
       onCellClick={onCellClick}
       onChooseOption={onChooseOption}
       onEventClick={onEventClick}
+      cellClickAction={cellClickAction}
       selectedEventId={selectedEventId}
     />
   );

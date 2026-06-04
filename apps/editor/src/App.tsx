@@ -10,7 +10,7 @@ import {
 } from "@rpg-deck/core-domain";
 import { createRuntime, type Direction, type PlayerInput } from "@rpg-deck/web-runtime";
 import sampleProjectJson from "../../../packages/sample-projects/tiny-rpg/project.json" with { type: "json" };
-import { EditorOverview } from "./EditorOverview.js";
+import { EditorOverview, type MapEditMode } from "./EditorOverview.js";
 import { createMockProposal, type ProjectProposal } from "./proposals.js";
 
 const sampleProject = parseProjectJson(JSON.stringify(sampleProjectJson));
@@ -20,6 +20,7 @@ export function App() {
   const [proposal, setProposal] = useState<ProjectProposal | null>(() => createMockProposal(sampleProject));
   const [proposalNotice, setProposalNotice] = useState<string | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(() => Object.keys(sampleProject.events)[0] ?? null);
+  const [mapEditMode, setMapEditMode] = useState<MapEditMode>("move_event");
   const summary = useMemo(() => summarizeProject(project), [project]);
   const validationIssues = useMemo(() => validateProject(project), [project]);
   const graph = useMemo(() => buildEventGraph(project), [project]);
@@ -108,12 +109,38 @@ export function App() {
     }));
   };
 
+  const toggleCollisionAt = (position: GridPosition) => {
+    const mapId = snapshot.currentMapId;
+    setProject((currentProject) => {
+      const currentMap = currentProject.maps[mapId];
+      if (!currentMap) return currentProject;
+
+      const collision = currentMap.collision ?? [];
+      const hasCollision = collision.some((collisionPosition) => positionsEqual(collisionPosition, position));
+      const nextCollision = hasCollision
+        ? collision.filter((collisionPosition) => !positionsEqual(collisionPosition, position))
+        : [...collision, [position[0], position[1]] as GridPosition];
+
+      return {
+        ...currentProject,
+        maps: {
+          ...currentProject.maps,
+          [mapId]: {
+            ...currentMap,
+            collision: nextCollision
+          }
+        }
+      };
+    });
+  };
+
   return (
     <EditorOverview
       eventLog={eventLog.slice(-8).reverse()}
       mermaid={mermaid}
       proposal={proposal}
       proposalNotice={proposalNotice}
+      mapEditMode={mapEditMode}
       project={project}
       projectTitle={project.title}
       runtimeSnapshot={snapshot}
@@ -126,12 +153,18 @@ export function App() {
       onHoldProposal={holdProposal}
       onInteract={() => dispatchRuntimeInput({ type: "interact" })}
       onChooseOption={(optionIndex) => dispatchRuntimeInput({ type: "choose", optionIndex })}
+      onMapEditModeChange={setMapEditMode}
       onMove={(direction: Direction) => dispatchRuntimeInput({ type: "move", direction })}
       onMoveSelectedEvent={moveSelectedEventTo}
       onRejectProposal={rejectProposal}
       onRestart={restart}
       onSelectEvent={setSelectedEventId}
+      onToggleCollision={toggleCollisionAt}
       onUpdateEvent={updateEvent}
     />
   );
+}
+
+function positionsEqual(left: GridPosition, right: GridPosition) {
+  return left[0] === right[0] && left[1] === right[1];
 }

@@ -13,6 +13,8 @@ import { EventInspector } from "./features/events/EventInspector.js";
 import { PlayablePreview } from "./features/preview/PlayablePreview.js";
 import type { ProjectProposal } from "./proposals.js";
 
+export type MapEditMode = "move_event" | "toggle_collision";
+
 export type EditorOverviewProps = {
   projectTitle: string;
   project: GameProject;
@@ -23,12 +25,15 @@ export type EditorOverviewProps = {
   eventLog: RuntimeEventLogEntry[];
   proposal: ProjectProposal | null;
   proposalNotice?: string | null;
+  mapEditMode: MapEditMode;
   selectedEventId: string | null;
   onMove?: (direction: Direction) => void;
   onInteract?: () => void;
   onAdvance?: () => void;
   onChooseOption?: (optionIndex: number) => void;
+  onMapEditModeChange?: (mode: MapEditMode) => void;
   onMoveSelectedEvent?: (position: GridPosition) => void;
+  onToggleCollision?: (position: GridPosition) => void;
   onRestart?: () => void;
   onCreateProposal?: () => void;
   onAcceptProposal?: () => void;
@@ -48,12 +53,15 @@ export function EditorOverview({
   eventLog,
   proposal,
   proposalNotice,
+  mapEditMode,
   selectedEventId,
   onMove,
   onInteract,
   onAdvance,
   onChooseOption,
+  onMapEditModeChange,
   onMoveSelectedEvent,
+  onToggleCollision,
   onRestart,
   onCreateProposal,
   onAcceptProposal,
@@ -168,21 +176,41 @@ export function EditorOverview({
       }
       main={
         <main className="editor-main">
+          <section className="map-edit-mode" aria-labelledby="map-edit-mode-title">
+            <h2 id="map-edit-mode-title">Map edit mode</h2>
+            <div className="map-edit-mode__actions">
+              <button
+                className="map-edit-mode__button"
+                data-active={mapEditMode === "move_event"}
+                type="button"
+                onClick={() => onMapEditModeChange?.("move_event")}
+              >
+                Move event
+              </button>
+              <button
+                className="map-edit-mode__button"
+                data-active={mapEditMode === "toggle_collision"}
+                type="button"
+                onClick={() => onMapEditModeChange?.("toggle_collision")}
+              >
+                Toggle collision
+              </button>
+            </div>
+          </section>
           <PlayablePreview
             eventLog={eventLog}
             project={project}
             selectedEventId={selectedEventId}
             snapshot={runtimeSnapshot}
             onAdvance={onAdvance}
-            onCellClick={selectedEventId ? onMoveSelectedEvent : undefined}
+            onCellClick={
+              mapEditMode === "toggle_collision" ? onToggleCollision : selectedEventId ? onMoveSelectedEvent : undefined
+            }
             onChooseOption={onChooseOption}
-            onEventClick={onSelectEvent}
+            onEventClick={mapEditMode === "move_event" ? onSelectEvent : undefined}
+            cellClickAction={mapEditMode === "toggle_collision" ? "toggle_collision" : "move_selected_event"}
           />
-          {selectedEventId ? (
-            <p className="playable-preview__edit-hint">
-              Click an event marker to select it. Click another cell to move the selected event.
-            </p>
-          ) : null}
+          <p className="playable-preview__edit-hint">{mapEditHint(mapEditMode, selectedEventId)}</p>
           <section>
             <h2>Runtime snapshot</h2>
             <pre>{JSON.stringify(runtimeSnapshot, null, 2)}</pre>
@@ -271,6 +299,12 @@ export function EditorOverview({
       footer={<p>Editor app composes core-domain, web-runtime, and ux-kit. Domain and runtime logic stay in packages.</p>}
     />
   );
+}
+
+function mapEditHint(mapEditMode: MapEditMode, selectedEventId: string | null) {
+  if (mapEditMode === "toggle_collision") return "Collision mode: click a grid cell to add or remove collision.";
+  if (selectedEventId) return "Move event mode: click an event marker to select it. Click another cell to move the selected event.";
+  return "Move event mode: select an event before moving it on the grid.";
 }
 
 type RuntimeKeyboardAction =

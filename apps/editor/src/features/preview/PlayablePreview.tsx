@@ -10,6 +10,7 @@ export type PlayablePreviewProps = {
   onCellClick?: (position: GridPosition) => void;
   onChooseOption?: (optionIndex: number) => void;
   onEventClick?: (eventId: string) => void;
+  cellClickAction?: "move_selected_event" | "toggle_collision";
   selectedEventId?: string | null;
   className?: string;
 };
@@ -31,6 +32,7 @@ export function PlayablePreview({
   onCellClick,
   onChooseOption,
   onEventClick,
+  cellClickAction = "move_selected_event",
   selectedEventId,
   className
 }: PlayablePreviewProps) {
@@ -77,7 +79,7 @@ export function PlayablePreview({
                   aria-label={
                     cell.eventId && onEventClick
                       ? `Select event ${cell.eventId}. ${cell.label}`
-                      : `Move selected event to ${positionLabel(cell.position)}. ${cell.label}`
+                      : `${cellActionLabel(cellClickAction, cell.position)}. ${cell.label}`
                   }
                   className="playable-preview__cell-button"
                   data-selected={cell.selected || undefined}
@@ -243,6 +245,11 @@ function positionsEqual(left: GridPosition, right: GridPosition) {
 
 function positionLabel(position: GridPosition) {
   return `[${position.join(", ")}]`;
+}
+
+function cellActionLabel(action: NonNullable<PlayablePreviewProps["cellClickAction"]>, position: GridPosition) {
+  if (action === "toggle_collision") return `Toggle collision at ${positionLabel(position)}`;
+  return `Move selected event to ${positionLabel(position)}`;
 }
 
 function playerMarker(direction: RuntimeSnapshot["facingDirection"]) {

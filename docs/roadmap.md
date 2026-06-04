@@ -281,6 +281,7 @@ Initial implementation status:
 * A selected event can be moved by clicking an HTML grid cell. Event Inspector and Playable Preview reflect the updated position while collision editing, tile painting, start-position editing, drag and drop, and cross-map movement remain out of scope.
 * The selected event is highlighted in the HTML grid so grid-click movement is easier to confirm.
 * Clicking an event marker now selects that event, while clicking a non-event cell continues to move the selected event. Drag and drop, event creation or deletion, collision editing, tile painting, and cross-map movement remain out of scope.
+* Map edit mode now separates event movement from collision toggling. Toggle collision mode updates the current map collision through project state, so runtime confirmation can show movement blocked or unblocked while tile painting, drag and drop, start-position editing, map creation or deletion, and cross-map movement remain out of scope.
 
 ## Phase 10: Better Preview Renderer
 

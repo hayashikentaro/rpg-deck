@@ -117,7 +117,11 @@ describe("EditorOverview", () => {
     const html = renderOverview();
 
     expect(html).toContain("Playable Grid Preview");
-    expect(html).toContain("Click an event marker to select it. Click another cell to move the selected event.");
+    expect(html).toContain("Map edit mode");
+    expect(html).toContain("Move event");
+    expect(html).toContain("Toggle collision");
+    expect(html).toContain('data-active="true"');
+    expect(html).toContain("Move event mode: click an event marker to select it. Click another cell to move the selected event.");
     expect(html).toContain("Runtime Status");
     expect(html).toContain("↓");
     expect(html).toContain("Player at [4, 6], facing down");
@@ -131,6 +135,13 @@ describe("EditorOverview", () => {
     expect(html).toContain("interact event mayor_intro at [7, 6], selected");
     expect(html).toContain("Select event mayor_intro. interact event mayor_intro at [7, 6], selected");
     expect(html).toContain('data-selected="true"');
+  });
+
+  it("renders collision mode hint and action labels", () => {
+    const html = renderOverview(null, snapshot, null, "toggle_collision");
+
+    expect(html).toContain("Collision mode: click a grid cell to add or remove collision.");
+    expect(html).toContain("Toggle collision at [4, 6]. Player at [4, 6], facing down");
   });
 
   it("renders event graph section", () => {
@@ -256,7 +267,8 @@ const mockProposal: ProjectProposal = {
 function renderOverview(
   proposal: ProjectProposal | null = null,
   runtimeSnapshot: RuntimeSnapshot = snapshot,
-  proposalNotice: string | null = null
+  proposalNotice: string | null = null,
+  mapEditMode: "move_event" | "toggle_collision" = "move_event"
 ) {
   return renderToStaticMarkup(
     <EditorOverview
@@ -264,6 +276,7 @@ function renderOverview(
       mermaid={"flowchart TD\n  map_town[\"Town\"]\n"}
       proposal={proposal}
       proposalNotice={proposalNotice}
+      mapEditMode={mapEditMode}
       project={project}
       projectTitle="Tiny RPG"
       runtimeSnapshot={runtimeSnapshot}
@@ -275,9 +288,11 @@ function renderOverview(
       onCreateProposal={() => undefined}
       onHoldProposal={() => undefined}
       onChooseOption={() => undefined}
+      onMapEditModeChange={() => undefined}
       onMoveSelectedEvent={() => undefined}
       onRejectProposal={() => undefined}
       onSelectEvent={() => undefined}
+      onToggleCollision={() => undefined}
       onUpdateEvent={() => undefined}
     />
   );

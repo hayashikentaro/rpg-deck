@@ -467,6 +467,36 @@ textarea {
   line-height: 1.4;
 }
 
+.map-edit-mode {
+  display: grid;
+  gap: 8px;
+}
+
+.map-edit-mode h2 {
+  margin: 0;
+}
+
+.map-edit-mode__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.map-edit-mode__button {
+  border: 1px solid #c9c9c2;
+  border-radius: 6px;
+  background: #fafaf8;
+  padding: 6px 10px;
+  color: #222;
+}
+
+.map-edit-mode__button[data-active="true"] {
+  border-color: #2266aa;
+  background: #eef6ff;
+  color: #0d4075;
+  font-weight: 700;
+}
+
 .diff-review__guidance,
 .diff-review__notice,
 .diff-review__status {
