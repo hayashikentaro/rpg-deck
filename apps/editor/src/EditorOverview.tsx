@@ -39,6 +39,7 @@ export type EditorOverviewProps = {
   onAcceptProposal?: () => void;
   onRejectProposal?: () => void;
   onHoldProposal?: () => void;
+  onImportProjectJson?: (json: string) => { ok: true } | { ok: false; message: string };
   onSelectEvent?: (eventId: string) => void;
   onUpdateEvent?: (eventId: string, updater: (event: EventDefinition) => EventDefinition) => void;
 };
@@ -67,10 +68,16 @@ export function EditorOverview({
   onAcceptProposal,
   onRejectProposal,
   onHoldProposal,
+  onImportProjectJson,
   onSelectEvent,
   onUpdateEvent
 }: EditorOverviewProps) {
   const [projectJsonCopyStatus, setProjectJsonCopyStatus] = useState<string | null>(null);
+  const [projectJsonImportText, setProjectJsonImportText] = useState("");
+  const [projectJsonImportStatus, setProjectJsonImportStatus] = useState<{
+    kind: "success" | "error";
+    message: string;
+  } | null>(null);
   const projectJson = JSON.stringify(project, null, 2);
   const issueItems = validationIssues.map((issue, index) => ({
     id: `${issue.code}-${issue.path}-${index}`,
@@ -111,6 +118,24 @@ export function EditorOverview({
       setProjectJsonCopyStatus("Project JSON copied.");
     } catch {
       setProjectJsonCopyStatus("Copy failed. Select and copy the JSON manually.");
+    }
+  };
+
+  const loadProjectJson = () => {
+    if (!onImportProjectJson) return;
+
+    const result = onImportProjectJson(projectJsonImportText);
+    if (result.ok) {
+      setProjectJsonImportText("");
+      setProjectJsonImportStatus({
+        kind: "success",
+        message: "Project JSON loaded."
+      });
+    } else {
+      setProjectJsonImportStatus({
+        kind: "error",
+        message: result.message
+      });
     }
   };
 
@@ -314,6 +339,27 @@ export function EditorOverview({
               <span>Current project JSON</span>
               <textarea className="project-json__textarea" readOnly value={projectJson} />
             </label>
+            <div className="project-json__import">
+              <h3>Import Project JSON</h3>
+              <label className="project-json__field">
+                <span>Paste project JSON</span>
+                <textarea
+                  className="project-json__textarea"
+                  value={projectJsonImportText}
+                  onChange={(event) => setProjectJsonImportText(event.currentTarget.value)}
+                />
+              </label>
+              <div className="project-json__actions">
+                <button className="project-json__button" type="button" onClick={loadProjectJson}>
+                  Load Project JSON
+                </button>
+              </div>
+              {projectJsonImportStatus ? (
+                <p className="project-json__status" data-kind={projectJsonImportStatus.kind} role="status">
+                  {projectJsonImportStatus.message}
+                </p>
+              ) : null}
+            </div>
           </section>
         </main>
       }

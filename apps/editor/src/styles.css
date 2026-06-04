@@ -692,6 +692,27 @@ textarea {
   resize: vertical;
 }
 
+.project-json__import {
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #deded8;
+}
+
+.project-json__import h3 {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.project-json__status[data-kind="success"] {
+  color: #1f6b3a;
+}
+
+.project-json__status[data-kind="error"] {
+  color: #9d3528;
+}
+
 .diff-review__status[data-proposal-status="held"] {
   color: #735500;
   font-weight: 700;

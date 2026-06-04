@@ -85,6 +85,28 @@ export function App() {
     setProposalNotice(null);
   };
 
+  const importProjectJson = (json: string): { ok: true } | { ok: false; message: string } => {
+    try {
+      const importedProject = parseProjectJson(json);
+
+      setProject(importedProject);
+      setSelectedEventId((currentEventId) =>
+        currentEventId && importedProject.events[currentEventId]
+          ? currentEventId
+          : Object.keys(importedProject.events)[0] ?? null
+      );
+      setProposal(null);
+      setProposalNotice("Project JSON imported. Runtime and editor views now use the imported project.");
+
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        message: `Import failed. Paste valid RPG Deck project JSON.${formatImportError(error)}`
+      };
+    }
+  };
+
   const updateEvent = (eventId: string, updater: (event: EventDefinition) => EventDefinition) => {
     setProject((currentProject) => {
       const currentEvent = currentProject.events[eventId];
@@ -151,6 +173,7 @@ export function App() {
       onAdvance={() => dispatchRuntimeInput({ type: "advance" })}
       onCreateProposal={createProposal}
       onHoldProposal={holdProposal}
+      onImportProjectJson={importProjectJson}
       onInteract={() => dispatchRuntimeInput({ type: "interact" })}
       onChooseOption={(optionIndex) => dispatchRuntimeInput({ type: "choose", optionIndex })}
       onMapEditModeChange={setMapEditMode}
@@ -167,4 +190,13 @@ export function App() {
 
 function positionsEqual(left: GridPosition, right: GridPosition) {
   return left[0] === right[0] && left[1] === right[1];
+}
+
+function formatImportError(error: unknown) {
+  if (!(error instanceof Error) || !error.message) return "";
+
+  const firstLine = error.message.split("\n")[0]?.trim();
+  if (!firstLine) return "";
+
+  return ` ${firstLine.slice(0, 160)}`;
 }

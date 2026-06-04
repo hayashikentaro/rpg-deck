@@ -121,6 +121,9 @@ describe("EditorOverview", () => {
     expect(html).toContain("Runtime, proposal, and UI state are not included.");
     expect(html).toContain("Copy Project JSON");
     expect(html).toContain("Current project JSON");
+    expect(html).toContain("Import Project JSON");
+    expect(html).toContain("Paste project JSON");
+    expect(html).toContain("Load Project JSON");
     expect(html).toContain("&quot;id&quot;: &quot;tiny-rpg&quot;");
     expect(html).toContain("&quot;title&quot;: &quot;Tiny RPG&quot;");
     expect(html).toContain("&quot;events&quot;");
@@ -309,6 +312,7 @@ function renderOverview(
       onAdvance={() => undefined}
       onCreateProposal={() => undefined}
       onHoldProposal={() => undefined}
+      onImportProjectJson={() => ({ ok: true })}
       onChooseOption={() => undefined}
       onMapEditModeChange={() => undefined}
       onMoveSelectedEvent={() => undefined}
