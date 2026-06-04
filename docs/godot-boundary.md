@@ -151,6 +151,65 @@ The exporter or Godot adapter is responsible for converting stable IDs to Godot 
 
 Runtime-specific paths are not the domain source of truth. The first Godot spike can render debug markers instead of loading sprite or tile artwork.
 
+## Manual Export / Handoff Procedure
+
+Until a dedicated exporter exists, the first Godot loader spike should use a manual handoff from the editor's Project JSON section.
+
+Current workflow:
+
+1. Start the RPG Deck editor.
+2. Edit project data using Event Inspector, grid editing, collision toggle, or proposal accept.
+3. Open the `Project JSON` section.
+4. If JSON is coming from another source, paste it into `Import Project JSON` and use `Preview Project JSON` first.
+5. Use `Copy Project JSON` to copy the current editor project.
+6. Paste the copied JSON into the Godot loader spike input location.
+7. The Godot loader should parse it as RPG Deck project JSON.
+8. If the loader fails, first confirm the same JSON still parses through RPG Deck import/preview.
+
+Important handoff rules:
+
+* copied JSON is the current editor project state
+* copied JSON excludes runtime snapshot, proposal state, and UI state
+* copied JSON should remain valid `parseProjectJson` input
+* validation should be checked before relying on the JSON in Godot
+* this is a manual handoff until a dedicated exporter exists
+
+For the first Godot spike, place copied JSON manually in a Godot-side fixture such as:
+
+    godot_spike/data/project.json
+
+The exact path can be chosen by the Godot spike. Treat that file as an input artifact for the spike, not as RPG Deck's canonical data. Do not commit generated handoff fixtures unless a later task explicitly asks for a fixture strategy.
+
+## Round-Trip Sanity Check
+
+Before handing JSON to Godot, use the editor to check the JSON can still round-trip through the RPG Deck parser:
+
+1. Copy current `Project JSON`.
+2. Paste it into `Import Project JSON`.
+3. Click `Preview Project JSON`.
+4. Confirm ID, title, map count, event count, flag count, and validation issue count.
+5. Load it only if you intentionally want to replace the current editor project.
+6. Use that same JSON for Godot handoff.
+
+If project JSON was manually edited outside RPG Deck, preview it in the editor before handing it to Godot. If preview fails, fix the JSON at the source instead of adding Godot-specific tolerance for invalid RPG Deck project data.
+
+## Future Automated Export
+
+Later work may introduce:
+
+* a dedicated exporter command
+* a fixture generator
+* a derived Godot-readable artifact
+* asset ID to `res://` path conversion
+* an optional `packages/godot-export` implementation
+
+For now:
+
+* no exporter package is created
+* no schema fork is introduced
+* no generated artifact is committed
+* no Godot project structure is created by RPG Deck
+
 ## First Godot Spike Behavior
 
 The first spike should prove the boundary, not complete a full port.
