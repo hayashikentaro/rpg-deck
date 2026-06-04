@@ -12,3 +12,4 @@ godot_spike/.godot/
 godot_spike/.mono/
 godot_spike/*.csproj
 godot_spike/*.sln
+godot_spike/.env.local

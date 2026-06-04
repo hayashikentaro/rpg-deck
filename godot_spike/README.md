@@ -37,6 +37,40 @@ When this repository is mounted into the Codex container, prepare local handoff 
 
 `godot_spike/data/project.json` is a local ignored handoff file. Godot may also create `.godot/`, `.csproj`, `.sln`, `.mono/`, or other local generated files while opening or running the project. These files are non-canonical and should not be committed unless a later task explicitly approves them.
 
+## Host Verification Script
+
+From the repository root, run:
+
+```bash
+./godot_spike/scripts/host_verify.sh
+```
+
+Supported modes:
+
+```bash
+./godot_spike/scripts/host_verify.sh run
+./godot_spike/scripts/host_verify.sh verbose
+./godot_spike/scripts/host_verify.sh build
+./godot_spike/scripts/host_verify.sh editor
+```
+
+`run` is the default mode. `verbose` writes `/tmp/rpg-deck-godot-run.log`, `build` runs a headless C# build, and `editor` opens the Godot editor.
+
+Host-specific paths can be passed as environment variables:
+
+```bash
+GODOT_BIN=/path/to/Godot DOTNET_ROOT=/path/to/dotnet ./godot_spike/scripts/host_verify.sh run
+```
+
+Or put them in ignored local file `godot_spike/.env.local`:
+
+```bash
+GODOT_BIN=/Applications/Godot_mono.app/Contents/MacOS/Godot
+DOTNET_ROOT=/usr/local/share/dotnet
+```
+
+The script falls back to common macOS Godot and .NET locations when env vars are not set. `.env.local` is ignored and must not be committed. `godot_spike/data/project.json` must already exist locally; the script checks for it but does not create it.
+
 ## Manual Verification
 
 1. Copy Project JSON from the RPG Deck editor.
