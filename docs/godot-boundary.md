@@ -19,6 +19,8 @@ For now, editor import/export remains browser-based JSON:
 
 The Godot loader should read the same project shape that `packages/core-domain` parses and validates. If a derived Godot export format becomes useful later, it should be introduced explicitly as an exporter output, not silently treated as the canonical schema.
 
+The next command-handling phase is defined separately in [`godot-command-boundary.md`](./godot-command-boundary.md). That note keeps event command work scoped to command preview first, followed by a minimal `show_message` executable spike.
+
 ## Ownership
 
 `packages/core-domain` owns:
@@ -343,7 +345,8 @@ Status labels:
 
 ### Commands
 
-* **Pending**: command execution boundary design note
+* **Implemented**: command execution boundary design note
+* **Pending**: log/status-only command preview
 * **Pending**: `show_message`, `choice`, flags, transfer, battle, and audio behavior
 * **Pending**: full command execution; it remains out of scope until explicitly designed
 
@@ -433,7 +436,7 @@ This boundary step does not include:
 Open questions for later spikes:
 
 * Should Godot read raw RPG Deck JSON directly, or should `packages/godot-export` produce a derived export later?
-* Which `EventCommand` types should Godot interpret in the first executable spike versus only display or log?
+* How should the command preview and first `show_message` executable spike be verified against the command boundary design note?
 * What asset mapping layer should convert sprite, tileset, and audio IDs into `res://` paths?
 * Should runtime semantics be shared by generated data, reimplemented in Godot C#, or tested against web-runtime snapshots?
 * How much of choice/message stepping should the first Godot spike support?

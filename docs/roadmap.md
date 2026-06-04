@@ -337,4 +337,5 @@ Initial implementation status:
 * The Godot debug grid can now detect `trigger: touch` events after successful entry and shows the event id in the Output log and status line. Event commands, dialogue UI, choices, flags, transfer, battle/audio, and command execution remain out of scope.
 * The Phase 11 boundary spike has reached log/status-only event detection: `interact` and `touch` events are detected by id and position but their commands are not executed.
 * Standard host implementation verification is `pnpm godot`, which performs a C# build before launching the spike.
-* The recommended next implementation step is a command execution boundary design note that decides which command semantics Godot should log, stub, or execute before runtime code is added.
+* The Godot command execution boundary is now documented in `docs/godot-command-boundary.md`. It classifies current command types as preview, placeholder, later executable, or out of scope for the first executable spike.
+* The recommended next implementation step is log/status-only command preview, followed by a separate minimal `show_message` debug message panel spike. Choices, flags, transfer, battle/audio, and full command execution remain deferred.

@@ -105,6 +105,8 @@ Current log/status-only behavior:
 * non-touch movement keeps the normal movement status; there is no `touch_event: none` output
 * blocked movement does not run touch detection
 
+The next command-handling boundary is documented in [`docs/godot-command-boundary.md`](../docs/godot-command-boundary.md). It recommends command preview before any command effects, followed by a separate minimal `show_message` debug message panel spike.
+
 ## Current Manual Verification Status
 
 Verified on a host Godot run:
