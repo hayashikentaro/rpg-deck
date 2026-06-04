@@ -470,10 +470,16 @@ textarea {
 .map-edit-mode {
   display: grid;
   gap: 8px;
+  padding: 10px;
+  border: 1px solid #deded8;
+  border-radius: 6px;
+  background: #fafaf8;
 }
 
 .map-edit-mode h2 {
   margin: 0;
+  color: #333;
+  font-size: 14px;
 }
 
 .map-edit-mode__actions {
@@ -485,9 +491,19 @@ textarea {
 .map-edit-mode__button {
   border: 1px solid #c9c9c2;
   border-radius: 6px;
-  background: #fafaf8;
+  background: #fff;
   padding: 6px 10px;
   color: #222;
+}
+
+.map-edit-mode__button:hover {
+  border-color: #2266aa;
+  background: #eef6ff;
+}
+
+.map-edit-mode__button:focus-visible {
+  outline: 2px solid #2266aa;
+  outline-offset: 2px;
 }
 
 .map-edit-mode__button[data-active="true"] {
