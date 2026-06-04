@@ -45,6 +45,26 @@ Use existing project conventions, scripts, and directory structure. Do not intro
 * When changing API routes, response shapes, persisted metadata, or shared types, update related docs and consumers together.
 * When removing a feature or supported path, remove or clearly deprecate related handlers, config fields, types, docs, and examples so dead code is not mistaken for supported behavior.
 
+## Change Authorization Boundary
+
+* Only edit files that are directly required by the user's requested task.
+* Do not turn analysis, diagnosis, recommendations, or proposals into repository changes unless the user explicitly asks for repository edits.
+* Optional cleanup, docs or guide updates, formatting sweeps, adjacent refactors, opportunistic component additions, and broad reorganizations require explicit user approval.
+* The commit-and-push rule applies only after an authorized repository change has been made. It does not authorize making repository changes.
+* When a task prompt includes an explicit `Allowed files to modify` list, treat it as a hard boundary.
+* Do not create, edit, rename, or delete files outside that list.
+* If another file appears necessary, stop and ask for authorization before making the change.
+
+## Responsibility-Specific Guides
+
+Responsibility-specific implementation guidance must live in dedicated files under `docs/guides/`. `AGENTS.md` is the top-level router and should not duplicate detailed guide content.
+
+When introducing or changing a recurring area-specific rule, create or update the relevant guide and link it from this section. Do not put detailed UI, runtime, domain, Godot, or editor rules directly into `AGENTS.md` unless they are truly repository-wide.
+
+Read the relevant guides before changing their areas:
+
+* Editor preview behavior, editor-to-playable confirmation, or authoring/preview flow: `docs/guides/editor-preview.md`
+
 ## Standard Task Workflow
 
 For every implementation task in this repository, follow this workflow unless the user explicitly says otherwise.
