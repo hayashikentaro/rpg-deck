@@ -245,6 +245,8 @@ The spike now renders a static debug grid for the current/start map when valid m
 
 The spike also supports minimal player marker movement on the debug grid. The initial position comes from `settings.start.position`, arrow keys and WASD move the `P` marker within map bounds, and cells restore their underlying `E`, `#`, or `.` marker when the player leaves. Collision remains visual-only and does not block movement yet.
 
+For mounted-repository host verification, prepare `godot_spike/data/project.json` from inside the container and keep host-side Godot usage to opening and running the project. Local Godot outputs such as `.godot/`, `.mono/`, `.csproj`, `.sln`, and the handoff `data/project.json` are ignored and non-canonical.
+
 ## First Godot Spike Behavior
 
 The first spike should prove the boundary, not complete a full port.

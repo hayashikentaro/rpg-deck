@@ -26,6 +26,18 @@ Non-goals for this skeleton:
 
 If `data/project.json` is missing, the loader should report a clear warning and not crash.
 
+## Host-side verification from mounted repo
+
+When this repository is mounted into the Codex container, prepare local handoff files from inside the container before opening Godot on the host.
+
+1. Ask Codex to refresh `godot_spike/data/project.json` from the sample project or from the current editor Project JSON.
+2. On the host, open `godot_spike/project.godot` in Godot.
+3. Run the project.
+4. Avoid manually editing repository files from the host during verification.
+5. After host verification, ask Codex to run `git status --short` again.
+
+`godot_spike/data/project.json` is a local ignored handoff file. Godot may also create `.godot/`, `.csproj`, `.sln`, `.mono/`, or other local generated files while opening or running the project. These files are non-canonical and should not be committed unless a later task explicitly approves them.
+
 ## Manual Verification
 
 1. Copy Project JSON from the RPG Deck editor.

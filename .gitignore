@@ -5,3 +5,10 @@ coverage/
 .DS_Store
 *.log
 .node-version
+
+# Godot host verification/generated files
+godot_spike/data/project.json
+godot_spike/.godot/
+godot_spike/.mono/
+godot_spike/*.csproj
+godot_spike/*.sln
