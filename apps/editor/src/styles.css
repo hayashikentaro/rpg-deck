@@ -562,6 +562,44 @@ textarea {
   font-weight: 700;
 }
 
+.authoring-status {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #deded8;
+  border-radius: 6px;
+  background: #fafaf8;
+}
+
+.authoring-status h2,
+.authoring-status dl,
+.authoring-status dd {
+  margin: 0;
+}
+
+.authoring-status h2 {
+  color: #333;
+  font-size: 14px;
+}
+
+.authoring-status__fields {
+  display: grid;
+  gap: 6px;
+}
+
+.authoring-status__fields div {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+}
+
+.authoring-status__label {
+  color: #666;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .diff-review__guidance,
 .diff-review__notice,
 .diff-review__status {

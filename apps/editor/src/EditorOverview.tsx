@@ -197,6 +197,23 @@ export function EditorOverview({
               </button>
             </div>
           </section>
+          <section className="authoring-status" aria-labelledby="authoring-status-title">
+            <h2 id="authoring-status-title">Authoring Status</h2>
+            <dl className="authoring-status__fields">
+              <div>
+                <dt className="authoring-status__label">Map edit mode</dt>
+                <dd>{mapEditModeLabel(mapEditMode)}</dd>
+              </div>
+              <div>
+                <dt className="authoring-status__label">Selected event</dt>
+                <dd>{selectedEventId ?? "none"}</dd>
+              </div>
+              <div>
+                <dt className="authoring-status__label">Grid click action</dt>
+                <dd>{gridClickActionLabel(mapEditMode, selectedEventId)}</dd>
+              </div>
+            </dl>
+          </section>
           <PlayablePreview
             eventLog={eventLog}
             project={project}
@@ -305,6 +322,17 @@ function mapEditHint(mapEditMode: MapEditMode, selectedEventId: string | null) {
   if (mapEditMode === "toggle_collision") return "Collision mode: click a grid cell to add or remove collision.";
   if (selectedEventId) return "Move event mode: click an event marker to select it. Click another cell to move the selected event.";
   return "Move event mode: select an event before moving it on the grid.";
+}
+
+function mapEditModeLabel(mapEditMode: MapEditMode) {
+  if (mapEditMode === "toggle_collision") return "Toggle collision";
+  return "Move event";
+}
+
+function gridClickActionLabel(mapEditMode: MapEditMode, selectedEventId: string | null) {
+  if (mapEditMode === "toggle_collision") return "click any cell to add or remove collision";
+  if (selectedEventId) return "event marker selects that event; another cell moves the selected event";
+  return "select an event before moving it";
 }
 
 type RuntimeKeyboardAction =

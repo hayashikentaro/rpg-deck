@@ -122,6 +122,12 @@ describe("EditorOverview", () => {
     expect(html).toContain("Toggle collision");
     expect(html).toContain('data-active="true"');
     expect(html).toContain("Move event mode: click an event marker to select it. Click another cell to move the selected event.");
+    expect(html).toContain("Authoring Status");
+    expect(html).toContain("Map edit mode");
+    expect(html).toContain("Selected event");
+    expect(html).toContain("mayor_intro");
+    expect(html).toContain("Grid click action");
+    expect(html).toContain("event marker selects that event; another cell moves the selected event");
     expect(html).toContain("Runtime Status");
     expect(html).toContain("↓");
     expect(html).toContain("Player at [4, 6], facing down");
@@ -141,6 +147,8 @@ describe("EditorOverview", () => {
     const html = renderOverview(null, snapshot, null, "toggle_collision");
 
     expect(html).toContain("Collision mode: click a grid cell to add or remove collision.");
+    expect(html).toContain("Toggle collision");
+    expect(html).toContain("click any cell to add or remove collision");
     expect(html).toContain("Toggle collision at [4, 6]. Player at [4, 6], facing down");
   });
 
