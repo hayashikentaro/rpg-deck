@@ -54,26 +54,28 @@ When this repository is mounted into the Codex container, prepare local handoff 
    * current map collision count
    * current map event count
 6. Confirm a static debug grid appears when the current map size is valid.
-7. Confirm the legend appears above the grid and explains marker meanings:
+7. Confirm the legend and `Status: ready` debug status line appear above the grid.
+8. Confirm the legend explains marker meanings:
    * `^`, `v`, `<`, `>` player facing
    * `E` event
    * `#` collision
    * `.` empty
-8. Press arrow keys or WASD and confirm the player marker moves within map bounds.
-9. Confirm the player marker changes facing direction when movement input is pressed, including blocked movement.
-10. Confirm the player marker cannot move into `#` collision cells.
-11. Face an `E` event marker and press Enter, Space, or Z.
-12. Confirm `ProjectLoader` logs `interact_event: <event_id> at [x, y]` only when the facing cell has a `trigger: interact` event.
-13. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
-14. Rename or remove `data/project.json`.
-15. Run the project again.
-16. Confirm the missing-file warning appears and the project does not crash.
+9. Press arrow keys or WASD and confirm the player marker moves within map bounds.
+10. Confirm the player marker changes facing direction when movement input is pressed, including blocked movement.
+11. Confirm the debug status line shows successful movement or the blocked reason.
+12. Confirm the player marker cannot move into `#` collision cells.
+13. Face an `E` event marker and press Enter, Space, or Z.
+14. Confirm `ProjectLoader` logs and shows `interact_event: <event_id> at [x, y]` only when the facing cell has a `trigger: interact` event.
+15. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
+16. Rename or remove `data/project.json`.
+17. Run the project again.
+18. Confirm the missing-file warning appears and the project does not crash.
 
 ## Current Skeleton
 
 The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
-`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and moves a facing marker with arrow keys or WASD. The debug renderer includes a marker legend, a configurable `DebugCellSize`, and a configurable `DebugMapOffset`. Player markers use ASCII `^`, `v`, `<`, and `>` for font-safe facing display. Marker priority is player over `E` over `#` over `.`. Facing updates even when movement is blocked. Movement is limited by map bounds and `#` collision cells. Pressing Enter, Space, or Z checks the facing cell for a `trigger: interact` event and logs the event id when found. Event commands, dialogue UI, touch events, and command execution are intentionally left for later Phase 11 steps.
+`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and moves a facing marker with arrow keys or WASD. The debug renderer includes a marker legend, a debug status line, a configurable `DebugCellSize`, and a configurable `DebugMapOffset`. Player markers use ASCII `^`, `v`, `<`, and `>` for font-safe facing display. Marker priority is player over `E` over `#` over `.`. Facing updates even when movement is blocked. Movement is limited by map bounds and `#` collision cells. Pressing Enter, Space, or Z checks the facing cell for a `trigger: interact` event and logs the event id when found. The status line mirrors the latest movement or interact result in the viewport; it is not dialogue UI. Event commands, dialogue UI, touch events, and command execution are intentionally left for later Phase 11 steps.
 
 Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.
 

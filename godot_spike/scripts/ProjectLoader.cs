@@ -6,6 +6,7 @@ public partial class ProjectLoader : Node
 {
     private readonly System.Collections.Generic.Dictionary<string, Label> _debugCells =
         new System.Collections.Generic.Dictionary<string, Label>();
+    private Label _debugStatusLabel;
     private HashSet<string> _collisionPositions = new HashSet<string>();
     private HashSet<string> _eventPositions = new HashSet<string>();
     private List<MapEventSummary> _currentMapEvents = new List<MapEventSummary>();
@@ -109,6 +110,7 @@ public partial class ProjectLoader : Node
     private void RenderDebugMap(ProjectSummary summary)
     {
         RenderDebugLegend();
+        RenderDebugStatus();
 
         if (!summary.CurrentMap.SizePosition.IsValid)
         {
@@ -161,6 +163,17 @@ public partial class ProjectLoader : Node
         AddChild(legend);
     }
 
+    private void RenderDebugStatus()
+    {
+        _debugStatusLabel = new Label
+        {
+            Name = "DebugStatus",
+            Text = "Status: ready",
+            Position = new Vector2(24, 56)
+        };
+        AddChild(_debugStatusLabel);
+    }
+
     private string MarkerForPosition(GridPosition position)
     {
         if (_currentPlayerPosition.IsValid && _currentPlayerPosition.X == position.X && _currentPlayerPosition.Y == position.Y)
@@ -195,13 +208,17 @@ public partial class ProjectLoader : Node
 
         if (!IsWithinMapBounds(nextPosition))
         {
-            GD.Print($"movement_blocked: map_bounds [{nextPosition.X}, {nextPosition.Y}] facing {FacingDirectionLabel()}");
+            var message = $"movement_blocked: map_bounds [{nextPosition.X}, {nextPosition.Y}] facing {FacingDirectionLabel()}";
+            GD.Print(message);
+            SetDebugStatus(message);
             return;
         }
 
         if (_collisionPositions.Contains(PositionKey(nextPosition)))
         {
-            GD.Print($"movement_blocked: collision [{nextPosition.X}, {nextPosition.Y}] facing {FacingDirectionLabel()}");
+            var message = $"movement_blocked: collision [{nextPosition.X}, {nextPosition.Y}] facing {FacingDirectionLabel()}";
+            GD.Print(message);
+            SetDebugStatus(message);
             return;
         }
 
@@ -209,7 +226,9 @@ public partial class ProjectLoader : Node
         _currentPlayerPosition = nextPosition;
         UpdateCell(previousPosition);
         UpdateCell(_currentPlayerPosition);
-        GD.Print($"player moved to [{_currentPlayerPosition.X}, {_currentPlayerPosition.Y}] facing {FacingDirectionLabel()}");
+        var movedMessage = $"player moved to [{_currentPlayerPosition.X}, {_currentPlayerPosition.Y}] facing {FacingDirectionLabel()}";
+        GD.Print(movedMessage);
+        SetDebugStatus(movedMessage);
     }
 
     private void TryInteract()
@@ -223,12 +242,24 @@ public partial class ProjectLoader : Node
                 eventSummary.Position.Y == targetPosition.Y
             )
             {
-                GD.Print($"interact_event: {eventSummary.Id} at [{targetPosition.X}, {targetPosition.Y}]");
+                var message = $"interact_event: {eventSummary.Id} at [{targetPosition.X}, {targetPosition.Y}]";
+                GD.Print(message);
+                SetDebugStatus(message);
                 return;
             }
         }
 
-        GD.Print($"interact_event: none at [{targetPosition.X}, {targetPosition.Y}]");
+        var noneMessage = $"interact_event: none at [{targetPosition.X}, {targetPosition.Y}]";
+        GD.Print(noneMessage);
+        SetDebugStatus(noneMessage);
+    }
+
+    private void SetDebugStatus(string message)
+    {
+        if (_debugStatusLabel != null)
+        {
+            _debugStatusLabel.Text = $"Status: {message}";
+        }
     }
 
     private void UpdateCell(GridPosition position)

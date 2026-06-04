@@ -245,7 +245,7 @@ The spike now renders a static debug grid for the current/start map when valid m
 
 The spike also supports minimal player marker movement on the debug grid. The initial position comes from `settings.start.position`, arrow keys and WASD move the player marker within map bounds, and cells restore their underlying `E`, `#`, or `.` marker when the player leaves. Facing direction updates from movement input even when movement is blocked by map bounds or collision. Collision cells from RPG Deck project JSON block debug player movement.
 
-The spike can detect a `trigger: interact` event in the player's facing cell when Enter, Space, or Z is pressed. It logs the event id and position only. Event commands, dialogue UI, touch event detection, and command execution remain out of scope.
+The spike can detect a `trigger: interact` event in the player's facing cell when Enter, Space, or Z is pressed. It logs the event id and position only. The debug viewport also shows a status line with the latest movement or interact result so manual verification does not depend only on the Output log. Event commands, dialogue UI, touch event detection, and command execution remain out of scope.
 
 For mounted-repository host verification, prepare `godot_spike/data/project.json` from inside the container and keep host-side Godot usage to opening and running the project. Local Godot outputs such as `.godot/`, `.mono/`, `.csproj`, `.sln`, and the handoff `data/project.json` are ignored and non-canonical.
 
