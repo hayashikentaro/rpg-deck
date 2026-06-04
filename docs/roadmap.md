@@ -302,6 +302,7 @@ Initial implementation status:
 
 * Playable Preview now includes a marker legend for player direction, event markers, collision, and empty cells. The renderer remains the existing HTML grid backed by project data and runtime snapshots; sprite rendering, tile artwork, Canvas, and renderer replacement remain out of scope.
 * Authoring status now shows the current map edit mode, selected event, and grid click action near the preview. This improves authoring clarity without changing runtime or map-editing behavior, and the renderer remains HTML grid based.
+* The editor can now show and copy the current project JSON as a first export-like artifact. File save, import, download, and persistence remain out of scope.
 
 ## Phase 11: Godot Boundary Spike
 

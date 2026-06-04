@@ -113,6 +113,16 @@ describe("EditorOverview", () => {
     expect(html).toContain("&quot;currentMapId&quot;");
   });
 
+  it("renders project JSON section", () => {
+    const html = renderOverview();
+
+    expect(html).toContain("Project JSON");
+    expect(html).toContain("Copy Project JSON");
+    expect(html).toContain("Current project JSON");
+    expect(html).toContain("&quot;id&quot;: &quot;tiny-rpg&quot;");
+    expect(html).toContain("&quot;title&quot;: &quot;Tiny RPG&quot;");
+  });
+
   it("renders playable grid preview section", () => {
     const html = renderOverview();
 

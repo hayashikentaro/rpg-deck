@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { EventDefinition, GameProject, GridPosition, ProjectSummary, ValidationIssue } from "@rpg-deck/core-domain";
 import type { Direction, RuntimeEventLogEntry, RuntimeSnapshot } from "@rpg-deck/web-runtime";
 import {
@@ -70,6 +70,8 @@ export function EditorOverview({
   onSelectEvent,
   onUpdateEvent
 }: EditorOverviewProps) {
+  const [projectJsonCopyStatus, setProjectJsonCopyStatus] = useState<string | null>(null);
+  const projectJson = JSON.stringify(project, null, 2);
   const issueItems = validationIssues.map((issue, index) => ({
     id: `${issue.code}-${issue.path}-${index}`,
     severity: issue.severity,
@@ -101,6 +103,16 @@ export function EditorOverview({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onAdvance, onInteract, onMove, onRestart, runtimeSnapshot.canAdvance]);
+
+  const copyProjectJson = async () => {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard API is not available.");
+      await navigator.clipboard.writeText(projectJson);
+      setProjectJsonCopyStatus("Project JSON copied.");
+    } catch {
+      setProjectJsonCopyStatus("Copy failed. Select and copy the JSON manually.");
+    }
+  };
 
   return (
     <AppShell
@@ -280,6 +292,28 @@ export function EditorOverview({
                 </button>
               </div>
             )}
+          </section>
+          <section className="project-json" aria-labelledby="project-json-title">
+            <div className="project-json__header">
+              <div>
+                <h2 id="project-json-title">Project JSON</h2>
+                <p>View and copy the current edited project data. Runtime, proposal, and UI state are not included.</p>
+              </div>
+              <div className="project-json__actions">
+                <button className="project-json__button" type="button" onClick={copyProjectJson}>
+                  Copy Project JSON
+                </button>
+              </div>
+            </div>
+            {projectJsonCopyStatus ? (
+              <p className="project-json__status" role="status">
+                {projectJsonCopyStatus}
+              </p>
+            ) : null}
+            <label className="project-json__field">
+              <span>Current project JSON</span>
+              <textarea className="project-json__textarea" readOnly value={projectJson} />
+            </label>
           </section>
         </main>
       }
