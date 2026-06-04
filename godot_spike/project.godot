@@ -8,4 +8,4 @@ config_version=5
 
 config/name="RPG Deck Godot Spike"
 config/features=PackedStringArray("4.2", "C#")
-
+run/main_scene="res://scenes/ProjectLoaderScene.tscn"

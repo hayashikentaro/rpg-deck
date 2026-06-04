@@ -217,6 +217,7 @@ The repository now includes `godot_spike/` as a non-canonical executable spike a
 Current skeleton files:
 
 * `godot_spike/project.godot`
+* `godot_spike/scenes/ProjectLoaderScene.tscn`
 * `godot_spike/data/README.md`
 * `godot_spike/scripts/ProjectLoader.cs`
 
@@ -232,6 +233,8 @@ The expected manual handoff input path is:
 * start position
 * map count
 * event count
+
+`project.godot` sets `res://scenes/ProjectLoaderScene.tscn` as the main scene. Running the project currently only executes `ProjectLoader.cs` on a plain `Node`.
 
 Map rendering, player movement, collision behavior, event interaction, and command execution remain the next steps. The `godot_spike/` directory is not an authoring source and must not become a schema fork.
 

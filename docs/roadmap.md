@@ -325,3 +325,4 @@ Initial implementation status:
 * The manual Godot JSON handoff procedure is documented. The current Project JSON UI is the handoff path for the first loader spike, and no Godot project, exporter package, or generated fixture is created in this step.
 * The Godot loader acceptance checklist is documented. First loader success is scoped to project, map, player, collision, event marker, and debug command handling while sprite art, full command UI, battle/audio, exporter package, and save-back remain out of scope.
 * A minimal `godot_spike/` project skeleton now exists. The manual Project JSON input path is documented, and `ProjectLoader.cs` only parses and logs project summary for now; map, player, and collision rendering remain the next step.
+* `godot_spike` now has a minimal main scene that runs `ProjectLoader.cs`. Running the project only parses and logs project summary; rendering and gameplay remain out of scope.

@@ -21,14 +21,15 @@ Non-goals for this skeleton:
 3. Copy the current project JSON from the editor's `Project JSON` section.
 4. Place the copied JSON manually at `godot_spike/data/project.json`.
 5. Open `godot_spike` in Godot.
-6. Create a temporary scene with a `Node`.
-7. Attach `scripts/ProjectLoader.cs` to that node.
-8. Run the temporary scene.
-9. Confirm the loader logs project id, title, start map, start position, map count, and event count.
+6. Run the project.
+7. Confirm the loader logs project id, title, start map, start position, map count, and event count.
 
 If `data/project.json` is missing, the loader should report a clear warning and not crash.
 
 ## Current Skeleton
 
+The committed `scenes/ProjectLoaderScene.tscn` only runs `ProjectLoader.cs` on a plain `Node`.
+
 `ProjectLoader.cs` only reads, parses, and logs a project summary. Map rendering, player movement, collision behavior, event interaction, and command execution are intentionally left for later Phase 11 steps.
 
+Godot may create local generated files such as `.godot/`, `.csproj`, or `.sln` while opening or running the project. Do not commit those files unless a later task explicitly approves them.
