@@ -4,10 +4,14 @@ using Godot.Collections;
 
 public partial class ProjectLoader : Node
 {
-    private const int DebugCellSize = 24;
-
     [Export]
     public string ProjectJsonPath { get; set; } = "res://data/project.json";
+
+    [Export]
+    public int DebugCellSize { get; set; } = 24;
+
+    [Export]
+    public Vector2 DebugMapOffset { get; set; } = new Vector2(24, 80);
 
     public override void _Ready()
     {
@@ -69,6 +73,8 @@ public partial class ProjectLoader : Node
 
     private void RenderDebugMap(ProjectSummary summary)
     {
+        RenderDebugLegend();
+
         if (!summary.CurrentMap.SizePosition.IsValid)
         {
             GD.PushWarning("Cannot render debug map because current map size is invalid.");
@@ -77,7 +83,8 @@ public partial class ProjectLoader : Node
 
         var debugMap = new Node2D
         {
-            Name = "DebugMap"
+            Name = "DebugMap",
+            Position = DebugMapOffset
         };
         AddChild(debugMap);
 
@@ -100,6 +107,17 @@ public partial class ProjectLoader : Node
                 debugMap.AddChild(label);
             }
         }
+    }
+
+    private void RenderDebugLegend()
+    {
+        var legend = new Label
+        {
+            Name = "DebugLegend",
+            Text = "RPG Deck Debug Map\nP player start  E event  # collision  . empty",
+            Position = new Vector2(24, 24)
+        };
+        AddChild(legend);
     }
 
     private static string MarkerForPosition(
