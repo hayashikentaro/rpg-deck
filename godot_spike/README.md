@@ -9,7 +9,6 @@ Non-goals for this skeleton:
 * no bidirectional editing
 * no schema fork
 * no full game implementation
-* no player movement yet
 * no collision behavior yet
 * no event interaction yet
 * no command execution yet
@@ -49,15 +48,17 @@ If `data/project.json` is missing, the loader should report a clear warning and 
    * `E` event
    * `#` collision
    * `.` empty
-8. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
-9. Rename or remove `data/project.json`.
-10. Run the project again.
-11. Confirm the missing-file warning appears and the project does not crash.
+8. Press arrow keys or WASD and confirm `P` moves within map bounds.
+9. Confirm `#` cells are still visual only and do not block movement yet.
+10. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
+11. Rename or remove `data/project.json`.
+12. Run the project again.
+13. Confirm the missing-file warning appears and the project does not crash.
 
 ## Current Skeleton
 
 The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
-`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, and renders a static debug grid for the current/start map. The debug renderer includes a marker legend, a configurable `DebugCellSize`, and a configurable `DebugMapOffset`. Marker priority is `P` over `E` over `#` over `.`. Player movement, collision behavior, event interaction, and command execution are intentionally left for later Phase 11 steps.
+`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and moves the `P` marker with arrow keys or WASD. The debug renderer includes a marker legend, a configurable `DebugCellSize`, and a configurable `DebugMapOffset`. Marker priority is `P` over `E` over `#` over `.`. Movement is limited by map bounds. Collision cells, event markers, event interaction, and command execution are intentionally left for later Phase 11 steps.
 
 Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.

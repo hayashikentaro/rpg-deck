@@ -4,6 +4,14 @@ using Godot.Collections;
 
 public partial class ProjectLoader : Node
 {
+    private readonly System.Collections.Generic.Dictionary<string, Label> _debugCells =
+        new System.Collections.Generic.Dictionary<string, Label>();
+    private HashSet<string> _collisionPositions = new HashSet<string>();
+    private HashSet<string> _eventPositions = new HashSet<string>();
+    private GridPosition _currentPlayerPosition = GridPosition.Invalid;
+    private GridPosition _currentMapSize = GridPosition.Invalid;
+    private bool _debugMapLoaded;
+
     [Export]
     public string ProjectJsonPath { get; set; } = "res://data/project.json";
 
@@ -16,6 +24,24 @@ public partial class ProjectLoader : Node
     public override void _Ready()
     {
         LoadProjectSummary();
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        var keyEvent = @event as InputEventKey;
+        if (!_debugMapLoaded || keyEvent == null || !keyEvent.Pressed || keyEvent.Echo)
+        {
+            return;
+        }
+
+        var delta = MovementDeltaForKey(keyEvent.Keycode);
+        if (!delta.IsValid)
+        {
+            return;
+        }
+
+        TryMovePlayer(delta);
+        GetViewport().SetInputAsHandled();
     }
 
     private void LoadProjectSummary()
@@ -88,15 +114,19 @@ public partial class ProjectLoader : Node
         };
         AddChild(debugMap);
 
-        var collisions = ToPositionSet(summary.CurrentMap.CollisionPositions);
-        var events = ToPositionSet(summary.CurrentMap.EventPositions);
+        _debugCells.Clear();
+        _collisionPositions = ToPositionSet(summary.CurrentMap.CollisionPositions);
+        _eventPositions = ToPositionSet(summary.CurrentMap.EventPositions);
+        _currentPlayerPosition = summary.StartPositionValue;
+        _currentMapSize = summary.CurrentMap.SizePosition;
+        _debugMapLoaded = _currentPlayerPosition.IsValid;
 
         for (var y = 0; y < summary.CurrentMap.SizePosition.Y; y += 1)
         {
             for (var x = 0; x < summary.CurrentMap.SizePosition.X; x += 1)
             {
                 var position = new GridPosition(x, y, true);
-                var marker = MarkerForPosition(position, summary.StartPositionValue, collisions, events);
+                var marker = MarkerForPosition(position);
 
                 var label = new Label
                 {
@@ -105,6 +135,7 @@ public partial class ProjectLoader : Node
                     Position = new Vector2(x * DebugCellSize, y * DebugCellSize)
                 };
                 debugMap.AddChild(label);
+                _debugCells[PositionKey(position)] = label;
             }
         }
     }
@@ -120,30 +151,87 @@ public partial class ProjectLoader : Node
         AddChild(legend);
     }
 
-    private static string MarkerForPosition(
-        GridPosition position,
-        GridPosition playerStart,
-        HashSet<string> collisions,
-        HashSet<string> events
-    )
+    private string MarkerForPosition(GridPosition position)
     {
-        if (playerStart.IsValid && playerStart.X == position.X && playerStart.Y == position.Y)
+        if (_currentPlayerPosition.IsValid && _currentPlayerPosition.X == position.X && _currentPlayerPosition.Y == position.Y)
         {
             return "P";
         }
 
         var key = PositionKey(position);
-        if (events.Contains(key))
+        if (_eventPositions.Contains(key))
         {
             return "E";
         }
 
-        if (collisions.Contains(key))
+        if (_collisionPositions.Contains(key))
         {
             return "#";
         }
 
         return ".";
+    }
+
+    private void TryMovePlayer(GridPosition delta)
+    {
+        var nextPosition = new GridPosition(
+            _currentPlayerPosition.X + delta.X,
+            _currentPlayerPosition.Y + delta.Y,
+            true
+        );
+
+        if (!IsWithinMapBounds(nextPosition))
+        {
+            GD.Print($"movement_blocked: map_bounds [{nextPosition.X}, {nextPosition.Y}]");
+            return;
+        }
+
+        var previousPosition = _currentPlayerPosition;
+        _currentPlayerPosition = nextPosition;
+        UpdateCell(previousPosition);
+        UpdateCell(_currentPlayerPosition);
+        GD.Print($"player moved to [{_currentPlayerPosition.X}, {_currentPlayerPosition.Y}]");
+    }
+
+    private void UpdateCell(GridPosition position)
+    {
+        if (_debugCells.TryGetValue(PositionKey(position), out var label))
+        {
+            label.Text = MarkerForPosition(position);
+        }
+    }
+
+    private bool IsWithinMapBounds(GridPosition position)
+    {
+        return position.X >= 0 &&
+            position.Y >= 0 &&
+            position.X < _currentMapSize.X &&
+            position.Y < _currentMapSize.Y;
+    }
+
+    private static GridPosition MovementDeltaForKey(Key key)
+    {
+        if (key == Key.Up || key == Key.W)
+        {
+            return new GridPosition(0, -1, true);
+        }
+
+        if (key == Key.Down || key == Key.S)
+        {
+            return new GridPosition(0, 1, true);
+        }
+
+        if (key == Key.Left || key == Key.A)
+        {
+            return new GridPosition(-1, 0, true);
+        }
+
+        if (key == Key.Right || key == Key.D)
+        {
+            return new GridPosition(1, 0, true);
+        }
+
+        return GridPosition.Invalid;
     }
 
     private static ProjectSummary ExtractProjectSummary(Dictionary project)
