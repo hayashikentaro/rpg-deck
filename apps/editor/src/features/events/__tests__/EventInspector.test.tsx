@@ -37,8 +37,36 @@ const project: GameProject = {
       trigger: "interact",
       commands: [
         {
+          type: "play_bgm",
+          bgm: "town_theme"
+        },
+        {
+          type: "play_sfx",
+          sfx: "talk"
+        },
+        {
           type: "show_message",
+          speaker: "mayor",
           text: "Welcome to town."
+        },
+        {
+          type: "choice",
+          prompt: "Will you help?",
+          options: [
+            {
+              label: "Yes",
+              commands: [
+                {
+                  type: "set_flag",
+                  flag: "helping"
+                }
+              ]
+            },
+            {
+              label: "No",
+              commands: []
+            }
+          ]
         }
       ]
     },
@@ -91,6 +119,43 @@ describe("EventInspector", () => {
 
   it("renders first show_message text when present", () => {
     expect(renderInspector("mayor")).toContain("Welcome to town.");
+  });
+
+  it("renders top-level command types", () => {
+    const html = renderInspector("mayor");
+
+    expect(html).toContain("Commands");
+    expect(html).toContain("play_bgm");
+    expect(html).toContain("play_sfx");
+    expect(html).toContain("show_message");
+    expect(html).toContain("choice");
+  });
+
+  it("renders editable show_message fields", () => {
+    const html = renderInspector("mayor");
+
+    expect(html).toContain("Speaker");
+    expect(html).toContain('value="mayor"');
+    expect(html).toContain("Text");
+    expect(html).toContain("Welcome to town.");
+  });
+
+  it("renders editable audio command fields", () => {
+    const html = renderInspector("mayor");
+
+    expect(html).toContain("BGM");
+    expect(html).toContain('value="town_theme"');
+    expect(html).toContain("SFX");
+    expect(html).toContain('value="talk"');
+  });
+
+  it("renders choice command as read-only", () => {
+    const html = renderInspector("mayor");
+
+    expect(html).toContain("Will you help?");
+    expect(html).toContain("Yes");
+    expect(html).toContain("No");
+    expect(html).toContain("Nested command editing is not available in this phase.");
   });
 
   it("renders no-message note when selected event has no show_message", () => {

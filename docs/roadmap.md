@@ -217,6 +217,11 @@ Target confirmation:
 * adding `start_battle` triggers battle placeholder
 * flag commands affect later `if_flag` behavior where testable
 
+Initial implementation status:
+
+* The Event Inspector now shows the selected event's top-level command sequence and edits simple direct `show_message`, flag, audio, transfer, and battle command fields.
+* Nested commands and unsupported command shapes remain intentionally read-only. Runtime confirmation continues through the Playable Grid Preview and manual controls.
+
 ## Phase 8: Mock Proposal / Diff Review + Preview Confirmation
 
 Purpose:

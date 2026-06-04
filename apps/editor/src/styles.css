@@ -288,6 +288,54 @@ textarea {
   resize: vertical;
 }
 
+.event-inspector__commands {
+  display: grid;
+  gap: 8px;
+}
+
+.event-inspector__commands h4 {
+  margin: 0;
+}
+
+.event-inspector__command-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.event-inspector__command {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #deded8;
+  border-radius: 6px;
+  background: #fafaf8;
+}
+
+.event-inspector__command-header {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.event-inspector__command-fields,
+.event-inspector__command-readonly {
+  display: grid;
+  gap: 8px;
+}
+
+.event-inspector__command-readonly ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.event-inspector__readonly-note {
+  color: #666;
+  font-size: 12px;
+}
+
 .runtime-controls {
   display: grid;
   gap: 10px;
