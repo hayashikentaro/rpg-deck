@@ -5,7 +5,8 @@ import {
   parseProjectJson,
   summarizeProject,
   validateProject,
-  type EventDefinition
+  type EventDefinition,
+  type GridPosition
 } from "@rpg-deck/core-domain";
 import { createRuntime, type Direction, type PlayerInput } from "@rpg-deck/web-runtime";
 import sampleProjectJson from "../../../packages/sample-projects/tiny-rpg/project.json" with { type: "json" };
@@ -98,6 +99,15 @@ export function App() {
     });
   };
 
+  const moveSelectedEventTo = (position: GridPosition) => {
+    if (!selectedEventId || !project.events[selectedEventId]) return;
+
+    updateEvent(selectedEventId, (event) => ({
+      ...event,
+      position: [position[0], position[1]]
+    }));
+  };
+
   return (
     <EditorOverview
       eventLog={eventLog.slice(-8).reverse()}
@@ -117,6 +127,7 @@ export function App() {
       onInteract={() => dispatchRuntimeInput({ type: "interact" })}
       onChooseOption={(optionIndex) => dispatchRuntimeInput({ type: "choose", optionIndex })}
       onMove={(direction: Direction) => dispatchRuntimeInput({ type: "move", direction })}
+      onMoveSelectedEvent={moveSelectedEventTo}
       onRejectProposal={rejectProposal}
       onRestart={restart}
       onSelectEvent={setSelectedEventId}

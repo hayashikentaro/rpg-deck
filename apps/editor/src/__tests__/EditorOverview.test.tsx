@@ -117,6 +117,7 @@ describe("EditorOverview", () => {
     const html = renderOverview();
 
     expect(html).toContain("Playable Grid Preview");
+    expect(html).toContain("Click a grid cell to move the selected event.");
     expect(html).toContain("Runtime Status");
     expect(html).toContain("↓");
     expect(html).toContain("Player at [4, 6], facing down");
@@ -271,6 +272,7 @@ function renderOverview(
       onCreateProposal={() => undefined}
       onHoldProposal={() => undefined}
       onChooseOption={() => undefined}
+      onMoveSelectedEvent={() => undefined}
       onRejectProposal={() => undefined}
       onSelectEvent={() => undefined}
       onUpdateEvent={() => undefined}

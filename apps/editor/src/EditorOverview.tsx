@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { EventDefinition, GameProject, ProjectSummary, ValidationIssue } from "@rpg-deck/core-domain";
+import type { EventDefinition, GameProject, GridPosition, ProjectSummary, ValidationIssue } from "@rpg-deck/core-domain";
 import type { Direction, RuntimeEventLogEntry, RuntimeSnapshot } from "@rpg-deck/web-runtime";
 import {
   AppShell,
@@ -28,6 +28,7 @@ export type EditorOverviewProps = {
   onInteract?: () => void;
   onAdvance?: () => void;
   onChooseOption?: (optionIndex: number) => void;
+  onMoveSelectedEvent?: (position: GridPosition) => void;
   onRestart?: () => void;
   onCreateProposal?: () => void;
   onAcceptProposal?: () => void;
@@ -52,6 +53,7 @@ export function EditorOverview({
   onInteract,
   onAdvance,
   onChooseOption,
+  onMoveSelectedEvent,
   onRestart,
   onCreateProposal,
   onAcceptProposal,
@@ -171,8 +173,12 @@ export function EditorOverview({
             project={project}
             snapshot={runtimeSnapshot}
             onAdvance={onAdvance}
+            onCellClick={selectedEventId ? onMoveSelectedEvent : undefined}
             onChooseOption={onChooseOption}
           />
+          {selectedEventId ? (
+            <p className="playable-preview__edit-hint">Click a grid cell to move the selected event.</p>
+          ) : null}
           <section>
             <h2>Runtime snapshot</h2>
             <pre>{JSON.stringify(runtimeSnapshot, null, 2)}</pre>

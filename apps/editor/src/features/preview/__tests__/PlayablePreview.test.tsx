@@ -175,14 +175,36 @@ describe("PlayablePreview", () => {
     expect(html).toContain("Battle Placeholder");
     expect(html).toContain("Enemy: slime");
   });
+
+  it("keeps read-only grid cells without cell controls", () => {
+    const html = renderPreview();
+
+    expect(html).toContain("Player at [0, 0], facing down");
+    expect(html).not.toContain("playable-preview__cell-button");
+  });
+
+  it("renders clickable cell controls with position and cell labels", () => {
+    const html = renderPreview(snapshot, undefined, undefined, () => undefined);
+
+    expect(html).toContain("playable-preview__cell-button");
+    expect(html).toContain("Move selected event to [0, 0]. Player at [0, 0], facing down");
+    expect(html).toContain("Move selected event to [2, 0]. interact event npc at [2, 0]");
+  });
 });
 
 function renderPreview(
   nextSnapshot: RuntimeSnapshot = snapshot,
   onChooseOption?: (optionIndex: number) => void,
-  onAdvance?: () => void
+  onAdvance?: () => void,
+  onCellClick?: (position: [number, number]) => void
 ) {
   return renderToStaticMarkup(
-    <PlayablePreview project={project} snapshot={nextSnapshot} onAdvance={onAdvance} onChooseOption={onChooseOption} />
+    <PlayablePreview
+      project={project}
+      snapshot={nextSnapshot}
+      onAdvance={onAdvance}
+      onCellClick={onCellClick}
+      onChooseOption={onChooseOption}
+    />
   );
 }

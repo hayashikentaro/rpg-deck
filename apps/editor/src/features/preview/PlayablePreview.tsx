@@ -7,6 +7,7 @@ export type PlayablePreviewProps = {
   snapshot: RuntimeSnapshot;
   eventLog?: RuntimeEventLogEntry[];
   onAdvance?: () => void;
+  onCellClick?: (position: GridPosition) => void;
   onChooseOption?: (optionIndex: number) => void;
   className?: string;
 };
@@ -23,6 +24,7 @@ export function PlayablePreview({
   snapshot,
   eventLog = [],
   onAdvance,
+  onCellClick,
   onChooseOption,
   className
 }: PlayablePreviewProps) {
@@ -63,7 +65,18 @@ export function PlayablePreview({
               key={`${cell.position[0]}-${cell.position[1]}`}
               role="gridcell"
             >
-              {cell.marker}
+              {onCellClick ? (
+                <button
+                  aria-label={`Move selected event to ${positionLabel(cell.position)}. ${cell.label}`}
+                  className="playable-preview__cell-button"
+                  type="button"
+                  onClick={() => onCellClick(cell.position)}
+                >
+                  {cell.marker}
+                </button>
+              ) : (
+                cell.marker
+              )}
             </div>
           ))}
         </div>
