@@ -19,7 +19,7 @@ For now, editor import/export remains browser-based JSON:
 
 The Godot loader should read the same project shape that `packages/core-domain` parses and validates. If a derived Godot export format becomes useful later, it should be introduced explicitly as an exporter output, not silently treated as the canonical schema.
 
-The command-handling phase is defined separately in [`godot-command-boundary.md`](./godot-command-boundary.md). That note keeps the minimal `show_message` debug panel separate from later sequencing and other command effects. The first spike closeout is recorded in [`godot-boundary-closeout.md`](./godot-boundary-closeout.md).
+The command-handling phase is defined separately in [`godot-command-boundary.md`](./godot-command-boundary.md). That note keeps the minimal `show_message` debug panel separate from later sequencing and other command effects. The first spike closeout is recorded in [`godot-boundary-closeout.md`](./godot-boundary-closeout.md). The final classic RPG scene/runtime map is recorded in [`architecture/classic-rpg-architecture-plan.md`](./architecture/classic-rpg-architecture-plan.md).
 
 ## Ownership
 

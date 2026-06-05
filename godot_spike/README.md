@@ -112,6 +112,8 @@ The command-handling boundary is documented in [`docs/godot-command-boundary.md`
 
 The Phase 11 first spike closeout is documented in [`docs/godot-boundary-closeout.md`](../docs/godot-boundary-closeout.md). It records that first spike acceptance is satisfied and lists the next phase options before further Godot runtime work.
 
+Future classic RPG scene/runtime boundaries are mapped in [`docs/architecture/classic-rpg-architecture-plan.md`](../docs/architecture/classic-rpg-architecture-plan.md), with AI scoping guidance in [`docs/architecture/ai-work-boundaries.md`](../docs/architecture/ai-work-boundaries.md).
+
 ## Current Manual Verification Status
 
 Verified on a host Godot run:

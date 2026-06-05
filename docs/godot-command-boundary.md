@@ -6,6 +6,8 @@ This note defines the boundary for moving the Godot spike from log/status-only e
 
 The goal is not to port every RPG Deck runtime behavior at once. The goal is to make command handling explicit, deterministic, and reviewable before Godot adds runtime state or UI that could be mistaken for a complete game implementation.
 
+The broader scene/state target for classic RPG work is recorded in [`architecture/classic-rpg-architecture-plan.md`](./architecture/classic-rpg-architecture-plan.md) and the sequencing boundary is expanded in [`runtime/command-sequencing.md`](./runtime/command-sequencing.md).
+
 ## Current State
 
 The Godot spike currently:
