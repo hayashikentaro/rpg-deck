@@ -145,4 +145,17 @@ Write an explicit message sequencing and advance-input design before implementin
 
 Keep gameplay scope fixed and harden verification only. Possible work includes clearer debug diagnostics, more defensive malformed-command reporting, or a plan for automated Godot smoke checks.
 
+Future work should follow the classic RPG architecture and AI work boundary docs before expanding beyond this Field spike.
+
 Recommended next step if continuing Godot runtime work: choose one option explicitly before implementation.
+
+## Links to Future Architecture Docs
+
+Use these docs to choose and scope the next phase:
+
+* [Classic RPG architecture plan](./architecture/classic-rpg-architecture-plan.md)
+* [AI work boundaries](./architecture/ai-work-boundaries.md)
+* [Dependency boundaries](./architecture/dependency-boundaries.md)
+* [Scene mode](./runtime/scene-mode.md)
+* [Runtime state](./runtime/runtime-state.md)
+* [Command sequencing](./runtime/command-sequencing.md)
