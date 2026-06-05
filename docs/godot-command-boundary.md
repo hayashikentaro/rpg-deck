@@ -18,6 +18,7 @@ The Godot spike currently:
 * does not execute other event command effects
 
 Command preview is implemented and host verified for both interact and touch event detection. The minimal `show_message` debug message panel is implemented without sequencing, advance input, or full dialogue UI.
+Startup `Message: <none>` panel visibility is host verified. Event-driven `show_message` display after interaction still needs explicit host verification.
 
 ## Source of Truth
 

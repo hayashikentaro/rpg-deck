@@ -269,7 +269,10 @@ Manually verified on a host:
 
 * `pnpm godot` performs build then run
 * Apple Silicon Godot/.NET architecture alignment works
-* debug grid, legend, status HUD, and markers are visible without layout overlap
+* scaled debug display is easier to read
+* debug window sizing prevents bottom clipping of the scaled grid
+* debug grid, legend, status HUD, startup message panel, and markers are visible without layout overlap
+* startup message panel displays `Message: <none>`
 * movement and collision blocking remain working
 * `touch` detection displays `touch_event: touch_test at [5, 6]`
 * empty touch command preview displays `command_preview: touch_test commands=0`
@@ -278,6 +281,8 @@ Manually verified on a host:
 * command preview has no effects; the new message panel is not yet included in this host verification record
 
 Touch verification used ignored local `godot_spike/data/project.json` with `touch_test` on `town` at `[5, 6]`. That local handoff artifact is non-canonical and is not committed.
+
+The debug message panel is implemented, and startup `Message: <none>` visibility is host verified. Event-driven `show_message` display after interaction still needs explicit host verification.
 
 ## First Godot Spike Behavior
 
@@ -354,7 +359,8 @@ Status labels:
 
 * **Implemented**: command execution boundary design note
 * **Host verified**: log/status-only top-level command preview after `interact` or `touch` detection
-* **Implemented**: first top-level `show_message` is displayed in a minimal debug message panel
+* **Host verified**: minimal debug message panel is visible on startup as `Message: <none>`
+* **Implemented / Pending host verification**: first top-level `show_message` is displayed in the debug message panel after event detection
 * **Pending**: message sequencing, advance input, `choice`, flags, transfer, battle, and audio behavior
 * **Pending**: full command execution; it remains out of scope until explicitly designed
 

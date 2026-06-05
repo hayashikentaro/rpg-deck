@@ -116,7 +116,10 @@ Verified on a host Godot run:
 
 * `pnpm godot` performs build then run
 * Apple Silicon Godot/.NET architecture alignment works
+* scaled debug display is easier to read
+* debug window sizing prevents bottom clipping of the scaled grid
 * grid, legend, status line, and facing markers are visible without layout overlap
+* startup message panel displays `Message: <none>`
 * movement and collision blocking remain working
 * collision blocking displays `movement_blocked: collision [2, 1] facing up`
 * touch detection displays `touch_event: touch_test at [5, 6]`
@@ -128,7 +131,7 @@ Verified on a host Godot run:
 
 Touch verification used ignored local handoff JSON with `touch_test` on `town` at `[5, 6]`, `trigger: touch`, and `commands: []`. That file is non-canonical and is not committed.
 
-The debug message panel is implemented but not yet included in the host verification record above.
+The debug message panel is implemented, and startup `Message: <none>` visibility is host verified. Event-driven `show_message` display after interacting with `mayor_intro` still needs explicit host verification.
 
 ## Manual Verification
 
