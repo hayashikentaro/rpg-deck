@@ -2,266 +2,199 @@
 
 ## Purpose
 
-The Godot Battle Scene Spike exists to test the tactile feel of classic RPG combat in Godot before a full renderer-agnostic battle implementation exists.
+The Godot Battle Scene Spike is a fixed-data / playable-feel / non-canonical prototype for testing classic Dragon Quest-like battle feel in Godot.
 
-This is a playable-feel spike, not canonical battle architecture.
+It exists to validate:
 
-## Why This Spike Exists
+* message pacing
+* input wait
+* HP display updates
+* attack/counterattack rhythm
+* victory/defeat flow
 
-Classic RPG feel depends on:
-
-* field movement
-* dialogue/event response
-* battle loop rhythm
-
-The Phase 11 Field spike proved field movement and dialogue/event response at debug depth. A small fixed-data battle spike is a reasonable next manual verification target because battle rhythm is hard to judge from architecture documents alone.
-
-## Relationship to Phase 11 Closeout
-
-The Phase 11 first Godot boundary spike remains accepted and closed. This Battle Spike is a new follow-up experiment.
-
-It should not reopen or expand the Field boundary spike, and it should not imply that full battle runtime, command execution, or Project JSON battle integration exists.
+This spike is not a canonical runtime implementation. It must not define final battle architecture, Project JSON schema, SaveData, or runtime-core semantics.
 
 ## Scope
 
 In scope:
 
 * one hero
-* one enemy
-* fixed battle data
-* fixed attack action
+* one slime
+* fixed stats
+* fixed deterministic damage
+* Attack only
 * enemy counterattack
 * HP display
-* message display
-* victory
-* defeat
-* manual host verification
+* battle messages
+* victory condition
+* defeat condition
+* manual verification
 
 Out of scope:
 
 * Project JSON schema changes
+* SaveData
+* RuntimeState persistence
+* EditorState
+* field-to-battle transition
 * enemy database
 * actor database
-* inventory
 * items
 * spells
 * skills
 * EXP
 * gold
-* drops
-* encounter tables
-* field connection
-* save data
-* runtime-core extraction in this first step
+* equipment
+* random encounters
 * audio
-* animations
+* animation polish
+* runtime-core extraction
+* runtime-systems extraction
 
 ## Fixed Battle Data
 
-Proposed fixed data:
+Use simple fixed data.
 
-```text
 Hero:
-  name: Hero
-  hp: 30
-  maxHp: 30
-  attack: 8
-  defense: 3
+
+* name: `Hero`
+* HP: `30 / 30`
+* attack label only, or fixed attack damage
+* receives fixed slime damage
 
 Slime:
-  name: Slime
-  hp: 16
-  maxHp: 16
-  attack: 5
-  defense: 1
-```
 
-Recommended first damage model:
+* name: `Slime`
+* HP: `16 / 16`
+* receives fixed hero damage
+* counterattacks while alive
 
-```text
-damage = max(1, attack - defense)
-```
+Recommended fixed damage:
 
-Fixed damage is also acceptable for the first spike:
+* Hero deals `6` damage to Slime.
+* Slime deals `3` damage to Hero.
 
-```text
-heroDamage = 6
-slimeDamage = 3
-```
+Fixed damage is preferred for this spike because the goal is feel and flow, not formula correctness.
 
-Use deterministic fixed or simple damage for the first spike.
+## Input
 
-## Minimal Playable Loop
-
-1. Battle starts: `A Slime appears!`
-2. Player confirms attack.
-3. Hero attacks Slime.
-4. Slime HP decreases.
-5. If Slime HP reaches `0`, show victory message.
-6. Otherwise Slime attacks Hero.
-7. Hero HP decreases.
-8. If Hero HP reaches `0`, show defeat message.
-9. Otherwise wait for the next attack input.
-
-## Input Model
-
-Use existing confirm keys if possible:
+Allowed inputs:
 
 * Enter
 * Space
 * Z
 
-There is no battle menu in the first spike. Confirm key means `Attack`.
+All should advance the battle when input is expected.
 
-No cancel behavior is required.
+No menu navigation is required yet. The only action is Attack.
 
-## UI Model
+## Battle Loop
 
-Text-only debug UI is acceptable.
-
-Display:
-
-* enemy name and HP
-* hero name and HP
-* current message
-* input hint
-
-Example:
+The spike should follow this exact loop:
 
 ```text
-Battle Spike
-Slime HP: 16/16
-Hero HP: 30/30
-Message: A Slime appears!
-Input: Enter / Space / Z = Attack
+A Slime appears!
+wait for input
+Hero attacks!
+Slime takes 6 damage.
+if Slime HP <= 0:
+  Slime is defeated!
+  Victory!
+  battle ends
+else:
+  Slime attacks!
+  Hero takes 3 damage.
+  if Hero HP <= 0:
+    Hero is defeated...
+    Defeat.
+    battle ends
+  else:
+    wait for next input
 ```
 
-No sprites, animations, or audio are required.
+Message pacing may be implemented with explicit input waits or simple staged messages. Keep the loop easy to inspect during host manual verification.
 
-## Battle State
+## Godot Implementation Boundary
 
-Minimal state:
+The future implementation should stay inside `godot_spike/` as much as possible.
 
-* phase:
-  * `intro`
-  * `awaiting_input`
-  * `resolving`
-  * `victory`
-  * `defeat`
-* hero HP
-* enemy HP
-* current message
+It may add Godot scene/script files needed for the spike.
 
-Do not use SaveData yet. Do not mutate Project JSON.
+It must not:
 
-## Damage Model
+* modify TypeScript runtime packages
+* modify Project JSON schema
+* treat Godot battle state as canonical SaveData
+* introduce general-purpose battle abstractions prematurely
+* make Godot the canonical runtime architecture
 
-Use deterministic damage.
+Godot remains non-authoritative:
 
-No randomness should be added for the first spike unless a later task explicitly chooses it.
+* it may read exported Project JSON
+* it must not define or fork canonical schema
+* it must not write ProjectData
+* it must not write SaveData
 
-Reasons:
+## Suggested Future Files
 
-* easier host verification
-* easier Codex implementation
-* easier future extraction to runtime-core tests
+Possible implementation files:
 
-## Manual Verification Flow
+* `godot_spike/BattleSpike.cs`
+* `godot_spike/BattleSpikeState.cs`
+* `godot_spike/BattleSpike.tscn`
 
-Host command should remain:
+These names are suggestions only. Use names and locations that follow existing Godot spike conventions if those conventions point somewhere better.
 
-```bash
-pnpm godot
-```
+Do not add these files during this documentation task.
 
-The implementation step may need a way to enter battle spike mode. Candidate entry options:
+## Manual Verification Checklist
 
-### Option A: Separate Scene / Script
+After a future implementation, manually confirm:
 
-Add a separate Godot scene/script for the battle spike and run it directly from the Godot editor later.
+* Battle scene starts with `A Slime appears!`
+* HP is visible for Hero and Slime.
+* Enter advances the battle.
+* Space advances the battle.
+* Z advances the battle.
+* Hero attack reduces Slime HP.
+* Slime counterattack reduces Hero HP.
+* Slime defeat shows victory message.
+* Hero defeat shows defeat message.
+* Battle does not write SaveData.
+* Battle does not require Project JSON schema changes.
+* Existing TypeScript checks still pass if applicable.
+* Existing Godot spike can still run if applicable.
 
-### Option B: Debug Key From Field Spike
+## Closeout Notes
 
-Add a debug key from the existing Field spike to switch to the battle spike later.
+After implementation and host verification, record:
 
-### Option C: Host Script Mode Later
+* what felt good
+* what felt awkward
+* whether message pacing should be input-driven or timed
+* whether HP display belongs in scene UI or shared runtime view model later
+* what should eventually move to runtime-core
+* what should eventually move to runtime-systems
+* what should remain Godot presentation-only
 
-Add a host script mode later. Do not change package scripts or host scripts in this design task.
+## Future Extraction Notes
 
-Recommended first implementation choice: Option A if the task can stay isolated from Field, otherwise Option B if a quick field-to-battle feel check is more valuable. Do not implement either option in this design task.
+After the spike is validated, a later phase may introduce renderer-agnostic battle architecture.
 
-Manual verification should eventually confirm:
+Future `runtime-core` concepts may include:
 
-* battle UI appears
-* initial message appears
-* confirm input performs hero attack
-* enemy HP decreases
-* enemy counterattacks
-* hero HP decreases
-* victory occurs when Slime HP reaches `0`
-* defeat can occur if Hero HP reaches `0`
-* no Project JSON schema changes
-* no field behavior regression
+* `BattleState`
+* `BattlePhase`
+* `BattleAction`
+* `BattleEvent` or `BattleEffect`
+* turn progression
 
-## Non-Goals
+Future `runtime-systems` concepts may include:
 
-Do not implement in the first battle spike:
+* damage formula
+* enemy AI
+* item effects
+* skill effects
+* reward calculation
 
-* full battle runtime
-* Project JSON battle integration
-* actor/enemy database usage
-* encounter tables
-* items, spells, skills, inventory, equipment, EXP, gold, drops
-* save data mutation
-* field-to-battle transition and return
-* audio
-* animation
-* runtime-core extraction
-
-## Guardrails
-
-* Do not change Project JSON schema.
-* Do not edit sample project data.
-* Do not implement enemy database.
-* Do not implement actor database.
-* Do not implement inventory/items/spells.
-* Do not implement battle rewards.
-* Do not implement field-to-battle connection until entry/return state is designed.
-* Do not modify package scripts unless a later task explicitly scopes it.
-* Do not touch runtime-core implementation in this spike.
-* Do not imply semantic parity with final battle runtime.
-
-## Future Runtime-Core Extraction
-
-After tactile validation, the battle loop should be extracted or reimplemented as renderer-agnostic runtime-core/runtime-systems work.
-
-Future extraction targets:
-
-* `packages/runtime-core/src/battle/`
-* `packages/runtime-systems/src/battle/`
-
-The first Godot spike may temporarily live in `godot_spike` as a fixed-data prototype. That does not make Godot the canonical battle runtime.
-
-## Recommended Implementation Steps
-
-1. Add separate `BattleSpike` script/class in `godot_spike/scripts/`.
-2. Keep fixed data inside the class.
-3. Add text-only battle HUD.
-4. Add confirm input.
-5. Implement deterministic attack/counterattack loop.
-6. Add victory/defeat phase.
-7. Host verify.
-8. Document verification result.
-9. Only then decide whether to connect Field or extract to runtime-core.
-
-## Stop Conditions
-
-Stop before implementation if:
-
-* Project JSON schema changes seem necessary
-* sample project data changes seem necessary
-* SaveData or persistence seems necessary
-* inventory, rewards, EXP, gold, audio, or animations become part of the task
-* field-to-battle transition or return state is required without design
-* package scripts or host scripts would need to change
-* runtime-core implementation would need to be added during the fixed-data spike
+None of this should be implemented during the Battle Spike documentation task.
