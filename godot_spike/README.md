@@ -92,7 +92,7 @@ The script falls back to common macOS Godot and .NET locations when env vars are
 
 The spike consumes copied or exported RPG Deck Project JSON from ignored local file `godot_spike/data/project.json`. Project JSON remains the source of truth; Godot does not edit or save it back.
 
-The debug HUD shows a legend, status line, debug message panel, and grid. Markers are `^`, `v`, `<`, and `>` for player facing, `E` for events, `#` for collision, and `.` for empty cells.
+The debug HUD shows a legend, status line, debug message panel, and grid. It is intentionally scaled up for host verification readability. Markers are `^`, `v`, `<`, and `>` for player facing, `E` for events, `#` for collision, and `.` for empty cells.
 
 Current log/status-only behavior:
 
@@ -165,7 +165,7 @@ The debug message panel is implemented but not yet included in the host verifica
 18. Confirm an event with an empty command array shows `command_preview: <event_id> commands=0`.
 19. Confirm an event with a top-level `show_message` displays its first speaker and text in the debug message panel.
 20. Confirm no dialogue UI, message sequencing, flag change, transfer, battle, or audio behavior occurs.
-21. Adjust `DebugCellSize` or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
+21. Adjust `DebugUiScale`, `DebugCellSize`, or `DebugMapOffset` on `ProjectLoader` in the inspector if the grid needs spacing changes.
 22. Rename or remove `data/project.json`.
 23. Run the project again.
 24. Confirm the missing-file warning appears and the project does not crash.
@@ -174,7 +174,7 @@ The debug message panel is implemented but not yet included in the host verifica
 
 The committed `scenes/ProjectLoaderScene.tscn` is the configured main scene. It only runs `ProjectLoader.cs` on a plain `Node`.
 
-`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and provides log/status-only event detection plus top-level command preview. The debug HUD places the marker legend first, the status line and debug message panel below it, and the grid below the HUD. The renderer includes a configurable `DebugCellSize` and a configurable `DebugMapOffset`. Marker priority is player over `E` over `#` over `.`. The first top-level `show_message` is displayed without sequencing; dialogue UI, choices, flags, transfer, battle/audio, and all other command effects are intentionally left for later Phase 11 steps.
+`ProjectLoader.cs` reads, parses, extracts first-loader summary data, logs a project summary, renders a debug grid for the current/start map, and provides log/status-only event detection plus top-level command preview. The debug HUD places the marker legend first, the status line and debug message panel below it, and the grid below the HUD. The renderer includes a configurable `DebugUiScale`, `DebugCellSize`, and `DebugMapOffset`; by default the HUD and grid render at roughly double the base layout size. Marker priority is player over `E` over `#` over `.`. The first top-level `show_message` is displayed without sequencing; dialogue UI, choices, flags, transfer, battle/audio, and all other command effects are intentionally left for later Phase 11 steps.
 
 Godot may create local generated files such as `.godot/`, `.csproj`, `.sln`, or other local files while opening or running the project. Do not commit generated files unless a later task explicitly approves them.
 

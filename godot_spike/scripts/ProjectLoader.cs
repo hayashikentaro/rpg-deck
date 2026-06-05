@@ -23,6 +23,9 @@ public partial class ProjectLoader : Node
     public int DebugCellSize { get; set; } = 24;
 
     [Export]
+    public int DebugUiScale { get; set; } = 2;
+
+    [Export]
     public Vector2 DebugMapOffset { get; set; } = new Vector2(24, 152);
 
     public override void _Ready()
@@ -123,7 +126,7 @@ public partial class ProjectLoader : Node
         var debugMap = new Node2D
         {
             Name = "DebugMap",
-            Position = DebugMapOffset
+            Position = ScaleDebugPosition(DebugMapOffset)
         };
         AddChild(debugMap);
 
@@ -146,7 +149,8 @@ public partial class ProjectLoader : Node
                 {
                     Name = $"Cell_{x}_{y}",
                     Text = marker,
-                    Position = new Vector2(x * DebugCellSize, y * DebugCellSize)
+                    Position = new Vector2(x * EffectiveDebugCellSize(), y * EffectiveDebugCellSize()),
+                    Scale = DebugScaleVector()
                 };
                 debugMap.AddChild(label);
                 _debugCells[PositionKey(position)] = label;
@@ -160,7 +164,8 @@ public partial class ProjectLoader : Node
         {
             Name = "DebugLegend",
             Text = "RPG Deck Debug Map\n^v<> player facing  E event  # collision  . empty",
-            Position = new Vector2(24, 24)
+            Position = ScaleDebugPosition(24, 24),
+            Scale = DebugScaleVector()
         };
         AddChild(legend);
     }
@@ -171,7 +176,8 @@ public partial class ProjectLoader : Node
         {
             Name = "DebugStatus",
             Text = "Status: ready",
-            Position = new Vector2(24, 72)
+            Position = ScaleDebugPosition(24, 72),
+            Scale = DebugScaleVector()
         };
         AddChild(_debugStatusLabel);
     }
@@ -182,9 +188,37 @@ public partial class ProjectLoader : Node
         {
             Name = "DebugMessage",
             Text = "Message: <none>",
-            Position = new Vector2(24, 96)
+            Position = ScaleDebugPosition(24, 96),
+            Scale = DebugScaleVector()
         };
         AddChild(_debugMessageLabel);
+    }
+
+    private int EffectiveDebugUiScale()
+    {
+        return DebugUiScale < 1 ? 1 : DebugUiScale;
+    }
+
+    private int EffectiveDebugCellSize()
+    {
+        return DebugCellSize * EffectiveDebugUiScale();
+    }
+
+    private Vector2 DebugScaleVector()
+    {
+        var scale = EffectiveDebugUiScale();
+        return new Vector2(scale, scale);
+    }
+
+    private Vector2 ScaleDebugPosition(float x, float y)
+    {
+        var scale = EffectiveDebugUiScale();
+        return new Vector2(x * scale, y * scale);
+    }
+
+    private Vector2 ScaleDebugPosition(Vector2 position)
+    {
+        return ScaleDebugPosition(position.X, position.Y);
     }
 
     private string MarkerForPosition(GridPosition position)
