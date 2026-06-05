@@ -4,6 +4,8 @@
 
 Battle Scene owns the distinct turn-based battle loop for classic RPG combat.
 
+For tactile Godot experimentation before canonical runtime extraction, see the fixed-data [Godot Battle Scene Spike](../godot-battle-spike.md). That spike is a prototype path; this document remains the final scene-level battle architecture boundary.
+
 ## Responsibilities
 
 * battle intro

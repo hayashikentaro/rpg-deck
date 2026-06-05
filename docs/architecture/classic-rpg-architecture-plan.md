@@ -268,6 +268,8 @@ Battle should be a base scene with its own `BattleState` and phases:
 
 Battle formulas and rewards belong in runtime systems, not in editor UI or renderer code.
 
+A fixed-data Godot Battle Scene Spike may be used to validate tactile battle feel before canonical runtime-core extraction. That spike should remain a playable-feel prototype with no Project JSON schema changes, no SaveData, no rewards, and no field connection until those boundaries are designed.
+
 ## Menu Architecture
 
 Menu should be an overlay or base mode depending on context. It should own cursor/panel navigation, but mutations such as item use, equipment changes, and save requests should go through runtime actions.
