@@ -342,4 +342,5 @@ Initial implementation status:
 * Host verification confirms `touch` detection using ignored local handoff JSON and confirms log/status-only command preview for both touch and interact events.
 * The Godot spike now displays the first top-level `show_message` from the most recently detected event in a separate debug message panel. It does not add message sequencing, advance input, movement blocking, or full dialogue UI.
 * The Godot debug HUD and grid now use a shared debug UI scale so host manual verification is easier to read without changing movement, collision, event detection, or command behavior.
+* The Godot spike now sizes the debug window from the scaled grid dimensions with a minimum size so the enlarged grid is not clipped during default host verification.
 * After host verification, the next step should be either a verification documentation update or an explicit message sequencing design. Choices, flags, transfer, battle/audio, and full command execution remain deferred.

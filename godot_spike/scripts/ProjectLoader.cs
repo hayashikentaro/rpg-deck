@@ -8,6 +8,9 @@ public partial class ProjectLoader : Node
         new System.Collections.Generic.Dictionary<string, Label>();
     private Label _debugStatusLabel;
     private Label _debugMessageLabel;
+    private const int DebugWindowMinWidth = 1280;
+    private const int DebugWindowMinHeight = 960;
+    private const int DebugWindowMargin = 64;
     private HashSet<string> _collisionPositions = new HashSet<string>();
     private HashSet<string> _eventPositions = new HashSet<string>();
     private List<MapEventSummary> _currentMapEvents = new List<MapEventSummary>();
@@ -123,6 +126,8 @@ public partial class ProjectLoader : Node
             return;
         }
 
+        SizeDebugWindow(summary.CurrentMap.SizePosition);
+
         var debugMap = new Node2D
         {
             Name = "DebugMap",
@@ -219,6 +224,21 @@ public partial class ProjectLoader : Node
     private Vector2 ScaleDebugPosition(Vector2 position)
     {
         return ScaleDebugPosition(position.X, position.Y);
+    }
+
+    private void SizeDebugWindow(GridPosition mapSize)
+    {
+        var scaledOffset = ScaleDebugPosition(DebugMapOffset);
+        var margin = DebugWindowMargin * EffectiveDebugUiScale();
+        var width = (int)scaledOffset.X + mapSize.X * EffectiveDebugCellSize() + margin;
+        var height = (int)scaledOffset.Y + mapSize.Y * EffectiveDebugCellSize() + margin;
+        var targetSize = new Vector2I(
+            width < DebugWindowMinWidth ? DebugWindowMinWidth : width,
+            height < DebugWindowMinHeight ? DebugWindowMinHeight : height
+        );
+
+        DisplayServer.WindowSetMinSize(targetSize);
+        DisplayServer.WindowSetSize(targetSize);
     }
 
     private string MarkerForPosition(GridPosition position)

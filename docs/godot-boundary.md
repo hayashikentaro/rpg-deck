@@ -243,7 +243,7 @@ The expected manual handoff input path is:
 
 The loader extracts these values defensively so missing or malformed fields warn and fall back instead of crashing. It also extracts current-map collision positions plus event id, trigger, and position for debug rendering and log/status-only event detection. The `godot_spike/` directory is not an authoring source and must not become a schema fork.
 
-The spike now renders a static debug grid for the current/start map when valid map size data is available. The grid uses text markers only: `^`, `v`, `<`, and `>` for player facing, `E` for events, `#` for collision, and `.` for empty cells. It includes a visible legend, and `ProjectLoader` exposes `DebugUiScale`, `DebugCellSize`, and `DebugMapOffset` so the debug display can be enlarged or adjusted in the inspector.
+The spike now renders a static debug grid for the current/start map when valid map size data is available. The grid uses text markers only: `^`, `v`, `<`, and `>` for player facing, `E` for events, `#` for collision, and `.` for empty cells. It includes a visible legend, and `ProjectLoader` exposes `DebugUiScale`, `DebugCellSize`, and `DebugMapOffset` so the debug display can be enlarged or adjusted in the inspector. The spike sizes the debug window from the scaled grid dimensions so the default host run does not clip the bottom of the grid.
 
 The spike also supports minimal player marker movement on the debug grid. The initial position comes from `settings.start.position`, arrow keys and WASD move the player marker within map bounds, and cells restore their underlying `E`, `#`, or `.` marker when the player leaves. Facing direction updates from movement input even when movement is blocked by map bounds or collision. Collision cells from RPG Deck project JSON block debug player movement.
 
@@ -257,7 +257,7 @@ Implemented in the repository:
 
 * Project JSON loading and defensive project summary extraction
 * current map size, collision, and event id/trigger/position extraction
-* scaled debug grid, marker legend, status HUD, message panel, and player start placement
+* scaled debug grid, debug window sizing, marker legend, status HUD, message panel, and player start placement
 * four-direction movement, facing display, map bounds blocking, and collision blocking
 * log/status-only `interact` detection in the facing cell
 * log/status-only `touch` detection after successful cell entry
