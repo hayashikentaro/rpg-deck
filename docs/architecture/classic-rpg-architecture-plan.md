@@ -148,6 +148,8 @@ Responsibilities:
 
 See [dependency boundaries](./dependency-boundaries.md) for allowed dependency direction.
 
+Skeleton boundary directories now exist for `runtime-core`, `runtime-systems`, `validation`, `editor-model`, `project-schema`, and `event-commands`. They contain README/AGENTS guidance and `.gitkeep` placeholders only; they are not yet registered as workspace packages, and no implementation has been moved.
+
 ## Godot Runtime Architecture
 
 If the Godot spike graduates into a runtime, prefer a split structure:

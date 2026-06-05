@@ -146,6 +146,8 @@ Recommended future files:
 
 Do not create these files until a task explicitly asks for them.
 
+Package-level `AGENTS.md` files now exist in the skeleton package directories for `runtime-core`, `runtime-systems`, `validation`, `editor-model`, `project-schema`, and `event-commands`. They are boundary guides for scoped Codex work, not complete implementation instructions.
+
 ## Stop Conditions
 
 Stop and ask before proceeding when:

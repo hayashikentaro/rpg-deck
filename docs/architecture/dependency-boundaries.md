@@ -20,6 +20,8 @@ core-domain
 
 Dependencies should point toward more stable, renderer-agnostic data and rules. UI and renderer packages should not be imported by domain packages.
 
+Skeleton package directories now exist for the future `runtime-core`, `runtime-systems`, `validation`, `editor-model`, `project-schema`, and `event-commands` boundaries. They make dependency direction visible before implementation migration; they are not yet workspace packages and contain no TypeScript implementation.
+
 ## Core Domain
 
 `core-domain` owns canonical declarative data:
