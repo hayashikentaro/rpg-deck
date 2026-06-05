@@ -346,3 +346,4 @@ Initial implementation status:
 * Host verification confirms the scaled debug display, debug window sizing, no bottom clipping, and startup `Message: <none>` panel visibility.
 * Host verification confirms event-driven debug message display after `mayor_intro` interact: `Status: command_preview: mayor_intro commands=4` and `Message: mayor_intro: 北の洞窟には近づくな。`
 * The first executable command spike has reached minimal first-top-level-`show_message` display. The next recommended step is explicit sequencing and advance-input design before any additional command execution. Choices, flags, transfer, battle/audio, and full command execution remain deferred.
+* The Phase 11 first Godot boundary spike is accepted and closed out in `docs/godot-boundary-closeout.md`. Next work should explicitly choose between stopping the first spike, designing message sequencing/advance input, or improving Godot QA without expanding gameplay scope.

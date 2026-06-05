@@ -110,6 +110,8 @@ Current log/status-only behavior:
 
 The command-handling boundary is documented in [`docs/godot-command-boundary.md`](../docs/godot-command-boundary.md). The message panel is a spike UI, not full dialogue UI: it has no advance input, sequencing, choices, or movement blocking.
 
+The Phase 11 first spike closeout is documented in [`docs/godot-boundary-closeout.md`](../docs/godot-boundary-closeout.md). It records that first spike acceptance is satisfied and lists the next phase options before further Godot runtime work.
+
 ## Current Manual Verification Status
 
 Verified on a host Godot run:

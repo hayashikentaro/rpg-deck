@@ -19,7 +19,7 @@ For now, editor import/export remains browser-based JSON:
 
 The Godot loader should read the same project shape that `packages/core-domain` parses and validates. If a derived Godot export format becomes useful later, it should be introduced explicitly as an exporter output, not silently treated as the canonical schema.
 
-The command-handling phase is defined separately in [`godot-command-boundary.md`](./godot-command-boundary.md). That note keeps the minimal `show_message` debug panel separate from later sequencing and other command effects.
+The command-handling phase is defined separately in [`godot-command-boundary.md`](./godot-command-boundary.md). That note keeps the minimal `show_message` debug panel separate from later sequencing and other command effects. The first spike closeout is recorded in [`godot-boundary-closeout.md`](./godot-boundary-closeout.md).
 
 ## Ownership
 
@@ -252,6 +252,8 @@ The spike can detect a `trigger: interact` event in the player's facing cell whe
 For mounted-repository host verification, prepare `godot_spike/data/project.json` from inside the container and use `pnpm godot` as the standard implementation verification command. It performs a headless C# build and launches the project only when the build succeeds; run-only remains available as `pnpm godot:run`. The underlying `godot_spike/scripts/host_verify.sh` supports the same workflow. Host-specific Godot, .NET, or architecture settings should come from `GODOT_BIN`, `DOTNET_ROOT`, `GODOT_ARCH`, or ignored `godot_spike/.env.local`, not tracked absolute paths. The script can force the effective Godot architecture so an x86_64 Node or pnpm process does not select an incompatible runtime on Apple Silicon. Local Godot outputs such as `.godot/`, `.mono/`, `.csproj`, `.sln`, the handoff `data/project.json`, and `.env.local` are ignored and non-canonical.
 
 ## Current Verification Status
+
+The Phase 11 first Godot boundary spike acceptance is satisfied. See [`godot-boundary-closeout.md`](./godot-boundary-closeout.md) for the closeout note and next phase options.
 
 Implemented in the repository:
 
