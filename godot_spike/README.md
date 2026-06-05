@@ -127,11 +127,13 @@ Verified on a host Godot run:
 * interact detection displays `interact_event: mayor_intro at [7, 6]`
 * a facing cell without an interact event displays `interact_event: none at [5, 6]`
 * `mayor_intro` command preview reports `play_bgm`, `play_sfx`, `show_message`, and `choice`
-* command effects did not run during command preview verification
+* after `mayor_intro` interact, status displays `Status: command_preview: mayor_intro commands=4`
+* after `mayor_intro` interact, the debug message panel displays `Message: mayor_intro: 北の洞窟には近づくな。`
+* the message panel displays the first top-level `show_message` speaker and text
+* command effects did not run during command preview or message panel verification
+* no choice UI appears, and BGM/SFX do not play
 
 Touch verification used ignored local handoff JSON with `touch_test` on `town` at `[5, 6]`, `trigger: touch`, and `commands: []`. That file is non-canonical and is not committed.
-
-The debug message panel is implemented, and startup `Message: <none>` visibility is host verified. Event-driven `show_message` display after interacting with `mayor_intro` still needs explicit host verification.
 
 ## Manual Verification
 

@@ -278,11 +278,11 @@ Manually verified on a host:
 * empty touch command preview displays `command_preview: touch_test commands=0`
 * `interact` detection displays `interact_event: mayor_intro at [7, 6]`
 * command preview includes `command_preview: mayor_intro[2] show_message speaker=mayor_intro text="北の洞窟には近づくな。"`
-* command preview has no effects; the new message panel is not yet included in this host verification record
+* after `mayor_intro` interact, status displays `Status: command_preview: mayor_intro commands=4`
+* after `mayor_intro` interact, the debug message panel displays `Message: mayor_intro: 北の洞窟には近づくな。`
+* command preview and the message panel have no other effects; choice UI does not appear and BGM/SFX do not play
 
 Touch verification used ignored local `godot_spike/data/project.json` with `touch_test` on `town` at `[5, 6]`. That local handoff artifact is non-canonical and is not committed.
-
-The debug message panel is implemented, and startup `Message: <none>` visibility is host verified. Event-driven `show_message` display after interaction still needs explicit host verification.
 
 ## First Godot Spike Behavior
 
@@ -360,7 +360,7 @@ Status labels:
 * **Implemented**: command execution boundary design note
 * **Host verified**: log/status-only top-level command preview after `interact` or `touch` detection
 * **Host verified**: minimal debug message panel is visible on startup as `Message: <none>`
-* **Implemented / Pending host verification**: first top-level `show_message` is displayed in the debug message panel after event detection
+* **Host verified**: first top-level `show_message` is displayed in the debug message panel after event detection
 * **Pending**: message sequencing, advance input, `choice`, flags, transfer, battle, and audio behavior
 * **Pending**: full command execution; it remains out of scope until explicitly designed
 

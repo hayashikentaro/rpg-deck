@@ -17,8 +17,9 @@ The Godot spike currently:
 * displays the first top-level `show_message` in a separate debug message panel
 * does not execute other event command effects
 
-Command preview is implemented and host verified for both interact and touch event detection. The minimal `show_message` debug message panel is implemented without sequencing, advance input, or full dialogue UI.
-Startup `Message: <none>` panel visibility is host verified. Event-driven `show_message` display after interaction still needs explicit host verification.
+Command preview is implemented and host verified for both interact and touch event detection. The minimal `show_message` debug message panel is implemented and host verified without sequencing, advance input, or full dialogue UI.
+Startup `Message: <none>` panel visibility is host verified. Event-driven display of the first top-level `show_message` is also host verified after `mayor_intro` interaction with `Message: mayor_intro: 北の洞窟には近づくな。`.
+Choice UI does not appear, audio does not play, and all non-`show_message` command effects remain preview-only or out of scope.
 
 ## Source of Truth
 
