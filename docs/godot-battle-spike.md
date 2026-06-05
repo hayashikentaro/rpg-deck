@@ -135,17 +135,16 @@ Godot remains non-authoritative:
 * it must not write ProjectData
 * it must not write SaveData
 
-## Suggested Future Files
+## Implemented Spike Files
 
-Possible implementation files:
+The first fixed-data spike uses:
 
-* `godot_spike/BattleSpike.cs`
-* `godot_spike/BattleSpikeState.cs`
-* `godot_spike/BattleSpike.tscn`
+* `godot_spike/scripts/BattleSpike.cs`
+* `godot_spike/scenes/BattleSpikeScene.tscn`
 
-These names are suggestions only. Use names and locations that follow existing Godot spike conventions if those conventions point somewhere better.
+State is intentionally local to `BattleSpike.cs`; no separate battle state file is used for this first prototype.
 
-Do not add these files during this documentation task.
+The default Godot main scene remains the existing field boundary spike. To verify the battle scene on host, open the Godot editor with `pnpm godot:editor`, open `res://scenes/BattleSpikeScene.tscn`, and run the current scene. `pnpm godot` still runs the existing ProjectLoader scene unless the host user temporarily runs the battle scene from the editor.
 
 ## Manual Verification Checklist
 
@@ -159,7 +158,7 @@ After a future implementation, manually confirm:
 * Hero attack reduces Slime HP.
 * Slime counterattack reduces Hero HP.
 * Slime defeat shows victory message.
-* Hero defeat shows defeat message.
+* Hero defeat branch shows defeat message if Hero HP reaches zero. With the default fixed values, normal play reaches victory first; do not add a debug defeat shortcut unless a later task explicitly scopes it.
 * Battle does not write SaveData.
 * Battle does not require Project JSON schema changes.
 * Existing TypeScript checks still pass if applicable.
